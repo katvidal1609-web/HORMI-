@@ -1,10 +1,8 @@
 // main.js — entry point, inicializa la app
 import { load, D, save } from './core/state.js'
-import { sb, setSupaUser } from './core/supabase.js'
+import { sb, setSupaUser, supaUser } from './core/supabase.js'
 import { go } from './ui/nav.js'
 import { showAuthScreen } from './features/auth/session.js'
-
-// Exponer funciones globales para onclick en HTML (temporalmente)
 import { doLogin, doForgotPassword } from './features/auth/login.js'
 import { doRegister, doResendEmail } from './features/auth/register.js'
 import { doGoogleAuth } from './features/auth/google.js'
@@ -27,46 +25,88 @@ window.maybeClose = maybeClose
 window.openSheet = openSheet
 window.go = go
 
-async function initApp() {
-  load()
-
-  // Manejar callback de Google OAuth (PKCE)
-  const params = new URLSearchParams(window.location.search)
-  if (params.get('code')) {
-    const { data, error } = await sb.auth.exchangeCodeForSession(window.location.href)
-    if (!error && data.session) {
-      window.history.replaceState({}, '', '/')
-    }
-  }
-
-  const { data: { session } } = await sb.auth.getSession()
-
-  if (session?.user) {
+// Auth state change — igual que hormi2.html
+sb.auth.onAuthStateChange(async (event, session) => {
+  console.log('Auth event:', event, session?.user?.email)
+  if (event === 'SIGNED_IN' && session?.user) {
+    if (supaUser?.id === session.user.id) return
     setSupaUser(session.user)
-    const { loadUserData } = await import('./features/settings/profile.js')
-    await loadUserData(session.user.id)
-    document.getElementById('s-main')?.style.setProperty('display', 'flex')
-    document.getElementById('s-welcome')?.style.setProperty('display', 'none')
-    const { go } = await import('./ui/nav.js')
-    go('s-home')
-  } else {
+    showReady('¡Hola! 🐜', 'Cargando tu cuenta...')
+    return
+  }
+  if (event === 'SIGNED_OUT') {
+    setSupaUser(null)
+    localStorage.removeItem('hormi_v2')
     showAuthScreen('s-welcome')
   }
+  if (event === 'TOKEN_REFRESHED' && !session) {
+    setSupaUser(null)
+    localStorage.removeItem('hormi_v2')
+    showAuthScreen('s-welcome')
+  }
+})
 
-  sb.auth.onAuthStateChange(async (event, session) => {
-    if (event === 'SIGNED_IN' && session?.user) {
+async function initApp() {
+  load()
+  const url = new URL(window.location.href)
+  const hasCode = url.searchParams.has('code')
+
+  if (hasCode) {
+    console.log('OAuth callback — procesando code...')
+    // Dejar que Supabase con detectSessionInUrl:true procese el code
+    const { data: { session } } = await sb.auth.getSession()
+    window.history.replaceState({}, '', '/')
+    if (session?.user) {
+      setSupaUser(session.user)
+      showReady('¡Hola! 🐜', 'Cargando tu cuenta...')
+    } else {
+      showAuthScreen('s-welcome')
+    }
+    return
+  }
+
+  // Sin code — verificar sesión existente
+  try {
+    const { data: { session } } = await sb.auth.getSession()
+    if (session?.user) {
       setSupaUser(session.user)
       const { loadUserData } = await import('./features/settings/profile.js')
       await loadUserData(session.user.id)
-      document.getElementById('s-main')?.style.setProperty('display', 'flex')
-      document.getElementById('s-welcome')?.style.setProperty('display', 'none')
-      const { go } = await import('./ui/nav.js')
-      go('s-home')
-    }
-    if (event === 'SIGNED_OUT') {
+      showMain()
+    } else {
       showAuthScreen('s-welcome')
     }
-  })
+  } catch (e) {
+    console.error('initApp:', e)
+    showAuthScreen('s-welcome')
+  }
 }
+
+function showReady(title, msg) {
+  document.querySelectorAll('.wc-new, .auth-screen, #s-main').forEach(el => {
+    el.style.display = 'none'
+  })
+  const el = document.getElementById('s-ready')
+  if (el) {
+    el.style.display = 'flex'
+    const t = document.getElementById('ready-title')
+    const m = document.getElementById('ready-msg')
+    if (t) t.textContent = title
+    if (m) m.textContent = msg
+  }
+}
+
+function showMain() {
+  document.querySelectorAll('.wc-new, .auth-screen').forEach(el => {
+    el.style.display = 'none'
+  })
+  const main = document.getElementById('s-main')
+  if (main) main.style.display = 'block'
+  go('s-home')
+}
+
+// Exponer para onclick en HTML
+window.showMain = showMain
+window.showReady = showReady
 
 document.addEventListener('DOMContentLoaded', initApp)
