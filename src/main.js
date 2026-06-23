@@ -105,8 +105,27 @@ function showMain() {
   go('s-home')
 }
 
+async function onReadyContinue() {
+  const btn = document.getElementById('ready-btn')
+  if (btn) { btn.disabled = true; btn.textContent = 'Cargando...' }
+  try {
+    const { data: { session } } = await sb.auth.getSession()
+    if (session?.user) {
+      const { loadUserData } = await import('./features/settings/profile.js')
+      await loadUserData(session.user.id)
+      showMain()
+    } else {
+      showAuthScreen('s-welcome')
+    }
+  } catch (e) {
+    console.error('onReadyContinue:', e)
+    showAuthScreen('s-welcome')
+  }
+}
+
 // Exponer para onclick en HTML
 window.showMain = showMain
 window.showReady = showReady
+window.onReadyContinue = onReadyContinue
 
 document.addEventListener('DOMContentLoaded', initApp)
