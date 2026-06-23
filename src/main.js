@@ -12,12 +12,20 @@ import { signOut } from './features/auth/session.js'
 import { toast } from './ui/toast.js'
 import { openModal, closeOv, maybeClose, openSheet } from './ui/modals.js'
 
-// Hacer globales para compatibilidad con onclick en HTML
-Object.assign(window, {
-  doLogin, doForgotPassword, doRegister, doResendEmail,
-  doGoogleAuth, signOut, toast, openModal, closeOv, maybeClose,
-  openSheet, go, showAuthScreen,
-})
+// Exponer funciones globales inmediatamente
+window.showAuthScreen = showAuthScreen
+window.doLogin = doLogin
+window.doForgotPassword = doForgotPassword
+window.doRegister = doRegister
+window.doResendEmail = doResendEmail
+window.doGoogleAuth = doGoogleAuth
+window.signOut = signOut
+window.toast = toast
+window.openModal = openModal
+window.closeOv = closeOv
+window.maybeClose = maybeClose
+window.openSheet = openSheet
+window.go = go
 
 async function initApp() {
   load()
