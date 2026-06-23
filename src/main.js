@@ -22,17 +22,25 @@ Object.assign(window, {
 async function initApp() {
   load()
 
+  // Manejar callback de Google OAuth (PKCE)
+  const params = new URLSearchParams(window.location.search)
+  if (params.get('code')) {
+    const { data, error } = await sb.auth.exchangeCodeForSession(window.location.href)
+    if (!error && data.session) {
+      window.history.replaceState({}, '', '/')
+    }
+  }
+
   const { data: { session } } = await sb.auth.getSession()
 
   if (session?.user) {
     setSupaUser(session.user)
     const { loadUserData } = await import('./features/settings/profile.js')
     await loadUserData(session.user.id)
-    const { renderHome } = await import('./features/home/render.js')
-    renderHome()
-    go('s-home')
     document.getElementById('s-main')?.style.setProperty('display', 'flex')
     document.getElementById('s-welcome')?.style.setProperty('display', 'none')
+    const { go } = await import('./ui/nav.js')
+    go('s-home')
   } else {
     showAuthScreen('s-welcome')
   }
@@ -42,8 +50,9 @@ async function initApp() {
       setSupaUser(session.user)
       const { loadUserData } = await import('./features/settings/profile.js')
       await loadUserData(session.user.id)
-      const { renderHome } = await import('./features/home/render.js')
-      renderHome()
+      document.getElementById('s-main')?.style.setProperty('display', 'flex')
+      document.getElementById('s-welcome')?.style.setProperty('display', 'none')
+      const { go } = await import('./ui/nav.js')
       go('s-home')
     }
     if (event === 'SIGNED_OUT') {
