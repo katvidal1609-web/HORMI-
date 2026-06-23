@@ -21,7 +21,7 @@ export async function buildShareCanvas(weekTotal, weekCount, daysOk) {
   logo.crossOrigin = 'anonymous'
   await new Promise(res => {
     logo.onload = res; logo.onerror = res
-    logo.src = fetch('isotipo-dark.png')
+    logo.src = fetch('/isotipo-dark.png')
       .then(r => r.blob())
       .then(b => URL.createObjectURL(b))
   })
