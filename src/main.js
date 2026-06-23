@@ -100,7 +100,7 @@ function showMain() {
   document.querySelectorAll('.wc-new, .auth-screen').forEach(el => {
     el.style.display = 'none'
   })
-  const main = document.getElementById('s-main')
+  const main = document.getElementById('main')
   if (main) main.style.display = 'block'
   go('s-home')
 }
