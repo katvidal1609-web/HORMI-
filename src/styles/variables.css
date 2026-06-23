@@ -1,0 +1,30 @@
+:root{
+  /* 60% — fondos neutros */
+  --bg:#f5f8f6;--bg-card:#ffffff;--bg-soft:#f0f4f2;
+  /* 30% — teal principal */
+  --primary:#407178;--primary-dark:#2d5158;--primary-light:#c0d1c7;--nav-bg:#407178;
+  /* 10% — lime CTA */
+  --lime:#d3e458;--lime-soft:#d3e458;--lime-d:#b8cc38;--lime-dark:#b8cc38;
+  --lime-bg:rgba(211,228,88,.18);--lime-b:rgba(211,228,88,.4);--lime-t:#407178;
+  /* acento secundario lila — solo badges y Pro */
+  --accent:#a6b1e7;--accent-soft:#dde1f5;
+  /* texto */
+  --t1:#1a2e2a;--t2:#407178;--t3:#8aada8;
+  --text-soft:#407178;--text-muted:#8aada8;
+  /* semáforo */
+  --red:#E63946;--red-bg:rgba(230,57,70,.07);--red-b:rgba(230,57,70,.2);
+  --amber:#F59E0B;--amber-bg:rgba(245,158,11,.08);--amber-t:#92400E;
+  --green:#407178;--green-bg:rgba(64,113,120,.08);--success:#407178;
+  /* bordes & sombras */
+  --border:#dde8e4;--b1:rgba(0,0,0,.05);--b2:rgba(0,0,0,.08);--b3:rgba(0,0,0,.12);
+  --card-shadow:none;--modal-shadow:0 20px 60px rgba(0,0,0,.15);
+  /* aliases de superficie (compatibilidad) */
+  --s1:#ffffff;--s2:#f0f4f2;--s3:#c0d1c7;
+  /* tipografía */
+  --font-title:'Lexend',sans-serif;--font-body:'Lexend',-apple-system,sans-serif;
+  /* radios */
+  --r:14px;--rsm:10px;--rlg:20px;
+  --radius-card:14px;--radius-pill:24px;--radius-sm:10px;--spacing:16px;
+  /* layout */
+  --nh:68px;--sb:env(safe-area-inset-bottom,0px);--st:env(safe-area-inset-top,0px);
+}

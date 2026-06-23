@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="HORMI">
+  <meta name="theme-color" content="#f5f8f6">
+  <title>HORMI — menos hormis, más money</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" href="/favicon.ico">
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <!-- Supabase & Lucide via CDN (reemplazar con npm en producción) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <!-- Estilos separados por responsabilidad -->
+  <link rel="stylesheet" href="/src/styles/variables.css">
+  <link rel="stylesheet" href="/src/styles/base.css">
+  <link rel="stylesheet" href="/src/styles/components.css">
+  <link rel="stylesheet" href="/src/styles/screens.css">
+  <link rel="stylesheet" href="/src/styles/pwa.css">
+</head>
+<body>
+
+<div class="app" id="app">
+
+<!-- ═══ WELCOME ═══ -->
+<div class="wc-new" id="s-welcome">
+  <div class="wc-carousel">
+    <div class="wc-slides" id="wc-slides">
+
+      <!-- Slide 1: El golpe de realidad -->
+      <div class="wc-slide">
+        <div class="wc-slide-ico">
+          <svg width="130" height="115" viewBox="0 0 130 115" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- wallet -->
+            <rect x="22" y="38" width="72" height="46" rx="10" fill="#1a1a1a"/>
+            <rect x="22" y="48" width="72" height="8" fill="#2a2a2a"/>
+            <rect x="72" y="54" width="22" height="22" rx="6" fill="#d3e458" opacity=".9"/>
+            <circle cx="83" cy="65" r="4" fill="#5C8001"/>
+            <!-- coins escaping with ants -->
+            <!-- coin 1 -->
+            <circle cx="106" cy="28" r="10" fill="#d3e458" stroke="#9ec43e" stroke-width="1.5"/>
+            <text x="102" y="32" font-size="9" fill="#5C8001" font-weight="700">S/</text>
+            <!-- ant 1 carrying coin 1 -->
+            <ellipse cx="99" cy="42" rx="5" ry="3.5" fill="#080808"/>
+            <ellipse cx="106" cy="38" rx="4" ry="3" fill="#1a1a1a"/>
+            <circle cx="112" cy="34" r="3" fill="#080808"/>
+            <line x1="111" y1="31" x2="108" y2="26" stroke="#080808" stroke-width="1.2" stroke-linecap="round"/>
+            <line x1="113" y1="31" x2="116" y2="26" stroke="#080808" stroke-width="1.2" stroke-linecap="round"/>
+            <circle cx="108" cy="25" r="1.5" fill="#d3e458"/>
+            <circle cx="116" cy="25" r="1.5" fill="#d3e458"/>
+            <line x1="100" y1="43" x2="93" y2="38" stroke="#080808" stroke-width="1.2" stroke-linecap="round"/>
+            <line x1="99" y1="46" x2="92" y2="44" stroke="#080808" stroke-width="1.2" stroke-linecap="round"/>
+            <line x1="101" y1="48" x2="96" y2="54" stroke="#080808" stroke-width="1.2" stroke-linecap="round"/>
+            <!-- coin 2 smaller -->
+            <circle cx="118" cy="52" r="7" fill="#d3e458" stroke="#9ec43e" stroke-width="1.5"/>
+            <text x="115" y="56" font-size="7" fill="#5C8001" font-weight="700">S/</text>
+            <!-- ant 2 -->
+            <ellipse cx="112" cy="64" rx="4" ry="3" fill="#080808"/>
+            <ellipse cx="118" cy="61" rx="3.5" ry="2.5" fill="#1a1a1a"/>
+            <circle cx="123" cy="57" r="2.5" fill="#080808"/>
+            <line x1="122" y1="55" x2="120" y2="51" stroke="#080808" stroke-width="1.2" stroke-linecap="round"/>
+            <line x1="124" y1="55" x2="127" y2="51" stroke="#080808" stroke-width="1.2" stroke-linecap="round"/>
+            <circle cx="120" cy="50" r="1.2" fill="#d3e458"/>
+            <circle cx="127" cy="50" r="1.2" fill="#d3e458"/>
+            <line x1="113" y1="65" x2="107" y2="62" stroke="#080808" stroke-width="1.2" stroke-linecap="round"/>
+            <line x1="112" y1="68" x2="106" y2="66" stroke="#080808" stroke-width="1.2" stroke-linecap="round"/>
+            <line x1="114" y1="70" x2="110" y2="75" stroke="#080808" stroke-width="1.2" stroke-linecap="round"/>
+            <!-- motion arrows -->
+            <path d="M88 24 L96 20 M88 30 L94 27" stroke="#d3e458" stroke-width="1.5" stroke-linecap="round" opacity=".6"/>
+          </svg>
+        </div>
+        <div class="wc-slide-t">¿Sabes cuánto pierdes<br>al mes sin darte cuenta?</div>
+        <div class="wc-slide-d">El café diario, el taxi de más, el antojo de las 11pm... Esos gastos pequeños se acumulan y se van. Se llaman <strong>gastos hormiga</strong>.</div>
+        <div class="wc-pill">💸 Promedio LATAM: S/ 300–500/mes en hormigas</div>
+      </div>
+
+      <!-- Slide 2: La solución con IA -->
+      <div class="wc-slide">
+        <div class="wc-slide-ico">
+          <svg width="130" height="115" viewBox="0 0 130 115" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- phone body -->
+            <rect x="35" y="10" width="60" height="95" rx="12" fill="#1a1a1a"/>
+            <rect x="40" y="18" width="50" height="72" rx="6" fill="#2a2a2a"/>
+            <!-- screen content: voucher -->
+            <rect x="44" y="22" width="42" height="60" rx="4" fill="#fff" opacity=".92"/>
+            <!-- voucher lines -->
+            <line x1="49" y1="30" x2="81" y2="30" stroke="#E0E0E0" stroke-width="1.5"/>
+            <line x1="49" y1="37" x2="75" y2="37" stroke="#E0E0E0" stroke-width="1.5"/>
+            <line x1="49" y1="44" x2="77" y2="44" stroke="#E0E0E0" stroke-width="1.5"/>
+            <!-- scan line animated feel -->
+            <rect x="44" y="52" width="42" height="3" rx="1.5" fill="#d3e458" opacity=".7"/>
+            <!-- Yape logo area -->
+            <rect x="49" y="58" width="36" height="18" rx="4" fill="rgba(200,246,90,.15)" stroke="rgba(200,246,90,.4)" stroke-width="1"/>
+            <text x="56" y="71" font-size="9" fill="#2D5A00" font-weight="700">S/ 25.00</text>
+            <!-- AI sparkles around phone -->
+            <!-- top right sparkle -->
+            <path d="M104 18 L106 14 L108 18 L112 20 L108 22 L106 26 L104 22 L100 20Z" fill="#d3e458"/>
+            <!-- top left sparkle small -->
+            <path d="M20 30 L21.5 27 L23 30 L26 31.5 L23 33 L21.5 36 L20 33 L17 31.5Z" fill="#d3e458" opacity=".7"/>
+            <!-- bottom right sparkle -->
+            <path d="M108 78 L109.5 75 L111 78 L114 79.5 L111 81 L109.5 84 L108 81 L105 79.5Z" fill="#d3e458" opacity=".8"/>
+            <!-- dots -->
+            <circle cx="22" cy="55" r="2.5" fill="#d3e458" opacity=".5"/>
+            <circle cx="112" cy="55" r="2" fill="#d3e458" opacity=".5"/>
+            <circle cx="26" cy="72" r="1.5" fill="#d3e458" opacity=".4"/>
+            <!-- phone notch -->
+            <rect x="55" y="13" width="20" height="4" rx="2" fill="#2a2a2a"/>
+          </svg>
+        </div>
+        <div class="wc-slide-t">HORMI los detecta<br>por ti. Con IA.</div>
+        <div class="wc-slide-d">La primera app de LATAM que usa inteligencia artificial para identificar, trackear y ayudarte a eliminar tus gastos hormiga.</div>
+        <div class="wc-pill">📸 Solo sube tu captura o boleta. HORMI hace el resto.</div>
+      </div>
+
+      <!-- Slide 3: El poder del cambio -->
+      <div class="wc-slide">
+        <div class="wc-slide-ico">
+          <svg width="130" height="115" viewBox="0 0 130 115" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- chart base line -->
+            <line x1="18" y1="92" x2="115" y2="92" stroke="#E0E0E0" stroke-width="2" stroke-linecap="round"/>
+            <!-- bars going up left to right -->
+            <rect x="24" y="72" width="16" height="20" rx="4" fill="#E0E0E0"/>
+            <rect x="46" y="62" width="16" height="30" rx="4" fill="#d3e458" opacity=".5"/>
+            <rect x="68" y="48" width="16" height="44" rx="4" fill="#d3e458" opacity=".75"/>
+            <rect x="90" y="28" width="16" height="64" rx="4" fill="#d3e458"/>
+            <!-- trend arrow -->
+            <polyline points="32,68 54,58 76,44 98,24" stroke="#5C8001" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <path d="M93 20 L104 22 L98 31" fill="#5C8001"/>
+            <!-- ant celebrating on top bar -->
+            <ellipse cx="98" cy="20" rx="4.5" ry="3.5" fill="#080808"/>
+            <ellipse cx="103" cy="16" rx="3.5" ry="3" fill="#1a1a1a"/>
+            <circle cx="108" cy="12" r="3" fill="#080808"/>
+            <line x1="107" y1="9" x2="104" y2="5" stroke="#080808" stroke-width="1.2" stroke-linecap="round"/>
+            <line x1="109" y1="9" x2="113" y2="5" stroke="#080808" stroke-width="1.2" stroke-linecap="round"/>
+            <circle cx="104" cy="4" r="1.5" fill="#d3e458"/>
+            <circle cx="113" cy="4" r="1.5" fill="#d3e458"/>
+            <!-- party lines from ant -->
+            <line x1="112" y1="10" x2="117" y2="6" stroke="#d3e458" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="113" y1="13" x2="119" y2="12" stroke="#d3e458" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="110" y1="8" x2="113" y2="3" stroke="#d3e458" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="wc-slide-t">Reduce tus hormis.<br>Cumple tus metas.</div>
+        <div class="wc-slide-d">¿Quieres viajar? ¿ahorrar para un celular? ¿Simplemente tener más plata a fin de mes? HORMI convierte lo que gastas en hormigas en progreso real hacia lo que sí importa.</div>
+        <div class="wc-mini-stats">
+          <span class="wc-mini-stat">🎯 Metas reales</span>
+          <span style="color:#E0E0E0">·</span>
+          <span class="wc-mini-stat">📊 Análisis IA</span>
+          <span style="color:#E0E0E0">·</span>
+          <span class="wc-mini-stat">🎙️ Registro por voz</span>
+        </div>
+      </div>
+
+      <!-- Slide 4: El cierre empoderador -->
+      <div class="wc-slide">
+        <div class="wc-slide-ico">
+          <svg width="130" height="115" viewBox="0 0 130 115" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- big coin -->
+            <circle cx="65" cy="68" r="30" fill="#d3e458" stroke="#9ec43e" stroke-width="2"/>
+            <circle cx="65" cy="68" r="22" fill="none" stroke="#9ec43e" stroke-width="1.5" stroke-dasharray="4 3"/>
+            <text x="54" y="75" font-size="16" fill="#5C8001" font-weight="800">S/</text>
+            <!-- ant body with cape -->
+            <ellipse cx="52" cy="46" rx="8" ry="6" fill="#080808"/>
+            <ellipse cx="63" cy="40" rx="7" ry="5.5" fill="#1a1a1a"/>
+            <ellipse cx="73" cy="35" rx="7.5" ry="5.5" fill="#080808" transform="rotate(-10 73 35)"/>
+            <!-- head -->
+            <circle cx="81" cy="28" r="6" fill="#1a1a1a"/>
+            <!-- antennae -->
+            <line x1="79" y1="22" x2="74" y2="14" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="83" y1="22" x2="89" y2="14" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="74" cy="13" r="2" fill="#d3e458"/>
+            <circle cx="89" cy="13" r="2" fill="#d3e458"/>
+            <!-- legs -->
+            <line x1="55" y1="48" x2="44" y2="42" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="53" y1="51" x2="42" y2="50" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="55" y1="54" x2="46" y2="60" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="65" y1="42" x2="59" y2="34" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="70" y1="38" x2="67" y2="30" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="67" y1="44" x2="62" y2="52" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
+            <!-- cape -->
+            <path d="M55 42 Q45 50 48 62 Q54 55 65 52 Q58 48 55 42Z" fill="#d3e458" opacity=".9"/>
+          </svg>
+        </div>
+        <div class="wc-slide-t">Tu plata. Tu control.<br>Tu futuro.</div>
+        <div class="wc-slide-d">Miles de jóvenes en LATAM no controlan sus gastos hormiga. Únete gratis y empieza a tener...</div>
+        <div class="wc-slogan-big">menos hormis, más money 🐜</div>
+      </div>
+
+    </div>
+  </div>
+  <div class="wc-dots">
+    <div class="wc-dot on" onclick="wcSlide(0)"></div>
+    <div class="wc-dot" onclick="wcSlide(1)"></div>
+    <div class="wc-dot" onclick="wcSlide(2)"></div>
+    <div class="wc-dot" onclick="wcSlide(3)"></div>
+  </div>
+  <div class="wc-foot">
+    <button class="wc-btn-primary" onclick="showAuthScreen('s-register')">Crear cuenta gratis</button>
+    <button class="wc-btn-outline" onclick="showAuthScreen('s-login')">Ya tengo cuenta</button>
+    <div class="wc-micro">Sin tarjeta de crédito · Cancela cuando quieras</div>
+    <div class="wc-legal">Al continuar aceptas nuestros <a onclick="_termsFrom='welcome';showAuthScreen('s-terms')" style="cursor:pointer">Términos y Política de privacidad</a></div>
+  </div>
+</div>
+
+<!-- ═══ REGISTER ═══ -->
+<div class="auth-screen" id="s-register">
+  <div class="auth-hd">
+    <button class="auth-back" onclick="showAuthScreen('s-welcome')">‹</button>
+    <div class="auth-title">Crear cuenta</div>
+  </div>
+  <div class="auth-body">
+    <label class="auth-label">Email</label>
+    <input class="auth-in" id="reg-email" type="email" inputmode="email" placeholder="tu@email.com" autocomplete="email" autocapitalize="none">
+    <label class="auth-label">Contraseña</label>
+    <div style="position:relative;margin-bottom:16px">
+      <input class="auth-in" id="reg-pass" type="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password" style="margin-bottom:0;padding-right:46px">
+      <button type="button" onclick="togglePass('reg-pass','reg-eye1')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:4px;color:var(--t3);display:flex;align-items:center" id="reg-eye1">
+        <svg id="reg-eye1-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        <svg id="reg-eye1-closed" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+      </button>
+    </div>
+    <label class="auth-label">Confirmar contraseña</label>
+    <div style="position:relative;margin-bottom:0">
+      <input class="auth-in" id="reg-pass2" type="password" placeholder="Repite tu contraseña" autocomplete="new-password" style="margin-bottom:0;padding-right:46px">
+      <button type="button" onclick="togglePass('reg-pass2','reg-eye2')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:4px;color:var(--t3);display:flex;align-items:center" id="reg-eye2">
+        <svg id="reg-eye2-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        <svg id="reg-eye2-closed" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+      </button>
+    </div>
+    <div class="auth-err" id="reg-err" style="margin-top:8px"></div>
+    <button class="auth-btn" id="reg-btn" onclick="doRegister()">Crear cuenta</button>
+    <div class="auth-sep">o</div>
+    <button class="auth-google" id="reg-google-btn" onclick="doGoogleAuth()">
+      <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z"/></svg>
+      Continuar con Google
+    </button>
+    <div class="auth-link">¿Ya tienes cuenta? <a onclick="showAuthScreen('s-login')">Inicia sesión</a></div>
+  </div>
+</div>
+
+<!-- ═══ LOGIN ═══ -->
+<div class="auth-screen" id="s-login">
+  <div class="auth-hd">
+    <button class="auth-back" onclick="showAuthScreen('s-welcome')">‹</button>
+    <div class="auth-title">Iniciar sesión</div>
+  </div>
+  <div class="auth-body">
+    <label class="auth-label">Email</label>
+    <input class="auth-in" id="login-email" type="email" inputmode="email" placeholder="tu@email.com" autocomplete="email" autocapitalize="none">
+    <label class="auth-label">Contraseña</label>
+    <input class="auth-in" id="login-pass" type="password" placeholder="Tu contraseña" autocomplete="current-password">
+    <div class="auth-err" id="login-err"></div>
+    <button class="auth-btn" id="login-btn" onclick="doLogin()">Iniciar sesión</button>
+    <div style="text-align:center;margin-top:12px">
+      <a style="font-size:13px;color:var(--t2);cursor:pointer;text-decoration:underline" onclick="showForgotPassword()">¿Olvidaste tu contraseña?</a>
+    </div>
+    <div class="auth-sep">o</div>
+    <button class="auth-google" id="login-google-btn" onclick="doGoogleAuth()">
+      <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z"/></svg>
+      Continuar con Google
+    </button>
+    <div class="auth-link">¿No tienes cuenta? <a onclick="showAuthScreen('s-register')">Regístrate</a></div>
+  </div>
+</div>
+
+<!-- ═══ CONFIRM EMAIL ═══ -->
+<div class="auth-screen" id="s-confirm">
+  <div class="auth-hd">
+    <button class="auth-back" onclick="showAuthScreen('s-register')">‹</button>
+    <div class="auth-title">Confirma tu email</div>
+  </div>
+  <div class="auth-body" style="align-items:center;text-align:center;padding-top:40px">
+    <div style="font-size:56px;margin-bottom:16px">📧</div>
+    <div style="font-size:18px;font-weight:700;color:var(--t1);margin-bottom:10px">Revisa tu correo</div>
+    <div id="confirm-email-txt" style="font-size:14px;color:var(--t2);line-height:1.5;margin-bottom:32px"></div>
+    <button class="auth-btn" type="button" onclick="showConfirmEmailCheck()" style="margin-bottom:12px">Ya confirmé mi email</button>
+    <button class="auth-btn" type="button" id="resend-btn" onclick="doResendEmail()" style="background:var(--s1);color:var(--t1)">Reenviar email</button>
+  </div>
+</div>
+
+<!-- ═══ VERIFY EMAIL ═══ -->
+<div class="auth-screen" id="s-verify" style="display:none">
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:40px;text-align:center;gap:20px">
+    <span style="font-size:48px">📬</span>
+    <h2 style="font-family:var(--font-title);font-weight:800;margin:0">Revisa tu correo</h2>
+    <p id="verify-email-msg" style="color:#666;margin:0;line-height:1.5">Te enviamos un link de verificación. Haz clic en él y luego vuelve aquí.</p>
+    <button class="auth-btn" onclick="showAuthScreen('s-login')">Ya verifiqué — iniciar sesión</button>
+    <button class="auth-btn" onclick="showAuthScreen('s-login')" style="background:var(--s1);color:var(--t1)">Volver al login</button>
+  </div>
+</div>
+
+<!-- ═══ READY ═══ -->
+<div class="auth-screen" id="s-ready" style="display:none">
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:40px;text-align:center;gap:20px">
+    <span style="font-size:48px">🐜</span>
+    <h2 id="ready-title" style="font-family:var(--font-title);font-weight:800;margin:0">¡Bienvenida!</h2>
+    <p id="ready-msg" style="color:#666;margin:0">Todo listo para empezar.</p>
+    <button class="auth-btn" id="ready-btn" onclick="onReadyContinue()">Comencemos</button>
+  </div>
+</div>
+
+<!-- ═══ TERMS ═══ -->
+<div class="auth-screen" id="s-terms" style="display:none">
+  <div style="padding:calc(var(--st)+16px) 20px 20px;max-width:430px;width:100%">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
+      <button onclick="termsBack()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--t2);padding:4px 8px 4px 0;line-height:1">‹</button>
+      <div style="font-family:var(--font-title);font-size:20px;font-weight:800">Términos y Privacidad</div>
+    </div>
+    <div style="font-family:var(--font-title);font-size:16px;font-weight:700;margin-bottom:8px;color:var(--t1)">Términos de uso</div>
+    <div style="font-size:14px;color:var(--t2);line-height:1.7;margin-bottom:20px">HORMI es una herramienta de seguimiento de gastos personales. El usuario es responsable de la información que ingresa. HORMI no almacena datos bancarios ni contraseñas. El servicio puede interrumpirse sin previo aviso durante el período beta.</div>
+    <div style="font-family:var(--font-title);font-size:16px;font-weight:700;margin-bottom:8px;color:var(--t1)">Política de privacidad</div>
+    <div style="font-size:14px;color:var(--t2);line-height:1.7;margin-bottom:24px">HORMI recopila nombre, correo electrónico y datos de gastos ingresados por el usuario. Esta información se almacena en servidores seguros (Supabase) y no se comparte con terceros. El usuario puede solicitar la eliminación de sus datos en cualquier momento desde Ajustes → Eliminar cuenta.</div>
+    <button onclick="termsBack()" style="width:100%;padding:14px;background:var(--lime);border:none;border-radius:var(--r);font-family:var(--font-title);font-weight:800;font-size:15px;color:#080808;cursor:pointer">Entendido ✓</button>
+  </div>
+</div>
+
+<!-- ═══ FORGOT PASSWORD ═══ -->
+<div class="auth-screen" id="s-forgot" style="display:none">
+  <div class="auth-hd">
+    <button class="auth-back" onclick="showAuthScreen('s-login')">‹</button>
+    <div class="auth-title">Recuperar contraseña</div>
+  </div>
+  <div class="auth-body">
+    <div style="font-size:42px;text-align:center;margin-bottom:16px">🔑</div>
+    <div style="font-size:15px;color:var(--t2);line-height:1.6;margin-bottom:24px;text-align:center">Te enviaremos un link a tu correo para restablecer tu contraseña.</div>
+    <label class="auth-label">Correo electrónico</label>
+    <input class="auth-in" id="forgot-email" type="email" inputmode="email" placeholder="tu@correo.com" autocomplete="email" autocapitalize="none">
+    <button class="auth-btn" id="forgot-btn" onclick="sendResetEmail()">Enviar link de recuperación</button>
+    <div id="forgot-msg" style="text-align:center;margin-top:16px;font-size:14px;color:var(--t2);line-height:1.5"></div>
+    <div style="text-align:center;margin-top:20px">
+      <a onclick="showAuthScreen('s-login')" style="font-size:13px;color:var(--t3);cursor:pointer;text-decoration:underline">Volver al inicio de sesión</a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ONBOARDING ═══ -->
+<div id="ob" class="ob" style="display:none">
+  <div class="ob-logo">
+    <div style="font-size:28px;line-height:1;flex-shrink:0">🐜</div>
+    <div class="ob-logo-name">HORMI</div>
+  </div>
+  <div class="ob-prog">
+    <div class="ob-dot done" id="d0"></div><div class="ob-dot" id="d1"></div>
+    <div class="ob-dot" id="d2"></div><div class="ob-dot" id="d3"></div>
+  </div>
+
+  <!-- 0: nombre -->
+  <div class="ob-step on" id="os0">
+    <div class="ob-h" style="margin-top:28px">Bienvenid@ a <span>HORMI 🐜</span></div>
+    <div class="ob-p">Identifica y reduce los gastos pequeños que se escapan sin que los notes. ¿Cómo te llamas?</div>
+    <input class="ob-in" id="ob-name" placeholder="Tu nombre..." maxlength="20" autocomplete="off">
+    <button class="ob-btn" type="button" onclick="obNext(0)">continuar</button>
+  </div>
+
+  <!-- 1: hormigas -->
+  <div class="ob-step" id="os1">
+    <div class="ob-h">¿cuáles son tus <span>hormigas</span>?</div>
+    <div class="ob-p">Gastos pequeños y frecuentes que podrías evitar. Selecciona o escribe los tuyos.</div>
+    <div class="chips" id="hormi-chips"></div>
+    <div class="custom-row">
+      <input class="custom-in" id="ob-custom" placeholder="otro (ej: empanadas, gaseosa...)" maxlength="30">
+      <button class="custom-btn" onclick="addCustom()">+</button>
+    </div>
+    <div id="ob-status"></div>
+    <div id="ob-detected"></div>
+    <button class="ob-btn" type="button" onclick="obNext(1)">continuar</button>
+    <div class="ob-skip" onclick="obNext(1)">saltar por ahora</div>
+  </div>
+
+  <!-- 2: meta -->
+  <div class="ob-step" id="os2">
+    <div class="ob-h">pon tu <span>meta</span> del mes</div>
+    <div class="ob-p">¿Cuál de tus hormigas quieres reducir este mes? Elige una y pon un límite.</div>
+    <div class="f-lbl">quiero reducir en...</div>
+    <div class="chips" id="goal-chips" style="margin-bottom:16px"></div>
+    <div class="f-lbl">presupuesto máximo este mes (S/)</div>
+    <div class="amt-wr" style="margin-bottom:14px">
+      <span class="amt-pr" style="font-size:16px">S/</span>
+      <input type="number" inputmode="decimal" class="amt-in" id="ob-goal-amt" placeholder="50.00" style="font-size:20px;padding:12px 12px 12px 38px">
+    </div>
+    <div class="f-lbl">límite diario total de hormigas</div>
+    <div class="amt-wr">
+      <span class="amt-pr" style="font-size:16px">S/</span>
+      <input type="number" inputmode="decimal" class="amt-in" id="ob-budget" placeholder="30.00" style="font-size:20px;padding:12px 12px 12px 38px">
+    </div>
+    <button class="ob-btn" type="button" onclick="obNext(2)">continuar</button>
+  </div>
+
+  <!-- 3: listo -->
+  <div class="ob-step" id="os3">
+    <div style="font-size:60px;text-align:center;margin-top:36px;margin-bottom:20px">🐜</div>
+    <div class="ob-h" style="text-align:center">¡listo, <span id="ob-fn"></span>!</div>
+    <div class="ob-p" style="text-align:center">HORMI está configurado. Registra un gasto, escanea un Yape, o sube tu historial del banco.</div>
+    <div style="background:var(--s1);border:.5px solid var(--b1);border-radius:var(--r);padding:15px;margin-bottom:18px;font-size:13px;color:var(--t2)">
+      <div id="ob-summary"></div>
+    </div>
+    <button class="ob-btn" type="button" onclick="finishOb()">empezar a trackear 🐜</button>
+  </div>
+</div>
+
+<!-- ═══ MAIN APP ═══ -->
+<div id="main" style="display:none">
+
+  <!-- HOME -->
+  <div class="screen on" id="s-home">
+    <div class="hm-sticky">
+      <div class="hm-hd">
+        <div>
+          <p class="hm-greet" id="hm-greeting">hola,</p>
+          <h2 class="hm-name" id="h-name">tú</h2>
+          <p class="hm-sub">¿Cómo van tus hormis hoy?</p>
+        </div>
+        <button class="streak-pill" id="streak-pill" onclick="showStreakTooltip()" style="display:none;flex-shrink:0;margin-top:4px"></button>
+      </div>
+      <p class="hm-daylbl" id="hm-daylbl" style="display:none">hoy</p>
+      <div id="trial-banner-slot"></div>
+      <!-- STATS ROW -->
+      <div style="display:flex;gap:1px;background:rgba(211,228,88,.25);border-radius:14px;overflow:hidden;margin:0 20px 12px">
+        <div style="flex:1;background:#d3e458;padding:14px 12px;text-align:center">
+          <div id="stat-streak" style="font-size:26px;font-weight:900;font-family:var(--font-title);color:#1a2e2a;line-height:1">0</div>
+          <div style="font-size:11px;color:#1a2e2a;margin-top:2px">días racha</div>
+        </div>
+        <div style="flex:1;background:#d3e458;padding:14px 12px;text-align:center">
+          <div id="stat-month" style="font-size:26px;font-weight:900;font-family:var(--font-title);color:#1a2e2a;line-height:1">S/0</div>
+          <div style="font-size:11px;color:#1a2e2a;margin-top:2px">este mes</div>
+        </div>
+        <div style="flex:1;background:#d3e458;padding:14px 12px;text-align:center">
+          <div id="stat-today" style="font-size:26px;font-weight:900;font-family:var(--font-title);color:#E63946;line-height:1">S/0</div>
+          <div style="font-size:11px;color:#1a2e2a;margin-top:2px">hoy</div>
+        </div>
+      </div>
+      <div class="wk hm-wk">
+        <div class="wk-nav">
+          <button class="wk-arr" onclick="navWeek(-1)">‹</button>
+          <span id="wk-lbl" class="sec" style="margin:0;cursor:pointer" onclick="openCal()">esta semana</span>
+          <button class="wk-arr" id="wk-next" onclick="navWeek(1)" disabled>›</button>
+        </div>
+        <div class="wk-row" id="wk-row"></div>
+      </div>
+    </div>
+    <div id="day-content">
+      <div id="gp-wrap"></div>
+      <div id="bc-day"></div>
+      <div class="feed" id="feed"></div>
+    </div>
+  </div>
+
+  <!-- STREAK TOOLTIP -->
+  <div id="streak-tooltip" style="display:none" onclick="this.style.display='none'">
+    <div class="st-box" onclick="event.stopPropagation()">
+      <div class="st-ico" id="st-ico">🔥</div>
+      <div class="st-msg" id="st-msg"></div>
+      <button class="st-close" onclick="document.getElementById('streak-tooltip').style.display='none'">Entendido</button>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="screen" id="s-stats"><div class="stats-wr" id="stats-c" style="padding-left:20px;padding-right:20px;box-sizing:border-box"></div></div>
+
+  <!-- GOALS -->
+  <div class="screen" id="s-goals"><div class="goals-wr" id="goals-c" style="padding-left:20px;padding-right:20px;box-sizing:border-box"></div></div>
+
+  <!-- PLAN -->
+  <div class="screen" id="s-plan"><div class="plan-wr" id="plan-c" style="padding-left:20px;padding-right:20px;box-sizing:border-box"></div></div>
+
+  <!-- SETTINGS -->
+  <div class="screen" id="s-set"><div class="set-wr" id="set-c" style="padding-left:20px;padding-right:20px;box-sizing:border-box"></div></div>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <button class="nb" id="n-stats" onclick="go('stats')">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span class="nb-lbl">Análisis</span>
+    </button>
+    <button class="nb" id="n-goals" onclick="go('goals')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg><span class="nb-lbl">Metas</span>
+    </button>
+    <button class="nb on" id="n-home" onclick="go('home')">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span class="nb-lbl">Inicio</span>
+    </button>
+    <button class="nb" id="n-plan" onclick="go('plan')">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg><span class="nb-lbl">Plan</span>
+    </button>
+    <button class="nb" id="n-set" onclick="go('set')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span class="nb-lbl">Ajustes</span>
+    </button>
+  </nav>
+  <!-- FAB FIJO -->
+  <button class="fab-fixed" onclick="openSheet('sh-fab')">
+    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  </button>
+
+  <!-- SHEET ADD -->
+  <div class="ov" id="sh-add" onclick="maybeClose(event,'sh-add')">
+    <div class="sheet">
+      <div class="sh"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div class="s-title" style="margin:0">Nuevo gasto</div>
+        <button class="btn-close" onclick="closeOv('sh-add')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="scan-up" id="scan-drop" onclick="document.getElementById('img-in').click()">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <div class="scan-up-t">Escanear capturas de Yape / Plin ó Boleta</div>
+        <div class="scan-up-s">Foto del pago — la IA extrae monto y descripción</div>
+      </div>
+      <input type="file" id="img-in" accept="image/*" style="display:none" onchange="scanImg(this)">
+      <div id="scan-confirm-banner" style="display:none;background:#FFF9C4;border:1.5px solid #F59E0B;border-radius:10px;padding:10px 13px;font-size:13px;font-weight:600;color:#92400E;margin-bottom:10px">⚠️ Revisa y confirma antes de guardar</div>
+      <div id="scan-st" style="min-height:4px;margin-bottom:4px"></div>
+      <div class="scan-res" id="scan-res">
+        <div style="font-size:11px;color:var(--t3);letter-spacing:.04em;margin-bottom:7px">DETECTADO POR IA</div>
+        <div id="scan-fields"></div>
+        <div id="alias-match" style="display:none;margin-top:6px;padding:7px 10px;background:rgba(74,222,128,.07);border:.5px solid rgba(74,222,128,.2);border-radius:8px;font-size:12px;color:var(--green)"></div>
+        <div style="display:flex;gap:7px;margin-top:9px">
+          <button class="ms-disc" style="flex:1" onclick="discardScan()">× Descartar</button>
+          <button class="ms-disc" style="flex:1;color:var(--amber);border-color:rgba(255,187,51,.3)" onclick="saveDraft()">Guardar borrador</button>
+        </div>
+      </div>
+      <div class="f-lbl">monto</div>
+      <div class="amt-wr"><span class="amt-pr">S/</span><input type="number" inputmode="decimal" class="amt-in" id="a-amt" placeholder="0.00" step="0.01" min="0"></div>
+      <div style="display:flex;gap:8px;margin-bottom:6px">
+        <div style="flex:1.5">
+          <div class="f-lbl">consumo</div>
+          <input type="text" class="txt-in" id="tx-consumo" placeholder="café, taxi, snack..." style="margin-bottom:0">
+        </div>
+        <div style="flex:1">
+          <div class="f-lbl">lugar (opcional)</div>
+          <input type="text" class="txt-in" id="tx-lugar" placeholder="Starbucks..." style="margin-bottom:0">
+        </div>
+      </div>
+      <div id="dup-warn" class="dup-warn" style="display:none"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:0">
+        <div>
+          <div class="f-lbl">fecha</div>
+          <input type="date" class="txt-in" id="a-date" style="margin-bottom:13px;color:var(--t1)" required>
+        </div>
+        <div>
+          <div class="f-lbl">hora (opcional)</div>
+          <input type="time" class="txt-in" id="a-time" style="margin-bottom:13px;color:var(--t1)">
+        </div>
+      </div>
+      <div class="f-lbl">categoría</div>
+      <div class="eg" id="a-eg"></div>
+      <div class="tog-row" onclick="togHormi()" id="hormi-tog">
+        <div class="tog-l"><div class="tog-lt">¿es gasto hormiga?</div><div class="tog-ls">pequeño, frecuente, evitable</div></div>
+        <div class="pill on" id="h-pill"><div class="knob"></div></div>
+      </div>
+      <button class="btn-p" id="btn-add-tx" onclick="addTx()">guardar gasto</button>
+    </div>
+  </div>
+
+  <!-- SHEET IMPORT -->
+
+  <!-- MODAL BUDGET -->
+  <div class="ov ctr" id="m-budget" onclick="maybeClose(event,'m-budget')">
+    <div class="modal">
+      <div class="m-title">ajustar límites</div>
+      <div class="m-sub">Límite diario de hormigas y umbral para marcarlas automáticamente.</div>
+      <div class="f-lbl">límite diario (S/)</div>
+      <div class="amt-wr" style="margin-bottom:12px">
+        <span class="amt-pr" style="font-size:16px">S/</span>
+        <input type="number" inputmode="decimal" class="amt-in" id="bud-in" style="font-size:20px;padding:11px 11px 11px 36px">
+      </div>
+      <div class="f-lbl">umbral hormiga — montos menores a (S/)</div>
+      <input type="number" inputmode="decimal" class="txt-in" id="thr-in" style="margin-bottom:0">
+      <div class="m-acts">
+        <button class="m-cancel" onclick="closeOv('m-budget')">cancelar</button>
+        <button class="m-save" onclick="saveBudget()">guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL GOAL -->
+  <div class="ov ctr" id="m-goal" onclick="maybeClose(event,'m-goal')">
+    <div class="modal" style="max-height:82dvh;overflow-y:auto">
+      <div class="m-title">nueva meta</div>
+      <div class="m-sub">Elige qué quieres reducir este mes.</div>
+      <div class="f-lbl">hormigas identificadas</div>
+      <div class="chips" id="mg-chips" style="margin-bottom:4px"></div>
+      <div class="f-lbl" style="margin-top:10px">o por categoría</div>
+      <div id="mg-cats" style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:4px"></div>
+      <div id="mg-inputs"></div>
+      <div class="m-acts" style="margin-top:14px">
+        <button class="m-cancel" onclick="closeOv('m-goal')">cancelar</button>
+        <button class="m-save" onclick="saveGoalMulti()">guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHEET DAY -->
+  <div class="ov" id="sh-day" onclick="maybeClose(event,'sh-day')">
+    <div class="sheet">
+      <div class="sh"></div>
+      <div class="s-title" id="sh-day-title">día</div>
+      <div id="sh-day-body"></div>
+    </div>
+  </div>
+
+  <!-- SHEET CALENDAR (mes) -->
+  <div class="ov" id="sh-cal" onclick="maybeClose(event,'sh-cal')">
+    <div class="sheet">
+      <div class="sh"></div>
+      <div class="cal-nav">
+        <button class="wk-arr" onclick="navCal(-1)">‹</button>
+        <div style="font-family:var(--font-title);font-weight:800;font-size:16px" id="cal-lbl"></div>
+        <button class="wk-arr" id="cal-next" onclick="navCal(1)">›</button>
+      </div>
+      <div class="cal-grid">
+        <div class="cal-hd">L</div><div class="cal-hd">M</div><div class="cal-hd">X</div>
+        <div class="cal-hd">J</div><div class="cal-hd">V</div><div class="cal-hd">S</div><div class="cal-hd">D</div>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+    </div>
+  </div>
+
+  <!-- SHEET FAB MODE -->
+  <div class="ov" id="sh-fab" onclick="fabMaybeClose(event)">
+    <div class="sheet">
+      <div class="sh"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <div class="s-title" style="margin:0" id="sh-fab-title">Agregar gasto</div>
+        <button class="btn-close" onclick="closeFabSheet()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <!-- Opciones -->
+      <div id="sh-fab-opts">
+        <div class="fab-opt" onclick="openFabVoice()">
+          <div class="fab-opt-ic">🎙️</div>
+          <div class="fab-opt-inf"><div class="fab-opt-t">Voz</div><div class="fab-opt-s">Di en voz alta lo que gastaste</div></div>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+        <div class="fab-opt" onclick="closeFabSheet();openAddSheet(_selDay)">
+          <div class="fab-opt-ic">📝</div>
+          <div class="fab-opt-inf"><div class="fab-opt-t">Gasto único</div><div class="fab-opt-s">Registra un gasto manualmente o escanea</div></div>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+        <div class="fab-opt" onclick="closeFabSheet();openMultiScan()">
+          <div class="fab-opt-ic">📸</div>
+          <div class="fab-opt-inf"><div class="fab-opt-t">Escaneo múltiple</div><div class="fab-opt-s">Sube varios vouchers de una vez</div></div>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+      <!-- Panel de voz (oculto por defecto) -->
+      <div id="sh-fab-voice" style="display:none;flex-direction:column;align-items:center;padding:12px 0 8px">
+        <div style="font-size:13px;color:var(--t2);margin-bottom:28px;text-align:center">Toca el micrófono para empezar</div>
+        <div id="vb-wrap">
+          <div class="vb-ring" id="vb-r1"></div>
+          <div class="vb-ring" id="vb-r2"></div>
+          <div class="vb-ring" id="vb-r3"></div>
+          <button class="vb" id="vb-btn" onclick="vbTap()" aria-label="Registrar por voz">
+            <span id="vb-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d3e458" stroke-width="2.2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></span>
+          </button>
+        </div>
+        <div id="vb-popup">
+          <div id="vb-pill-text"></div>
+          <div id="vb-acts">
+            <button class="vb-save" onclick="vbSave()">Guardar</button>
+            <button class="vb-cancel" onclick="vbCancel()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+          </div>
+        </div>
+        <button class="btn-g" onclick="vbCancel()" style="margin-top:24px;width:100%">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHEET MULTI-SCAN -->
+  <div class="ov" id="sh-multi" onclick="maybeClose(event,'sh-multi')">
+    <div class="sheet" style="max-height:88dvh">
+      <div class="sh"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div class="s-title" style="margin:0">Escaneo múltiple</div>
+        <label style="display:flex;align-items:center;gap:6px;padding:8px 13px;background:var(--lime);border:none;border-radius:var(--rsm);color:#080808;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font-title)">
+          + fotos <input type="file" accept="image/*" multiple style="display:none" onchange="addMultiFiles(this)">
+        </label>
+      </div>
+      <div id="ms-queue"></div>
+      <div id="ms-empty" style="text-align:center;padding:30px 0;color:var(--t3);font-size:13px">Toca "+ fotos" para escanear comprobantes</div>
+      <button class="btn-p" id="ms-save-all" onclick="saveAllMulti()" style="display:none;background:#080808;color:#fff">Guardar confirmados</button>
+    </div>
+  </div>
+
+  <!-- MODAL TX DETAIL -->
+  <div class="ov ctr" id="m-tx-detail" onclick="maybeClose(event,'m-tx-detail')">
+    <div class="modal" style="max-height:88dvh;overflow-y:auto">
+      <div class="m-title" id="m-tx-title">Detalle del gasto</div>
+      <div id="m-tx-body" style="font-size:13px;color:var(--t2);margin-bottom:6px;line-height:1.7"></div>
+      <div class="m-acts" id="m-tx-acts">
+        <button class="m-cancel" style="color:var(--red)" onclick="deleteTxModal()">Eliminar</button>
+        <button class="m-save" id="m-tx-edit-btn" onclick="editTxModal()" style="background:var(--s2);color:var(--t1);border:1px solid var(--b2)">Editar</button>
+        <button class="m-save" id="m-tx-confirm-btn" onclick="confirmDraft()" style="display:none">✓ Confirmar</button>
+        <button class="m-save" id="m-tx-close-btn" onclick="closeOv('m-tx-detail')">Cerrar</button>
+        <button class="m-save" id="m-tx-save-btn" onclick="saveTxEdit()" style="display:none">Guardar</button>
+        <button class="m-cancel" id="m-tx-cancel-edit-btn" onclick="cancelEdit()" style="display:none">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHEET TRIAL -->
+  <div class="ov" id="sh-trial" onclick="maybeClose(event,'sh-trial')">
+    <div class="sheet">
+      <div class="sh"></div>
+      <div style="text-align:center;padding:8px 0 18px">
+        <div style="font-size:46px;margin-bottom:8px">🐜</div>
+        <div style="font-family:var(--font-title);font-size:21px;font-weight:800;margin-bottom:6px">Prueba HORMI Pro</div>
+        <div style="font-size:13px;color:var(--t2);line-height:1.6">15 días gratis · sin tarjeta · sin compromisos</div>
+      </div>
+      <div style="background:#fff;border-radius:12px;overflow:hidden;margin-bottom:20px;border:1px solid var(--b2)">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;font-size:12px;font-weight:700;text-align:center">
+          <div style="padding:10px 6px;color:var(--t2)">Función</div>
+          <div style="padding:10px 6px;color:#888;background:#f5f5f5">Gratis</div>
+          <div style="padding:10px 6px;color:var(--lime-t);background:rgba(200,246,90,.15)">Pro</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;font-size:12px;text-align:center;border-top:1px solid var(--b2)">
+          <div style="padding:9px 6px;color:var(--t1);text-align:left;padding-left:10px">Escaneos</div>
+          <div style="padding:9px 6px;color:#aaa">2/día</div>
+          <div style="padding:9px 6px;color:#2d7a00;font-weight:600">Ilimitado</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;font-size:12px;text-align:center;border-top:1px solid var(--b2);background:#fafafa">
+          <div style="padding:9px 6px;color:var(--t1);text-align:left;padding-left:10px">Registro por voz</div>
+          <div style="padding:9px 6px;color:#aaa">✗</div>
+          <div style="padding:9px 6px;color:#2d7a00;font-weight:600">✓</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;font-size:12px;text-align:center;border-top:1px solid var(--b2)">
+          <div style="padding:9px 6px;color:var(--t1);text-align:left;padding-left:10px">Planificador IA</div>
+          <div style="padding:9px 6px;color:#aaa">✗</div>
+          <div style="padding:9px 6px;color:#2d7a00;font-weight:600">✓</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;font-size:12px;text-align:center;border-top:1px solid var(--b2);background:#fafafa">
+          <div style="padding:9px 6px;color:var(--t1);text-align:left;padding-left:10px">Metas</div>
+          <div style="padding:9px 6px;color:#aaa">3</div>
+          <div style="padding:9px 6px;color:#2d7a00;font-weight:600">Ilimitado</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;font-size:12px;text-align:center;border-top:1px solid var(--b2)">
+          <div style="padding:9px 6px;color:var(--t1);text-align:left;padding-left:10px">Historial</div>
+          <div style="padding:9px 6px;color:#aaa">30 días</div>
+          <div style="padding:9px 6px;color:#2d7a00;font-weight:600">Ilimitado</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;font-size:12px;text-align:center;border-top:1px solid var(--b2);background:#fafafa">
+          <div style="padding:9px 6px;color:var(--t1);text-align:left;padding-left:10px">Exportar datos</div>
+          <div style="padding:9px 6px;color:#aaa">✗</div>
+          <div style="padding:9px 6px;color:#2d7a00;font-weight:600">✓</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;font-size:12px;text-align:center;border-top:1px solid var(--b2)">
+          <div style="padding:9px 6px;color:var(--t1);text-align:left;padding-left:10px">Compartir progreso</div>
+          <div style="padding:9px 6px;color:#aaa">✗</div>
+          <div style="padding:9px 6px;color:#2d7a00;font-weight:600">✓</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;font-size:12px;text-align:center;border-top:1px solid var(--b2);background:#fafafa">
+          <div style="padding:9px 6px;color:var(--t1);text-align:left;padding-left:10px">Alias inteligentes</div>
+          <div style="padding:9px 6px;color:#aaa">✗</div>
+          <div style="padding:9px 6px;color:#2d7a00;font-weight:600">✓</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;font-size:12px;text-align:center;border-top:1px solid var(--b2)">
+          <div style="padding:9px 6px;color:var(--t1);text-align:left;padding-left:10px">Soporte prioritario</div>
+          <div style="padding:9px 6px;color:#aaa">✗</div>
+          <div style="padding:9px 6px;color:#2d7a00;font-weight:600">✓</div>
+        </div>
+      </div>
+      <button class="btn-p" onclick="openTrialDataSheet()">Activar trial gratuito 🎉</button>
+      <button class="btn-g" onclick="closeOv('sh-trial')">Ahora no</button>
+    </div>
+  </div>
+
+  <!-- SHEET UPGRADE -->
+  <div class="ov" id="sh-upgrade" onclick="maybeClose(event,'sh-upgrade')">
+    <div class="sheet">
+      <div class="sh"></div>
+      <div class="s-title">HORMI Pro 🐜</div>
+      <div style="font-size:13px;color:var(--t2);margin-bottom:16px">Elige el plan que más te conviene</div>
+      <div id="upgrade-plans"></div>
+      <button class="btn-p" onclick="goToPurchase()">Pagar por WhatsApp →</button>
+      <div style="font-size:11px;color:var(--t3);text-align:center;margin-top:8px;margin-bottom:4px">Soporte directo · activación manual en menos de 1h</div>
+      <button class="btn-g" onclick="closeOv('sh-upgrade')">Cancelar</button>
+      <div style="text-align:center;margin-top:10px"><a href="#" onclick="closeOv('sh-upgrade');go('set');return false;" style="font-size:12px;color:var(--t3);text-decoration:underline">¿Ya tienes un código? Actívalo aquí</a></div>
+    </div>
+  </div>
+
+  <!-- S-UPGRADE FULLSCREEN -->
+  <div class="s-upgrade" id="s-upgrade">
+    <div class="upgrade-hd">
+      <div class="upgrade-pro-badge" style="margin:0 auto">HORMI 🐜 PRO</div>
+    </div>
+    <div class="upgrade-carousel" id="upgrade-carousel">
+      <div class="upgrade-slides" id="upgrade-slides">
+        <div class="upgrade-slide">
+          <div class="upgrade-slide-ico">📸</div>
+          <div class="upgrade-slide-t">Escanea Yapes y boletas</div>
+          <div class="upgrade-slide-s">Escanea Yapes, Plin y Boletas ilimitado. La IA extrae monto, descripción y fecha. Sin tipear nada.</div>
+        </div>
+        <div class="upgrade-slide">
+          <div class="upgrade-slide-ico">🎙️</div>
+          <div class="upgrade-slide-t">Registra con voz</div>
+          <div class="upgrade-slide-s">Di "gasté 15 soles en café" y HORMI lo registra al instante. El registro más rápido que existe.</div>
+        </div>
+        <div class="upgrade-slide">
+          <div class="upgrade-slide-ico">🚀</div>
+          <div class="upgrade-slide-t">Plan de ahorro con IA</div>
+          <div class="upgrade-slide-s">Recibe un plan personalizado según tus ingresos, tus hormis y tu meta. Semana a semana.</div>
+        </div>
+        <div class="upgrade-slide">
+          <div class="upgrade-slide-ico">🎯</div>
+          <div class="upgrade-slide-t">Metas ilimitadas</div>
+          <div class="upgrade-slide-s">Pon límites a cada hormiga. HORMI trackea automáticamente cuánto llevas del mes.</div>
+        </div>
+        <div class="upgrade-slide">
+          <div class="upgrade-slide-ico">📊</div>
+          <div class="upgrade-slide-t">Historial completo</div>
+          <div class="upgrade-slide-s">Analiza patrones, exporta tus datos y descubre exactamente dónde se escapa tu plata.</div>
+        </div>
+      </div>
+    </div>
+    <div class="upgrade-dots" id="upgrade-dots">
+      <div class="upgrade-dot on" onclick="setUpgradeSlide(0)"></div>
+      <div class="upgrade-dot" onclick="setUpgradeSlide(1)"></div>
+      <div class="upgrade-dot" onclick="setUpgradeSlide(2)"></div>
+      <div class="upgrade-dot" onclick="setUpgradeSlide(3)"></div>
+      <div class="upgrade-dot" onclick="setUpgradeSlide(4)"></div>
+    </div>
+    <div class="upgrade-founders">
+      <div class="upgrade-founders-badge">🔥 PRIMEROS 100 — 53 lugares disponibles</div>
+      <div class="upgrade-founders-t" style="margin-top:3px">Precio de lanzamiento · solo por tiempo limitado</div>
+    </div>
+    <div id="upgrade-plans-new"></div>
+    <div class="upgrade-tl">
+      <div class="upgrade-tl-item">
+        <div class="upgrade-tl-dot">🔓</div>
+        <div><div class="upgrade-tl-t">Hoy</div><div class="upgrade-tl-s">Acceso completo a todo Pro</div></div>
+      </div>
+      <div class="upgrade-tl-item">
+        <div class="upgrade-tl-dot">🔔</div>
+        <div><div class="upgrade-tl-t">Día 13</div><div class="upgrade-tl-s">Te avisamos antes de que venza</div></div>
+      </div>
+      <div class="upgrade-tl-item">
+        <div class="upgrade-tl-dot">💳</div>
+        <div><div class="upgrade-tl-t">Día 15</div><div class="upgrade-tl-s">Empieza tu plan — cancela antes si no quieres</div></div>
+      </div>
+    </div>
+    <div class="upgrade-cta">
+      <button class="btn-p" id="btn-start-trial-main" onclick="goToPurchaseNew()" style="margin-bottom:8px">Hazte PRO ahora</button>
+      <div id="upgrade-cta-sub" style="text-align:center;font-size:11px;color:var(--t3);margin-bottom:4px">No se te cobrará ahora · Cancela cuando quieras</div>
+      <div style="text-align:center;font-size:11px;color:var(--t3);margin-bottom:4px">¿Preguntas? <a href="https://wa.me/51970300434" target="_blank" style="color:var(--lime-t);text-decoration:none">Contactar por WhatsApp</a></div>
+      <div style="text-align:center;font-size:10px;color:var(--t3);margin-bottom:8px">Al continuar aceptas nuestros <span style="text-decoration:underline;cursor:pointer">Términos</span> y <span style="text-decoration:underline;cursor:pointer">Política de privacidad</span></div>
+      <div style="text-align:center"><a href="#" onclick="closeUpgrade();go('set');return false;" style="font-size:12px;color:var(--t3);text-decoration:underline">¿Ya tienes un código? Actívalo aquí</a></div>
+      <button onclick="closeUpgrade()" style="display:block;width:100%;margin-top:12px;padding:16px 32px;background:#d3e458;border:none;border-radius:100px;font-size:16px;color:#000;font-weight:800;cursor:pointer;font-family:var(--font-title)">← Volver</button>
+    </div>
+  </div>
+
+  <!-- SHARE PREVIEW MODAL -->
+  <div class="share-preview-ov" id="share-preview-ov" onclick="if(event.target===this)this.classList.remove('on')">
+    <div class="share-preview-modal">
+      <div style="font-family:var(--font-title);font-weight:800;font-size:17px;margin-bottom:14px;text-align:center">compartir progreso</div>
+      <img id="share-preview-img" style="width:100%;border-radius:16px;margin-bottom:14px;display:block" src="" alt="progreso HORMI">
+      <input type="hidden" id="share-preview-dataurl">
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <button class="btn-g" style="flex:1;margin:0" onclick="document.getElementById('share-preview-ov').classList.remove('on')">Cancelar</button>
+        <button class="btn-p" style="flex:2;margin:0" onclick="doShareProgress()">Compartir ↗</button>
+      </div>
+      <button onclick="const a=document.createElement('a');a.href=document.getElementById('share-preview-dataurl').value;a.download='hormi_progreso.png';a.click();toast('Imagen descargada ✓','ok')" style="width:100%;padding:11px;background:var(--s2);border:.5px solid var(--b2);border-radius:var(--r);cursor:pointer;font-size:13px;color:var(--t2);font-family:var(--font-title)">Descargar imagen</button>
+    </div>
+  </div>
+
+  <!-- FULLSCREEN IMAGE OVERLAY -->
+  <div class="img-fullscreen" id="img-fullscreen">
+    <button class="btn-close img-fullscreen-close" onclick="document.getElementById('img-fullscreen').classList.remove('on')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    <img class="img-fullscreen-img" id="img-fullscreen-img" src="" alt="">
+  </div>
+
+  <!-- TOOLTIP OVERLAY -->
+  <div class="tooltip-ov" id="tooltip-ov">
+    <div class="tooltip-pop" id="tooltip-pop">
+      <div id="tooltip-text"></div>
+      <button class="tooltip-btn" onclick="dismissTooltip()">entendido</button>
+    </div>
+  </div>
+
+  <!-- GUIDE MODAL -->
+  <div id="guide-modal" style="display:none;position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.6);align-items:center;justify-content:center;padding:20px">
+    <div style="background:#fff;border-radius:24px;width:100%;max-width:390px;overflow:hidden">
+      <div style="overflow:hidden">
+        <div id="guide-slides" style="display:flex;transition:transform .35s cubic-bezier(.32,.72,0,1)">
+          <!-- 5 slides injected by JS -->
+        </div>
+      </div>
+      <div style="display:flex;justify-content:center;gap:7px;padding:12px 0 0" id="guide-dots"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px 20px">
+        <button onclick="skipGuide()" style="background:none;border:none;color:#999;font-size:14px;cursor:pointer;padding:4px">Saltar</button>
+        <button id="guide-next-btn" onclick="guideNext()" style="background:#d3e458;border:none;border-radius:12px;padding:11px 24px;font-family:var(--font-title);font-weight:800;font-size:15px;color:#080808;cursor:pointer">Siguiente →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHEET TRIAL DATA -->
+  <div class="ov" id="sh-trial-data" onclick="maybeClose(event,'sh-trial-data')">
+    <div class="sheet" style="max-height:90dvh;overflow-y:auto">
+      <div class="sh"></div>
+      <div style="text-align:center;padding:4px 0 16px">
+        <div style="font-size:36px;margin-bottom:6px">🐜</div>
+        <div style="font-family:var(--font-title);font-size:19px;font-weight:800;margin-bottom:4px">Antes de empezar</div>
+        <div style="font-size:13px;color:var(--t2)">Completa estos datos para acceder al trial gratuito</div>
+      </div>
+      <div>
+        <div class="f-lbl">Número de celular *</div>
+        <input class="txt-in" type="tel" id="td-phone" placeholder="Ej: 987654321" inputmode="tel" style="margin-bottom:12px">
+        <div class="f-lbl">Ciudad *</div>
+        <input class="txt-in" type="text" id="td-city" placeholder="Ej: Lima, Arequipa..." style="margin-bottom:12px">
+        <div class="f-lbl">Ocupación *</div>
+        <select class="txt-in" id="td-occ" style="margin-bottom:12px;color:var(--t1)">
+          <option value="">Selecciona...</option>
+          <option>Estudiante</option>
+          <option>Profesional dependiente</option>
+          <option>Emprendedor/a</option>
+          <option>Freelancer</option>
+          <option>Ama de casa</option>
+          <option>Otro</option>
+        </select>
+        <div class="f-lbl">Edad *</div>
+        <input class="txt-in" type="number" id="td-age" placeholder="Ej: 25" min="16" max="80" inputmode="numeric" style="margin-bottom:16px">
+      </div>
+      <button class="btn-p" onclick="submitTrialData()">Activar mi trial gratis 🐜</button>
+      <button class="btn-g" onclick="closeOv('sh-trial-data')" style="margin-top:8px">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- SHEET EDIT PROFILE -->
+  <div class="ov" id="sh-edit-profile" onclick="maybeClose(event,'sh-edit-profile')">
+    <div class="sheet" style="max-height:85dvh;overflow-y:auto">
+      <div class="sh"></div>
+      <div class="s-title">Editar perfil</div>
+      <div class="f-lbl">Nombre</div>
+      <input class="txt-in" id="ep-name" placeholder="Tu nombre" style="margin-bottom:12px">
+      <div class="f-lbl">Celular</div>
+      <input class="txt-in" type="tel" id="ep-phone" placeholder="Ej: 987654321" inputmode="tel" style="margin-bottom:12px">
+      <div class="f-lbl">Ciudad</div>
+      <input class="txt-in" id="ep-city" placeholder="Ej: Lima, Arequipa..." style="margin-bottom:12px">
+      <div class="f-lbl">Ocupación</div>
+      <select class="txt-in" id="ep-occ" style="margin-bottom:12px;color:var(--t1)">
+        <option value="">Selecciona...</option>
+        <option>Estudiante</option>
+        <option>Profesional dependiente</option>
+        <option>Emprendedor/a</option>
+        <option>Freelancer</option>
+        <option>Ama de casa</option>
+        <option>Otro</option>
+      </select>
+      <div class="f-lbl">Edad</div>
+      <input class="txt-in" type="number" id="ep-age" placeholder="Ej: 25" min="16" max="80" inputmode="numeric" style="margin-bottom:20px">
+      <button class="btn-p" onclick="saveEditProfile()">Guardar cambios</button>
+    </div>
+  </div>
+
+  <!-- SHEET CHANGE PASSWORD -->
+  <div class="ov" id="sh-change-pass" onclick="maybeClose(event,'sh-change-pass')">
+    <div class="sheet">
+      <div class="sh"></div>
+      <div class="s-title">Cambiar contraseña</div>
+      <div id="cp-google-msg" style="display:none;background:var(--s2);border-radius:var(--r);padding:14px;font-size:13px;color:var(--t2);margin-bottom:16px;line-height:1.5">
+        Tu cuenta usa Google — no necesitas contraseña para iniciar sesión.
+      </div>
+      <div id="cp-form">
+        <div class="f-lbl">Nueva contraseña</div>
+        <div style="position:relative;margin-bottom:12px">
+          <input class="txt-in" type="password" id="cp-new" placeholder="Mínimo 6 caracteres" autocomplete="new-password" style="margin-bottom:0;padding-right:46px">
+          <button type="button" onclick="togglePass('cp-new','cp-eye1')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:4px;color:var(--t3)">
+            <svg id="cp-eye1-open" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg id="cp-eye1-closed" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+          </button>
+        </div>
+        <div class="f-lbl">Confirmar nueva contraseña</div>
+        <div style="position:relative;margin-bottom:8px">
+          <input class="txt-in" type="password" id="cp-confirm" placeholder="Repite la nueva contraseña" autocomplete="new-password" style="margin-bottom:0;padding-right:46px">
+          <button type="button" onclick="togglePass('cp-confirm','cp-eye2')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:4px;color:var(--t3)">
+            <svg id="cp-eye2-open" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg id="cp-eye2-closed" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+          </button>
+        </div>
+        <div id="cp-err" style="font-size:12px;color:var(--red);min-height:16px;margin-bottom:12px"></div>
+        <button class="btn-p" id="cp-btn" onclick="doChangePass()">Cambiar contraseña</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HC DETAIL PANEL -->
+  <div class="hc-panel-bg" id="hc-panel-bg" onclick="closeHormiDetail()"></div>
+  <div class="hc-panel" id="hc-detail-panel">
+    <div class="sh" style="margin:12px auto 0"></div>
+    <div id="hc-panel-body"></div>
+  </div>
+
+  <!-- SHEET DELETE ACCOUNT -->
+  <div class="ov" id="sh-delete-account" onclick="maybeClose(event,'sh-delete-account')">
+    <div class="sheet">
+      <div class="sh"></div>
+      <div style="text-align:center;padding:8px 0 16px">
+        <div style="font-size:40px;margin-bottom:8px">⚠️</div>
+        <div style="font-family:var(--font-title);font-size:18px;font-weight:800;color:var(--red);margin-bottom:8px">¿Estás segura?</div>
+        <div style="font-size:13px;color:var(--t2);line-height:1.6">Esta acción es irreversible. Se borrarán todos tus gastos, metas y datos de HORMI.</div>
+      </div>
+      <div class="f-lbl">Escribe <strong>ELIMINAR</strong> para confirmar</div>
+      <input class="txt-in" id="del-confirm-in" placeholder="ELIMINAR" autocomplete="off" autocapitalize="characters" oninput="document.getElementById('del-confirm-btn').disabled=this.value!=='ELIMINAR'" style="margin-bottom:16px;letter-spacing:.1em;font-family:monospace">
+      <button class="btn-p" id="del-confirm-btn" disabled onclick="doDeleteAccount()" style="background:var(--red);color:#fff">Eliminar mi cuenta para siempre</button>
+      <button class="btn-g" onclick="closeOv('sh-delete-account')" style="margin-top:8px">Cancelar</button>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<div class="toast" id="toast"></div>
+</div>
+
+
+
+<!-- Entry point -->
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>
