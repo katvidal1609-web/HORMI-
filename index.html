@@ -15,22 +15,9 @@
   <!-- Supabase & Lucide via CDN (reemplazar con npm en producción) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-  <style>
-.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;display:none;padding-bottom:calc(90px + env(safe-area-inset-bottom,0px));background:var(--bg)}
-.screen.on{display:block}
-.auth-screen{position:fixed;inset:0;background:#fff;display:none;flex-direction:column;overflow-y:auto;padding:0 0 calc(32px + var(--sb));height:100dvh;height:-webkit-fill-available}
-.auth-screen.on{display:flex}
-.ov{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:none;align-items:flex-end;justify-content:center}
-.ov.open{display:flex}
-.ov.ctr{align-items:center}
-html{background:var(--bg)}
-html,body{height:100%;overflow:hidden;background:var(--bg)}
-body{font-family:var(--font-body);background:var(--bg);color:var(--t1);font-size:14px;overscroll-behavior:none;-webkit-font-smoothing:antialiased}
-.app{display:flex;flex-direction:column;height:100dvh;width:100%;max-width:430px;margin:0 auto;position:relative;overflow:hidden;background:var(--bg)}
-@media all and (display-mode:standalone){.app{height:100svh}}
-</style>
   <!-- Estilos separados por responsabilidad -->
   <link rel="stylesheet" href="/css/variables.css">
+  <link rel="stylesheet" href="/css/base.css">
   <link rel="stylesheet" >
   <link rel="stylesheet" href="/css/components.css">
   <link rel="stylesheet" href="/css/screens.css">
