@@ -1,5 +1,5 @@
 // ui/nav.js — navegación entre tabs/screens
-const SCREENS = ['s-home', 's-analysis', 's-goals', 's-plan', 's-settings']
+const SCREENS = ['s-home', 's-stats', 's-goals', 's-plan', 's-set']
 
 export function go(sc) {
   SCREENS.forEach(id => {
