@@ -1,25 +1,23 @@
-// ui/nav.js — navegación entre tabs/screens
-const SCREENS = ['s-home', 's-stats', 's-goals', 's-plan', 's-set']
+// ui/nav.js — navegación entre tabs, igual que el original
+const TABS = ['home', 'stats', 'goals', 'plan', 'set']
 
 export function go(sc) {
-  SCREENS.forEach(id => {
-    const el = document.getElementById(id)
-    if (!el) return
-    if (id === sc) {
-      el.classList.add('on')
-    } else {
-      el.classList.remove('on')
-    }
+  // sc puede venir como 'home' o 's-home' — normalizamos
+  const tab = sc.startsWith('s-') ? sc.slice(2) : sc
+
+  TABS.forEach(s => {
+    document.getElementById('s-' + s)?.classList.toggle('on', s === tab)
+    document.getElementById('n-' + s)?.classList.toggle('on', s === tab)
   })
-  document.querySelectorAll('.nb').forEach(b => {
-    b.classList.toggle('on', b.dataset.screen === sc)
-  })
+
+  if (tab === 'home') {
+    import('../features/home/render.js').then(m => m.renderHome())
+    const sh = document.getElementById('s-home')
+    if (sh) sh.scrollTop = 0
+  }
 }
 
 export function refreshCurrent() {
-  const active = SCREENS.find(id => {
-    const el = document.getElementById(id)
-    return el && el.classList.contains('on')
-  })
-  if (active === 's-home') import('../features/home/render.js').then(m => m.renderHome())
+  const active = TABS.find(s => document.getElementById('s-' + s)?.classList.contains('on'))
+  if (active === 'home') import('../features/home/render.js').then(m => m.renderHome())
 }
