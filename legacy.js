@@ -2095,9 +2095,12 @@ async function shareProgress(){
     grad.addColorStop(0,'#d3e458');grad.addColorStop(0.5,'#5A9430');grad.addColorStop(1,'#080808');
     ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
     // Isotipo + wordmark
-    const lh=120,lw=logo.naturalWidth&&logo.naturalHeight?Math.round(logo.naturalWidth/logo.naturalHeight*lh):120;
-    if(logo.complete&&logo.naturalHeight)ctx.drawImage(logo,28,16,lw,lh);
-    ctx.fillStyle='rgba(8,8,8,0.70)';ctx.font='400 14px Lexend, sans-serif';ctx.fillText('menos hormis, más money',28,lh+20);
+    const lh=200,lw=logo.naturalWidth&&logo.naturalHeight?Math.round(logo.naturalWidth/logo.naturalHeight*lh):200;
+    const logoX=Math.round((W-lw)/2);
+    if(logo.complete&&logo.naturalHeight)ctx.drawImage(logo,logoX,20,lw,lh);
+    ctx.fillStyle='rgba(255,255,255,0.80)';ctx.font='400 13px Lexend, sans-serif';ctx.textAlign='center';
+    ctx.fillText('menos hormis, más money',W/2,lh+36);
+    ctx.textAlign='left';
     // Divider
     ctx.fillStyle='rgba(8,8,8,0.15)';ctx.fillRect(28,94,344,1);
     // Main amount
