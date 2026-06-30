@@ -1926,6 +1926,14 @@ async function renderLugarChart(){
   if(rawNames.length){normalizarLugares(rawNames).then(changed=>{if(changed)renderLugarChart();});}
 }
 
+let _saveCardAvg=0;
+function updateSavePct(pct){
+  const p=parseInt(pct)/100;
+  document.getElementById('save-pct-lbl').textContent=`si reduces ${pct}% tus hormigas`;
+  document.getElementById('save-mes-val').textContent=`+${fmt(_saveCardAvg*30*p)}`;
+  document.getElementById('save-ano-val').textContent=`+${fmt(_saveCardAvg*365*p)}`;
+}
+
 function renderStats(){
   const all=D.transactions,hm=all.filter(t=>t.isHormi);
   const tm=new Date().toISOString().slice(0,7);
@@ -1948,6 +1956,7 @@ function renderStats(){
   const thisTotal=thisQ.reduce((s,t)=>s+t.amount,0);
   const daysLeft=fH?(15-dayP):(new Date(nowP.getFullYear(),nowP.getMonth()+1,0).getDate()-dayP);
   const proj=avg>0?thisTotal+(avg*daysLeft):0;
+  _saveCardAvg=avg;
   document.getElementById('stats-c').innerHTML=`
     <div style="font-family:var(--font-title);font-size:25px;font-weight:800;margin-bottom:16px">Análisis</div>
     <button class="share-btn" onclick="shareProgress()">
@@ -1978,10 +1987,11 @@ function renderStats(){
   </div>`;
 })()}
     <div class="save-c">
-      <div class="save-t">si reduces 50% tus hormigas</div>
+      <div class="save-t" id="save-pct-lbl">si reduces 50% tus hormigas</div>
+      <input type="range" id="save-pct-slider" min="10" max="90" step="10" value="50" style="width:100%;margin-bottom:12px;accent-color:#407178" oninput="updateSavePct(this.value)">
       <div class="save-g">
-        <div class="save-i"><div class="save-il">al mes</div><div class="save-iv">+${fmt(avg*15)}</div></div>
-        <div class="save-i"><div class="save-il">al año</div><div class="save-iv">+${fmt(avg*182)}</div></div>
+        <div class="save-i"><div class="save-il">al mes</div><div class="save-iv" id="save-mes-val">+${fmt(avg*15)}</div></div>
+        <div class="save-i"><div class="save-il">al año</div><div class="save-iv" id="save-ano-val">+${fmt(avg*182)}</div></div>
       </div>
     </div>
     ${buildPieChart(sc,mc)}
