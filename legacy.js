@@ -2028,10 +2028,15 @@ function buildPieChart(sc,total){
     paths+=`<path d="M${cx},${cy} L${x1.toFixed(1)},${y1.toFixed(1)} A${r},${r} 0 ${large},1 ${x2.toFixed(1)},${y2.toFixed(1)} Z" fill="${color}" opacity=".9" style="cursor:pointer" onclick="showPieDetail('${ci}','${cm.l}','${fmt(amt).replace(/'/g,'')}')" />`;
   });
   const legend=mScEntries.map(([ci,amt],i)=>{const cm=allCats().find(c=>c.id===ci)||CATS[13];return`<div class="pie-leg-it" onclick="showPieDetail('${ci}','${capFirst(cm.l)}','${fmt(amt).replace(/'/g,'')}')"><div class="pie-leg-dot" style="background:${PIE_COLORS[i%PIE_COLORS.length]}"></div><div class="pie-leg-nm">${cm.e} ${capFirst(cm.l)}</div><div class="pie-leg-amt">${fmt(amt)}</div></div>`;}).join('');
+  const onlyOneCat=mScEntries.length===1;
   return`<div class="pie-wrap">
     <div class="sec" style="margin-bottom:10px">distribución este mes — hormis</div>
     <svg class="pie-svg" width="160" height="160" viewBox="0 0 160 160">${paths}<circle cx="${cx}" cy="${cy}" r="30" fill="var(--bg)"/><text x="${cx}" y="${cy+4}" text-anchor="middle" font-size="10" fill="var(--t2)" font-family="Inter">${fmt(mTotal)}</text></svg>
     <div class="pie-legend">${legend}</div>
+    ${onlyOneCat?`<div style="display:flex;align-items:center;gap:8px;background:var(--amber-bg);border:1px solid rgba(245,158,11,.25);border-radius:10px;padding:10px 12px;margin-top:10px;font-size:12px;color:var(--amber-t)">
+      <i data-lucide="alert-circle" style="width:15px;height:15px;flex-shrink:0"></i>
+      <span>Todos tus gastos están en "${capFirst(allCats().find(c=>c.id===mScEntries[0][0])?.l||'otros')}". Categorizar mejor te ayuda a ver patrones más claros.</span>
+    </div>`:''}
     <div class="pie-detail" id="pie-detail"></div>
   </div>`;
 }
