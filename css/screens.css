@@ -86,7 +86,7 @@
 .save-g{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .save-i{background:rgba(166,177,231,.25);border-radius:var(--rsm);padding:11px}
 .save-il{font-size:11px;color:#407178;opacity:.8;margin-bottom:3px}
-.save-iv{font-family:var(--font-title);font-size:17px;font-weight:700;color:#1a2e2a}
+.save-iv{font-family:var(--font-title);font-size:17px;font-weight:700;color:#407178}
 .catlist{background:var(--s1);border:.5px solid var(--b1);border-radius:var(--r);padding:15px;margin-bottom:10px}
 .ctr{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:.5px solid var(--b1)}
 .ctr:last-child{border-bottom:none}
