@@ -2044,6 +2044,7 @@ function buildPieChart(sc,total){
   const cx=80,cy=80,r=70;
   let angle=-Math.PI/2;
   let paths='';
+  let gradDefs='';
   mScEntries.forEach(([ci,amt],i)=>{
     const gapDeg=mScEntries.length>1?0.025:0;
     const slice=(amt/mTotal*2*Math.PI)-gapDeg;
@@ -2053,14 +2054,16 @@ function buildPieChart(sc,total){
     angle+=gapDeg;
     const large=slice>Math.PI?1:0;
     const color=PIE_COLORS[i%PIE_COLORS.length];
+    const gradId=`pieGrad${i}`;
     const cm=allCats().find(c=>c.id===ci)||CATS[13];
-    paths+=`<path d="M${cx},${cy} L${x1.toFixed(1)},${y1.toFixed(1)} A${r},${r} 0 ${large},1 ${x2.toFixed(1)},${y2.toFixed(1)} Z" fill="${color}" style="cursor:pointer;filter:drop-shadow(0 2px 4px rgba(0,0,0,.12))" onclick="showPieDetail('${ci}','${cm.l}','${fmt(amt).replace(/'/g,'')}')" />`;
+    gradDefs+=`<radialGradient id="${gradId}" cx="35%" cy="30%" r="75%"><stop offset="0%" stop-color="${color}" stop-opacity="1"/><stop offset="100%" stop-color="${color}" stop-opacity=".75"/></radialGradient>`;
+    paths+=`<path d="M${cx},${cy} L${x1.toFixed(1)},${y1.toFixed(1)} A${r},${r} 0 ${large},1 ${x2.toFixed(1)},${y2.toFixed(1)} Z" fill="url(#${gradId})" style="cursor:pointer;filter:drop-shadow(0 3px 5px rgba(0,0,0,.18))" onclick="showPieDetail('${ci}','${cm.l}','${fmt(amt).replace(/'/g,'')}')" />`;
   });
   const legend=mScEntries.map(([ci,amt],i)=>{const cm=allCats().find(c=>c.id===ci)||CATS[13];return`<div class="pie-leg-it" onclick="showPieDetail('${ci}','${capFirst(cm.l)}','${fmt(amt).replace(/'/g,'')}')"><div class="pie-leg-dot" style="background:${PIE_COLORS[i%PIE_COLORS.length]}"></div><div class="pie-leg-nm">${cm.e} ${capFirst(cm.l)}</div><div class="pie-leg-amt">${fmt(amt)}</div></div>`;}).join('');
   const onlyOneCat=mScEntries.length===1;
   return`<div class="pie-wrap">
     <div class="sec" style="margin-bottom:10px">distribución este mes — hormis</div>
-    <svg class="pie-svg" width="160" height="160" viewBox="0 0 160 160">${paths}<circle cx="${cx}" cy="${cy}" r="32" fill="#fff" style="filter:drop-shadow(0 1px 3px rgba(0,0,0,.08))"/><text x="${cx}" y="${cy+5}" text-anchor="middle" font-size="15" font-weight="800" fill="#1a2e2a" font-family="Lexend, sans-serif">${fmt(mTotal)}</text></svg>
+    <svg class="pie-svg" width="160" height="160" viewBox="0 0 160 160"><defs>${gradDefs}</defs>${paths}<circle cx="${cx}" cy="${cy}" r="32" fill="#fff" style="filter:drop-shadow(0 1px 3px rgba(0,0,0,.08))"/><text x="${cx}" y="${cy+5}" text-anchor="middle" font-size="15" font-weight="800" fill="#1a2e2a" font-family="Lexend, sans-serif">${fmt(mTotal)}</text></svg>
     <div class="pie-legend">${legend}</div>
     ${onlyOneCat?`<div style="display:flex;align-items:center;gap:8px;background:var(--amber-bg);border:1px solid rgba(245,158,11,.25);border-radius:10px;padding:10px 12px;margin-top:10px;font-size:12px;color:var(--amber-t)">
       <i data-lucide="alert-circle" style="width:15px;height:15px;flex-shrink:0"></i>
