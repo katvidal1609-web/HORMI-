@@ -1864,16 +1864,7 @@ function openHormiDetail(idx){
   const avgD=total/veces;
   const hp=calcHoraPico(txs);
   const dp=calcDiaPico(txs);
-  const altMap={
-    food:['Llevar tupper de casa','Buscar menú más económico del día'],
-    drink:['Llevar termo con café o agua','Preparar bebidas en casa'],
-    snack:['Comprar snacks en mercado a granel','Comer antes de salir de casa'],
-    del:['Pedir menos seguido','Cocinar en batch los domingos'],
-    trans:['Compartir taxi con alguien','Usar transporte público'],
-    subs:['Compartir cuenta familiar','Pausar servicios que no usas'],
-    other:['Evaluar si es gasto necesario','Postponer la compra 24 horas']
-  };
-  const alts=altMap[ci]||altMap.other;
+  const alts=['Cargando sugerencias...','Cargando sugerencias...'];
   const insight=veces>=5
     ?`Aparece <strong>${veces} veces</strong> este mes, sumando <strong>${fmt(total)}</strong>. Reducir a la mitad liberaría <strong>${fmt(total/2)}</strong> al mes.`
     :veces>=2
@@ -1889,20 +1880,43 @@ function openHormiDetail(idx){
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:16px 16px 0">
       <div class="hc-stat-box"><label>Total gastado</label><strong>${fmt(total)}</strong><span>este mes</span></div>
       <div class="hc-stat-box"><label>Veces</label><strong>${veces}</strong><span>aparición${veces!==1?'es':''}</span></div>
-      <div class="hc-stat-box"><label>Hora pico</label><strong>${hp!==null?String(hp).padStart(2,'0')+':00':'—'}</strong><span>${hp!==null?'más frecuente':'sin dato'}</span></div>
-      <div class="hc-stat-box"><label>Día pico</label><strong>${dp||'—'}</strong><span>${dp?'más frecuente':'sin dato'}</span></div>
+      ${veces>=3?`<div class="hc-stat-box"><label>Hora pico</label><strong>${hp!==null?String(hp).padStart(2,'0')+':00':'—'}</strong><span>más frecuente</span></div>
+      <div class="hc-stat-box"><label>Día pico</label><strong>${dp||'—'}</strong><span>más frecuente</span></div>`:''}
     </div>
     <div style="padding:12px 16px 0"><div class="hc-insight">${insight}</div></div>
-    <div class="hc-alt-section" style="margin-top:12px">
+    <div class="hc-alt-section" style="margin-top:12px" id="hc-alt-section">
       <div class="hc-alt-title">alternativas</div>
-      ${alts.map(a=>`<div class="hc-alt-card"><span>💡</span><p>${a}</p></div>`).join('')}
+      <div id="hc-alt-content">${alts.map(a=>`<div class="hc-alt-card"><span>💡</span><p>${a}</p></div>`).join('')}</div>
     </div>`;
   document.getElementById('hc-detail-panel').classList.add('open');
   document.getElementById('hc-panel-bg').classList.add('open');
+  loadPersonalizedTips(desc,ci,total,veces,avgD);
 }
 function closeHormiDetail(){
   document.getElementById('hc-detail-panel').classList.remove('open');
   document.getElementById('hc-panel-bg').classList.remove('open');
+}
+async function loadPersonalizedTips(desc,ci,total,veces,avgD){
+  try{
+    const {data:{session}}=await sb.auth.getSession();
+    const token=session?.access_token;if(!token)return;
+    const prompt=`Eres un asesor financiero peruano. El usuario gasta en: "${desc}" (categoría: ${ci}). Apareció ${veces} vez(es) este mes, gastando ${fmt(total)} en total, promedio ${fmt(avgD)} c/u. Dame EXACTAMENTE 2 sugerencias breves, específicas y personalizadas para reducir este gasto puntual (no genéricas). Responde SOLO un array JSON de 2 strings cortos (max 12 palabras c/u), sin explicación: ["sugerencia1","sugerencia2"]`;
+    const res=await fetch(PROXY_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json',authorization:`Bearer ${token}`},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:200,system:'Responde SOLO JSON válido, sin markdown.',messages:[{role:'user',content:prompt}]})
+    });
+    const data=await res.json();
+    const text=data.content?.find(b=>b.type==='text')?.text||'[]';
+    const match=text.match(/\[[\s\S]*\]/);
+    if(!match)throw new Error('no json');
+    const tips=JSON.parse(match[0]);
+    const el=document.getElementById('hc-alt-content');
+    if(el&&tips.length)el.innerHTML=tips.map(a=>`<div class="hc-alt-card"><span>💡</span><p>${a}</p></div>`).join('');
+  }catch(e){
+    const el=document.getElementById('hc-alt-content');
+    if(el)el.innerHTML=`<div class="hc-alt-card"><span>💡</span><p>Evalúa si es un gasto necesario</p></div>`;
+  }
 }
 
 async function renderLugarChart(){
