@@ -856,12 +856,18 @@ Para Yape/Plin busca específicamente:
 - El concepto/mensaje: texto opcional que acompaña el pago
 
 Responde SOLO con este JSON sin texto adicional ni backticks:
-{"items":[{"descripcion":"concepto o nombre del destinatario","monto":0.00}],"lugar":"nombre del negocio o persona si aplica","fecha":"YYYY-MM-DD","hora":"HH:MM","categoria_sugerida":"ID"}
+{"items":[{"descripcion":"concepto o nombre del destinatario","monto":0.00}],"lugar":"nombre comercial + distrito (ej: Listo Monterrico)","fecha":"YYYY-MM-DD","hora":"HH:MM","categoria_sugerida":"ID"}
 
 Para categoria_sugerida elige UNO de estos IDs según el tipo de gasto:
 food (restaurante/almuerzo/cena), drink (café/bebidas/jugos), snack (snacks/dulces/postres), del (delivery/pedidos), trans (transporte/taxi/bus/combustible), subs (apps/suscripciones/streaming), health (farmacia/salud/médico), beauty (peluquería/spa/cosméticos), sport (gimnasio/deporte), edu (libros/cursos/educación), shop (ropa/calzado/accesorios), soc (bares/fiestas/social), enter (entretenimiento/cine/videojuegos), other (otros)
 
-Si no puedes leer algún campo con certeza, usa null para ese campo. Para el monto, extrae SOLO el número sin S/. Si hay varios items en una boleta, crea un objeto por cada uno. IMPORTANTE sobre IGV: en boletas peruanas el IGV (18%) a veces aparece desglosado como línea separada. Si ves líneas de "GRAVADAS S/", "IGV (18%)" o "IMPORTE TOTAL S/" como líneas separadas del subtotal, usa SIEMPRE el IMPORTE TOTAL (que ya incluye IGV) como referencia para validar que los montos individuales sumen al total con IGV. NO agregues el IGV extra sobre los precios unitarios — los precios en la boleta ya lo incluyen. El campo 'monto' de cada item debe ser el precio unitario tal como aparece en la columna TOTAL de la boleta.`;
+Si no puedes leer algún campo con certeza, usa null para ese campo. Para el monto, extrae SOLO el número sin S/. Si hay varios items en una boleta, crea un objeto por cada uno. IMPORTANTE sobre IGV: en boletas peruanas el IGV (18%) a veces aparece desglosado como línea separada. Si ves líneas de "GRAVADAS S/", "IGV (18%)" o "IMPORTE TOTAL S/" como líneas separadas del subtotal, usa SIEMPRE el IMPORTE TOTAL (que ya incluye IGV) como referencia para validar que los montos individuales sumen al total con IGV. NO agregues el IGV extra sobre los precios unitarios — los precios en la boleta ya lo incluyen. El campo 'monto' de cada item debe ser el precio unitario tal como aparece en la columna TOTAL de la boleta.
+
+REGLAS PARA EL CAMPO 'lugar':
+1. Usa SIEMPRE el nombre comercial conocido, NO la razón social legal. Ejemplos: "COESTI S.A." → "Listo", "Operaciones Arcos Dorados de Peru SA" → "McDonald's", "Supermercados Peruanos S.A." → "Plaza Vea", "Saga Falabella S.A." → "Saga Falabella".
+2. Si la boleta menciona una dirección o distrito, agrégalo al nombre comercial separado por espacio: "Listo Monterrico", "Starbucks Miraflores", "McDonald's San Isidro".
+3. Si hay número de tienda o local, ignóralo — solo nombre comercial + distrito.
+4. Si no puedes identificar el nombre comercial, usa el nombre tal como aparece en la boleta pero elimina términos legales como S.A., S.A.C., E.I.R.L., S.R.L.`;
 
 async function scanImg(input){
   const file=input.files[0];if(!file)return;
