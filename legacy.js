@@ -2063,7 +2063,7 @@ function buildPieChart(sc,total){
   const onlyOneCat=mScEntries.length===1;
   return`<div class="pie-wrap">
     <div class="sec" style="margin-bottom:10px">distribución este mes — hormis</div>
-    <svg class="pie-svg" width="160" height="160" viewBox="0 0 160 160"><defs>${gradDefs}</defs>${paths}<circle cx="${cx}" cy="${cy}" r="32" fill="#fff" style="filter:drop-shadow(0 1px 3px rgba(0,0,0,.08))"/><text x="${cx}" y="${cy+5}" text-anchor="middle" font-size="15" font-weight="800" fill="#1a2e2a" font-family="Lexend, sans-serif">${fmt(mTotal)}</text></svg>
+    <svg class="pie-svg" width="160" height="160" viewBox="0 0 160 160"><defs>${gradDefs}</defs>${paths}<circle cx="${cx}" cy="${cy}" r="36" fill="#fff" style="filter:drop-shadow(0 1px 3px rgba(0,0,0,.08))"/><text x="${cx}" y="${cy+4}" text-anchor="middle" font-size="${fmt(mTotal).length>9?'12':'14'}" font-weight="800" fill="#1a2e2a" font-family="Lexend, sans-serif">${fmt(mTotal)}</text></svg>
     <div class="pie-legend">${legend}</div>
     ${onlyOneCat?`<div style="display:flex;align-items:center;gap:8px;background:var(--amber-bg);border:1px solid rgba(245,158,11,.25);border-radius:10px;padding:10px 12px;margin-top:10px;font-size:12px;color:var(--amber-t)">
       <i data-lucide="alert-circle" style="width:15px;height:15px;flex-shrink:0"></i>
