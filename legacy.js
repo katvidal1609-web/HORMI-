@@ -1327,9 +1327,17 @@ function addTx(){
   const _adi=document.getElementById('a-date');if(_adi){_adi.style.border='';_adi.style.background='';_adi.value=_selDay||td();}
   document.getElementById('a-time').value='';
   txDate=null;scanReceiptTs=null;_currentThumb=null;_scanPending=null;_txSource='manual';
-  closeOv('sh-add');refreshCurrent();
+  closeOv('sh-add');
   const _ss=document.getElementById('stat-streak');if(_ss)_ss.textContent=calcStreak();
-  toast(aHormi?`🐜 ${fmt(amt)} registrado`:`${fmt(amt)} registrado`,'ok');
+  const today=td();
+  if(date!==today){
+    _selDay=date;
+    selectDay(date);
+    toast(`Gasto guardado ✓ — viendo ${dlbl(date)}`,'ok',3500);
+  }else{
+    refreshCurrent();
+    toast('Gasto guardado ✓','ok');
+  }
 }
 
 function evaluateGoals(){
