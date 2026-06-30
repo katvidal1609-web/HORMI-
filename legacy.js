@@ -1927,11 +1927,28 @@ async function renderLugarChart(){
 }
 
 let _saveCardAvg=0;
+function pctToColor(pct){
+  // Degradado de #a6b1e7 (lila suave, 10%) a #2d3a8c (azul oscuro intenso, 90%)
+  const p=(parseInt(pct)-10)/80; // normaliza 10-90 a 0-1
+  const c1={r:166,g:177,b:231}; // a6b1e7
+  const c2={r:45,g:58,b:140};   // 2d3a8c
+  const r=Math.round(c1.r+(c2.r-c1.r)*p);
+  const g=Math.round(c1.g+(c2.g-c1.g)*p);
+  const b=Math.round(c1.b+(c2.b-c1.b)*p);
+  return `rgb(${r},${g},${b})`;
+}
 function updateSavePct(pct){
   const p=parseInt(pct)/100;
+  const color=pctToColor(pct);
   document.getElementById('save-pct-lbl').textContent=`si reduces ${pct}% tus hormigas`;
   document.getElementById('save-mes-val').textContent=`+${fmt(_saveCardAvg*30*p)}`;
   document.getElementById('save-ano-val').textContent=`+${fmt(_saveCardAvg*365*p)}`;
+  const slider=document.getElementById('save-pct-slider');
+  if(slider){
+    slider.style.accentColor=color;
+    const pctPos=(pct-slider.min)/(slider.max-slider.min)*100;
+    slider.style.background=`linear-gradient(to right, ${color} ${pctPos}%, #d1d5db ${pctPos}%)`;
+  }
 }
 
 function renderStats(){
@@ -1988,7 +2005,7 @@ function renderStats(){
 })()}
     <div class="save-c">
       <div class="save-t" id="save-pct-lbl">si reduces 50% tus hormigas</div>
-      <input type="range" id="save-pct-slider" min="10" max="90" step="10" value="50" style="width:100%;margin-bottom:12px;accent-color:#407178" oninput="updateSavePct(this.value)">
+      <input type="range" id="save-pct-slider" min="10" max="90" step="10" value="50" style="width:100%;margin-bottom:12px;accent-color:rgb(166,177,231);-webkit-appearance:none;height:6px;border-radius:3px;background:linear-gradient(to right, rgb(166,177,231) 50%, #d1d5db 50%)" oninput="updateSavePct(this.value)">
       <div class="save-g">
         <div class="save-i"><div class="save-il">al mes</div><div class="save-iv" id="save-mes-val">+${fmt(avg*15)}</div></div>
         <div class="save-i"><div class="save-il">al año</div><div class="save-iv" id="save-ano-val">+${fmt(avg*182)}</div></div>
