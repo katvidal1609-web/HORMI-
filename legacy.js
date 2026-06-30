@@ -1821,7 +1821,7 @@ function renderHormiCategories(){
       const idx=_hcItemStore.push({desc,txs:data.txs,total:data.total,ci,catTotal:total,catCount:txs.length,cm})-1;
       const hp=calcHoraPico(data.txs);
       const avgD=data.total/data.txs.length;
-      const horaSub=hp!==null?` · Hora pico: ${String(hp).padStart(2,'0')}:00`:'';
+      const horaSub=(hp!==null&&data.txs.length>=3)?` · Hora pico: ${String(hp).padStart(2,'0')}:00`:'';
       const vecesSub=`${data.txs.length} vez${data.txs.length!==1?'es':''} · ${fmt(avgD)} c/u${horaSub}`;
       return`<div class="hc-item" onclick="openHormiDetail(${idx})">
         <div style="font-size:20px;flex-shrink:0">${cm.e}</div>
