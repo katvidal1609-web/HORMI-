@@ -2031,7 +2031,7 @@ function renderStats(){
   renderHormiCategories();
   if(window.lucide)lucide.createIcons();
 }
-const PIE_COLORS=['#5C8001','#E53935','#D97706','#2E7D32','#1565C0','#C2185B','#6A1B9A','#E65100','#00695C','#B71C1C','#283593','#F57F17','#1B5E20','#0D47A1'];
+const PIE_COLORS=['#407178','#d3e458','#a6b1e7','#E63946','#5A9430','#8aada8','#1a2e2a','#F59E0B','#2d5158','#c0d1c7','#92400E','#dde1f5','#b8cc38','#2d3a8c'];
 function buildPieChart(sc,total){
   if(!sc.length||total<=0)return'';
   const tm=new Date().toISOString().slice(0,7);
@@ -2045,20 +2045,22 @@ function buildPieChart(sc,total){
   let angle=-Math.PI/2;
   let paths='';
   mScEntries.forEach(([ci,amt],i)=>{
-    const slice=amt/mTotal*2*Math.PI;
+    const gapDeg=mScEntries.length>1?0.025:0;
+    const slice=(amt/mTotal*2*Math.PI)-gapDeg;
     const x1=cx+r*Math.cos(angle),y1=cy+r*Math.sin(angle);
     angle+=slice;
     const x2=cx+r*Math.cos(angle),y2=cy+r*Math.sin(angle);
+    angle+=gapDeg;
     const large=slice>Math.PI?1:0;
     const color=PIE_COLORS[i%PIE_COLORS.length];
     const cm=allCats().find(c=>c.id===ci)||CATS[13];
-    paths+=`<path d="M${cx},${cy} L${x1.toFixed(1)},${y1.toFixed(1)} A${r},${r} 0 ${large},1 ${x2.toFixed(1)},${y2.toFixed(1)} Z" fill="${color}" opacity=".9" style="cursor:pointer" onclick="showPieDetail('${ci}','${cm.l}','${fmt(amt).replace(/'/g,'')}')" />`;
+    paths+=`<path d="M${cx},${cy} L${x1.toFixed(1)},${y1.toFixed(1)} A${r},${r} 0 ${large},1 ${x2.toFixed(1)},${y2.toFixed(1)} Z" fill="${color}" style="cursor:pointer;filter:drop-shadow(0 2px 4px rgba(0,0,0,.12))" onclick="showPieDetail('${ci}','${cm.l}','${fmt(amt).replace(/'/g,'')}')" />`;
   });
   const legend=mScEntries.map(([ci,amt],i)=>{const cm=allCats().find(c=>c.id===ci)||CATS[13];return`<div class="pie-leg-it" onclick="showPieDetail('${ci}','${capFirst(cm.l)}','${fmt(amt).replace(/'/g,'')}')"><div class="pie-leg-dot" style="background:${PIE_COLORS[i%PIE_COLORS.length]}"></div><div class="pie-leg-nm">${cm.e} ${capFirst(cm.l)}</div><div class="pie-leg-amt">${fmt(amt)}</div></div>`;}).join('');
   const onlyOneCat=mScEntries.length===1;
   return`<div class="pie-wrap">
     <div class="sec" style="margin-bottom:10px">distribución este mes — hormis</div>
-    <svg class="pie-svg" width="160" height="160" viewBox="0 0 160 160">${paths}<circle cx="${cx}" cy="${cy}" r="30" fill="var(--bg)"/><text x="${cx}" y="${cy+4}" text-anchor="middle" font-size="10" fill="var(--t2)" font-family="Inter">${fmt(mTotal)}</text></svg>
+    <svg class="pie-svg" width="160" height="160" viewBox="0 0 160 160">${paths}<circle cx="${cx}" cy="${cy}" r="32" fill="#fff" style="filter:drop-shadow(0 1px 3px rgba(0,0,0,.08))"/><text x="${cx}" y="${cy+5}" text-anchor="middle" font-size="15" font-weight="800" fill="#1a2e2a" font-family="Lexend, sans-serif">${fmt(mTotal)}</text></svg>
     <div class="pie-legend">${legend}</div>
     ${onlyOneCat?`<div style="display:flex;align-items:center;gap:8px;background:var(--amber-bg);border:1px solid rgba(245,158,11,.25);border-radius:10px;padding:10px 12px;margin-top:10px;font-size:12px;color:var(--amber-t)">
       <i data-lucide="alert-circle" style="width:15px;height:15px;flex-shrink:0"></i>
