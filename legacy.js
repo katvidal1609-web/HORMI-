@@ -2743,6 +2743,8 @@ function _pS4(){
     <div class="pl-iw"><span class="pl-ipr">S/</span><input id="pl-trans" type="number" placeholder="Taxi, pasajes, gasolina…" value="${fd.transporte||''}" oninput="_pU4()"></div>
     <span class="pl-flbl">Ocio y salidas</span>
     <div class="pl-iw"><span class="pl-ipr">S/</span><input id="pl-ocio" type="number" placeholder="Salidas, entretenimiento…" value="${fd.ocio||''}" oninput="_pU4()"></div>
+    <div id="pl-extra-vars"></div>
+    <button onclick="_pAddVar()" style="width:100%;padding:11px;border:1.5px dashed var(--b2);border-radius:var(--r);background:none;color:var(--t2);font-size:14px;font-family:var(--font-body);cursor:pointer;margin-bottom:8px">+ agregar categoría</button>
     <div class="pl-total-pill"><span>Total gastos variables</span><strong id="pl-var-total">${_pFmt(totalVar)}</strong></div>
     <div class="pl-hormi-badge"><span>🐜</span><p>Tu promedio de hormis: <strong>S/${avgMes}/mes</strong> — solo referencia, no entra en el total.</p></div>
     <div class="pl-nav-row"><button class="pl-btn-back" onclick="planBack(4)">← Atrás</button><button class="pl-btn-next" onclick="planGenerate()">Generar plan 🚀</button></div>`;
@@ -2763,7 +2765,43 @@ function _pFAdd(){
   row.innerHTML=`<input class="pl-exp-lbl" placeholder="Ej: Gimnasio" oninput="_pFLbl(${i},this.value)"><span class="pl-exp-sep">·</span><span style="font-size:13px;color:var(--t3);flex-shrink:0">S/</span><input class="pl-exp-amt" type="number" placeholder="0" oninput="_pFAmt(${i},this.value)"><button class="pl-exp-del" onclick="_pFRm(${i})">×</button>`;
   list.appendChild(row);
 }
-function _pU4(){_planFD.alimentacion=parseFloat(document.getElementById('pl-alim')?.value)||0;_planFD.transporte=parseFloat(document.getElementById('pl-trans')?.value)||0;_planFD.ocio=parseFloat(document.getElementById('pl-ocio')?.value)||0;const el=document.getElementById('pl-var-total');if(el)el.textContent=_pFmt(_planFD.alimentacion+_planFD.transporte+_planFD.ocio);}
+let _planExtraVars=[];
+function _pAddVar(){
+  const idx=_planExtraVars.length;
+  _planExtraVars.push({label:'',monto:0});
+  const container=document.getElementById('pl-extra-vars');
+  if(!container)return;
+  const div=document.createElement('div');
+  div.id=`pl-extra-${idx}`;
+  div.style.cssText='margin-bottom:10px';
+  div.innerHTML=`<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+    <input type="text" placeholder="Nombre categoría..." value="" oninput="_pUpdateExtra(${idx},'label',this.value)" style="flex:1;padding:8px 10px;border:1px solid var(--b2);border-radius:var(--rsm);font-family:var(--font-body);font-size:13px;color:var(--t1);background:var(--bg);outline:none">
+    <button onclick="_pRemoveVar(${idx})" style="width:28px;height:28px;border:none;border-radius:8px;background:var(--red-bg);color:var(--red);font-size:16px;cursor:pointer;flex-shrink:0">×</button>
+  </div>
+  <div class="pl-iw"><span class="pl-ipr">S/</span><input type="number" placeholder="0" oninput="_pUpdateExtra(${idx},'monto',parseFloat(this.value)||0)" style="width:100%"></div>`;
+  container.appendChild(div);
+}
+function _pUpdateExtra(idx,field,val){
+  if(_planExtraVars[idx])_planExtraVars[idx][field]=val;
+  _pU4();
+}
+function _pRemoveVar(idx){
+  _planExtraVars[idx]={label:'',monto:0};
+  const el=document.getElementById(`pl-extra-${idx}`);
+  if(el)el.remove();
+  _pU4();
+}
+function _pU4(){
+  _planFD.alimentacion=parseFloat(document.getElementById('pl-alim')?.value)||0;
+  _planFD.transporte=parseFloat(document.getElementById('pl-trans')?.value)||0;
+  _planFD.ocio=parseFloat(document.getElementById('pl-ocio')?.value)||0;
+  const extraTotal=_planExtraVars.reduce((s,v)=>s+(v.monto||0),0);
+  _planFD.extrasTotal=extraTotal;
+  _planFD.extras=_planExtraVars.filter(v=>v.label||v.monto);
+  const total=_planFD.alimentacion+_planFD.transporte+_planFD.ocio+extraTotal;
+  const el=document.getElementById('pl-var-total');
+  if(el)el.textContent=_pFmt(total);
+}
 
 function planSaveStage(s){
   if(s===1){_planFD.metaTotal=parseFloat(document.getElementById('pl-amt')?.value)||_planFD.metaTotal;_planFD.meses=parseInt(document.getElementById('pl-meses')?.value)||_planFD.meses;_planFD.objetivo=document.getElementById('pl-custom')?.value||_planFD.objetivo;}
