@@ -1962,6 +1962,21 @@ function renderStats(){
       <i data-lucide="target" style="width:18px;height:18px;color:#407178;flex-shrink:0"></i>
       <div><div class="sec" style="margin:0 0 2px">Proyección al cierre</div><div style="font-size:13px;color:var(--t2)">Con tu ritmo actual: <strong>${fmt(proj)}</strong> hormis este mes</div></div>
     </div>`:''}
+    ${(()=>{
+  const nowW=Date.now();
+  const weeklyHmW=hm.filter(t=>new Date(t.date+'T12:00:00')>=new Date(nowW-7*86400000)).reduce((s,t)=>s+t.amount,0);
+  const prevWeekHmW=hm.filter(t=>new Date(t.date+'T12:00:00')>=new Date(nowW-14*86400000)&&new Date(t.date+'T12:00:00')<new Date(nowW-7*86400000)).reduce((s,t)=>s+t.amount,0);
+  if(prevWeekHmW<=0)return'';
+  const weekDiffW=weeklyHmW-prevWeekHmW;
+  const icon=weekDiffW<0?'trending-down':weekDiffW>0?'trending-up':'minus';
+  const color=weekDiffW<0?'#407178':weekDiffW>0?'#E63946':'#8aada8';
+  const msg=weekDiffW<0?`${fmt(Math.abs(weekDiffW))} menos esta semana`:weekDiffW>0?`${fmt(weekDiffW)} más esta semana`:'Mismo gasto que la semana pasada';
+  const sub=weekDiffW<0?'Vas mejorando respecto a la semana anterior 🎉':weekDiffW>0?'Tus hormigas subieron — revisa qué cambió':'Sin cambios respecto a la semana anterior';
+  return`<div class="hrc" style="margin-bottom:10px;display:flex;align-items:center;gap:10px;padding:13px 15px;border-left:3px solid ${color}">
+    <i data-lucide="${icon}" style="width:18px;height:18px;color:${color};flex-shrink:0"></i>
+    <div><div class="sec" style="margin:0 0 2px">${msg}</div><div style="font-size:13px;color:var(--t2)">${sub}</div></div>
+  </div>`;
+})()}
     <div class="save-c">
       <div class="save-t">si reduces 50% tus hormigas</div>
       <div class="save-g">
@@ -2049,17 +2064,6 @@ function buildQuinCards(hm,avg){
   if(prevTotal>0)cards.push({ic:diff<0?'📉':'📈',t:diff<0?`${fmt(Math.abs(diff))} menos que la quincena anterior`:`${fmt(diff)} más que la quincena anterior`,s:diff<0?'¡Vas mejorando! Sigue así.':'Revisa qué categoría subió.'});
   else cards.push({ic:'📊',t:`Esta quincena: ${fmt(thisTotal)}`,s:`${thisQ.length} gastos hormiga hasta ahora`});
   if(proj>0)cards.push({ic:'🎯',t:`Proyección al cierre`,s:`Con tu ritmo actual: ${fmt(proj)} hormigas este mes`});
-  const now2=Date.now();
-  const weeklyHm2=hm.filter(t=>new Date(t.date+'T12:00:00')>=new Date(now2-7*86400000)).reduce((s,t)=>s+t.amount,0);
-  const prevWeekHm2=hm.filter(t=>new Date(t.date+'T12:00:00')>=new Date(now2-14*86400000)&&new Date(t.date+'T12:00:00')<new Date(now2-7*86400000)).reduce((s,t)=>s+t.amount,0);
-  const weekDiff=weeklyHm2-prevWeekHm2;
-  if(prevWeekHm2>0){
-    cards.push({
-      ic: weekDiff<0?'📉':weekDiff>0?'⚠️':'➖',
-      t: weekDiff<0?`${fmt(Math.abs(weekDiff))} menos esta semana`:weekDiff>0?`${fmt(weekDiff)} más esta semana`:'Mismo gasto que la semana pasada',
-      s: weekDiff<0?'Vas mejorando respecto a la semana anterior 🎉':weekDiff>0?'Tus hormigas subieron — revisa qué cambió':'Sin cambios respecto a la semana anterior'
-    });
-  }
   if(!cards.length)return'';
   return`<div class="sec" style="margin-bottom:9px">quincena</div><div class="quin-cards">${cards.map(c=>`<div class="quin-card"><div class="quin-ic">${c.ic}</div><div class="quin-body"><div class="quin-t">${c.t}</div><div class="quin-s">${c.s}</div></div></div>`).join('')}</div>`;
 }
