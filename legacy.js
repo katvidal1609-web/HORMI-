@@ -1901,13 +1901,12 @@ async function loadPersonalizedTips(desc,ci,total,veces,avgD){
     const {data:{session}}=await _sb.auth.getSession();
     const token=session?.access_token;if(!token)return;
     const prompt=`Eres un asesor financiero peruano. El usuario gasta en: "${desc}" (categoría: ${ci}). Apareció ${veces} vez(es) este mes, gastando ${fmt(total)} en total, promedio ${fmt(avgD)} c/u. Dame EXACTAMENTE 2 sugerencias breves, específicas y personalizadas para reducir este gasto puntual (no genéricas). Responde SOLO un array JSON de 2 strings cortos (max 12 palabras c/u), sin explicación: ["sugerencia1","sugerencia2"]`;
-    const res=await fetch(PROXY_URL,{
+    const res=await fetch(SCAN_URL,{
       method:'POST',
-      headers:{'Content-Type':'application/json',authorization:`Bearer ${token}`},
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:200,system:'Responde SOLO JSON válido, sin markdown.',messages:[{role:'user',content:prompt}]})
+      headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},
+      body:JSON.stringify({prompt})
     });
-    const data=await res.json();
-    const text=data.content?.find(b=>b.type==='text')?.text||'[]';
+    const text=await res.text();
     const match=text.match(/\[[\s\S]*\]/);
     if(!match)throw new Error('no json');
     const tips=JSON.parse(match[0]);
