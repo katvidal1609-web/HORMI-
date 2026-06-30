@@ -946,8 +946,8 @@ async function scanImg(input){
     const multi=items.length>1;
     // show detected items
     document.getElementById('scan-fields').innerHTML=`
-      <div style="font-size:11px;color:rgba(255,255,255,.5);letter-spacing:.04em;margin-bottom:5px">DETECTADO${lugar?' · '+lugar:''}</div>
-      ${items.map((it,idx)=>`<div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;margin-bottom:4px;gap:6px"><span style="color:#fff;flex:1;">${it.descripcion||'ítem'}</span><span style="font-weight:600;white-space:nowrap;color:#fff">${fmt(it.monto||0)}</span><button onclick="editScanItem(${idx})" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:6px;padding:3px 9px;font-size:11px;color:#fff;cursor:pointer;white-space:nowrap;font-family:var(--font-body)">editar</button></div>`).join('')}
+      <div style="font-size:11px;color:var(--t3);letter-spacing:.04em;margin-bottom:5px">DETECTADO${lugar?' · '+lugar:''}</div>
+      ${items.map((it,idx)=>`<div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;margin-bottom:4px;gap:6px"><span style="color:var(--t1);flex:1;">${it.descripcion||'ítem'}</span><span style="font-weight:600;white-space:nowrap;color:var(--t1)">${fmt(it.monto||0)}</span><button onclick="editScanItem(${idx})" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:6px;padding:3px 9px;font-size:11px;color:#fff;cursor:pointer;white-space:nowrap;font-family:var(--font-body)">editar</button></div>`).join('')}
       ${multi?`<div style="border-top:.5px solid rgba(255,255,255,.2);margin-top:6px;padding-top:6px;display:flex;justify-content:space-between;font-size:13px"><span style="color:rgba(255,255,255,.6)">Total</span><span style="font-weight:700;color:#fff">${fmt(totalAmt)}</span></div>`:''}
       ${ds?`<div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:4px">${p.fecha||ds}${p.hora?' · '+p.hora:''}</div>`:''}
     `;
@@ -1048,10 +1048,10 @@ function saveEditScanItem(){
   const lugar=_scanPending.lugar||'';
   const ds=_scanPending.date;
   document.getElementById('scan-fields').innerHTML=`
-    <div style="font-size:11px;color:rgba(255,255,255,.5);letter-spacing:.04em;margin-bottom:5px">DETECTADO${lugar?' · '+lugar:''}</div>
+    <div style="font-size:11px;color:var(--t3);letter-spacing:.04em;margin-bottom:5px">DETECTADO${lugar?' · '+lugar:''}</div>
     ${_scanPending.items.map((x,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;margin-bottom:4px;gap:6px">
-      <span style="color:#fff;flex:1">${x.descripcion||'ítem'}</span>
-      <span style="font-weight:600;white-space:nowrap;color:#fff">${fmt(x.monto||0)}</span>
+      <span style="color:var(--t1);flex:1">${x.descripcion||'ítem'}</span>
+      <span style="font-weight:600;white-space:nowrap;color:var(--t1)">${fmt(x.monto||0)}</span>
       <button onclick="editScanItem(${i})" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:6px;padding:3px 9px;font-size:11px;color:#fff;cursor:pointer;white-space:nowrap;font-family:var(--font-body)">editar</button>
     </div>`).join('')}
     ${_scanPending.items.length>1?`<div style="border-top:.5px solid rgba(255,255,255,.2);margin-top:6px;padding-top:6px;display:flex;justify-content:space-between;font-size:13px"><span style="color:rgba(255,255,255,.6)">Total</span><span style="font-weight:700;color:#fff">${fmt(totalAmt)}</span></div>`:''}
