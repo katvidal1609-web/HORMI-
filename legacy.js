@@ -2012,7 +2012,7 @@ function renderStats(){
       </div>
     </div>
     ${buildPieChart(sc,mc)}
-    ${sc.length?`<div class="catlist"><div class="sec" style="margin-bottom:4px">general por categoría · ${fmt(totalMes)}</div>${sc.map(([ci,a])=>{const cm=allCats().find(c=>c.id===ci)||CATS[13];return`<div class="ctr"><div class="ctr-ic">${cm.e}</div><div class="ctr-nm">${capFirst(cm.l)}</div><div class="ctr-bar"><div class="ctr-fill" style="width:${Math.round(a/mc*100)}%"></div></div><div class="ctr-amt">${fmt(a)}</div></div>`;}).join('')}</div>`:''}
+    ${sc.length?`<div class="catlist"><div class="sec" style="margin-bottom:4px">general por categoría · ${fmt(totalMes)}</div><div style="font-size:11px;color:var(--t3);margin-bottom:10px;line-height:1.4">Incluye todos tus gastos del mes, no solo hormigas — por eso el total es mayor</div>${sc.map(([ci,a])=>{const cm=allCats().find(c=>c.id===ci)||CATS[13];return`<div class="ctr"><div class="ctr-ic">${cm.e}</div><div class="ctr-nm">${capFirst(cm.l)}</div><div class="ctr-bar"><div class="ctr-fill" style="width:${Math.round(a/mc*100)}%"></div></div><div class="ctr-amt">${fmt(a)}</div></div>`;}).join('')}</div>`:''}
     <div style="background:var(--s1);border-radius:14px;border:0.5px solid var(--border);padding:20px;margin-bottom:12px">
       <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);margin-bottom:12px">HORMIS QUE MÁS APARECEN</div>
       <div id="hormi-cat-list"></div>
