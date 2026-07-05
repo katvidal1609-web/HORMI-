@@ -859,7 +859,22 @@ Responde SOLO con este JSON sin texto adicional ni backticks:
 {"items":[{"descripcion":"concepto o nombre del destinatario","monto":0.00}],"lugar":"nombre comercial + distrito (ej: Listo Monterrico)","fecha":"YYYY-MM-DD","hora":"HH:MM","categoria_sugerida":"ID"}
 
 Para categoria_sugerida elige UNO de estos IDs según el tipo de gasto:
-food (restaurante/almuerzo/cena), drink (café/bebidas/jugos), snack (snacks/dulces/postres), del (delivery/pedidos), trans (transporte/taxi/bus/combustible), subs (apps/suscripciones/streaming), health (farmacia/salud/médico), beauty (peluquería/spa/cosméticos), sport (gimnasio/deporte), edu (libros/cursos/educación), shop (ropa/calzado/accesorios), soc (bares/fiestas/social), enter (entretenimiento/cine/videojuegos), other (otros)
+- food: restaurantes, fast food, menús, cualquier comida preparada. Ej: McDonald's, KFC, Bembos, Norky's, cualquier plato o combo
+- drink: café, bebidas, jugos, cocteles. Ej: Starbucks, Juan Valdez, cualquier bebida
+- snack: postres, helados, pasteles, dulces, waffles, croissants. Ej: El Bigote Coffee, Puku Puku, D'onofrio
+- del: delivery, pedidos online, Rappi, Glovo, Uber Eats
+- trans: taxi, Uber, bus, combustible, peajes, grifos. Ej: Listo (COESTI), Primax, Repsol, Beat, Cabify
+- subs: apps, suscripciones digitales, streaming. Ej: Netflix, Spotify, Adobe
+- health: farmacias, clínicas, médicos. Ej: Mifarma, Inkafarma, Boticas
+- beauty: peluquerías, salones, spa, cosméticos
+- sport: gimnasios, deportes, canchas. Ej: SmartFit, Bodytech
+- edu: libros, cursos, universidades, colegios
+- shop: ropa, calzado, accesorios, tiendas. Ej: Saga Falabella, Ripley, Zara, Topitop
+- soc: bares, discotecas, alcohol, salidas sociales
+- enter: cine, teatro, conciertos. Ej: Cineplanet, Cinemark
+- other: todo lo demás
+
+IMPORTANTE: usa tu conocimiento de establecimientos peruanos para categorizar correctamente aunque el nombre en la boleta sea la razón social legal.
 
 Si no puedes leer algún campo con certeza, usa null para ese campo. Para el monto, extrae SOLO el número sin S/. Si hay varios items en una boleta, crea un objeto por cada uno. IMPORTANTE sobre IGV: en boletas peruanas el IGV (18%) a veces aparece desglosado como línea separada. Si ves líneas de "GRAVADAS S/", "IGV (18%)" o "IMPORTE TOTAL S/" como líneas separadas del subtotal, usa SIEMPRE el IMPORTE TOTAL (que ya incluye IGV) como referencia para validar que los montos individuales sumen al total con IGV. NO agregues el IGV extra sobre los precios unitarios — los precios en la boleta ya lo incluyen. El campo 'monto' de cada item debe ser el precio unitario tal como aparece en la columna TOTAL de la boleta.
 
@@ -1139,7 +1154,7 @@ async function addMultiFiles(input){
     msQueue.push({id,status:'scanning',data:null,confirmed:false,hash,thumb});
     renderMsQueue();
     try{
-      const multiPrompt=`Analiza este comprobante de pago peruano. Si NO es un comprobante válido, responde: {"error":"no_receipt"}. Si es válido, extrae monto total (number), descripción del producto o establecimiento (string), fecha (DD/MM/YYYY), hora (HH:MM o null) y categoría. Responde SOLO JSON sin markdown: {"amount":0.00,"description":"nombre comercial","date":"DD/MM/YYYY","time":"HH:MM o null","categoria_sugerida":"ID"}. IDs de categoría: food,drink,snack,del,trans,subs,health,beauty,sport,edu,shop,soc,enter,other.`;
+      const multiPrompt=`Analiza este comprobante de pago peruano. Si NO es un comprobante válido, responde: {"error":"no_receipt"}. Si es válido, extrae monto total (number), descripción del producto o establecimiento (string), fecha (DD/MM/YYYY), hora (HH:MM o null) y categoría. Responde SOLO JSON sin markdown: {"amount":0.00,"description":"nombre comercial","date":"DD/MM/YYYY","time":"HH:MM o null","categoria_sugerida":"ID"}. IDs: food(comida/restaurante), drink(café/bebidas), snack(postres/dulces/waffles), del(delivery), trans(taxi/combustible/grifo), subs(apps/streaming), health(farmacia/médico), beauty(spa/peluquería), sport(gimnasio), edu(libros/cursos), shop(ropa/tiendas), soc(bares/alcohol), enter(cine/teatro), other. Usa tu conocimiento de negocios peruanos para categorizar.`;
       const{data:{session:_ss2}}=await _sb.auth.getSession();
       const r=await fetch(SCAN_URL,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${_ss2?.access_token||''}`},body:JSON.stringify({image_base64:b64,media_type:mime,prompt:multiPrompt})});
       const p=await r.json();
