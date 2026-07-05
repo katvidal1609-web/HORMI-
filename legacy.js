@@ -1374,9 +1374,17 @@ function addTx(){
   closeOv('sh-add');
   const _ss=document.getElementById('stat-streak');if(_ss)_ss.textContent=calcStreak();
   const today=td();
-  if(date!==today){
+  if(date&&date!==today){
+    // Calcular el offset de semana correcto para la fecha guardada
+    const target=new Date(date+'T12:00:00');
+    const nowDate=new Date(today+'T12:00:00');
+    const diffMs=nowDate-target;
+    const diffDays=Math.floor(diffMs/86400000);
+    wkOffset=-Math.ceil(diffDays/7);
     _selDay=date;
-    selectDay(date);
+    renderWk();
+    renderDayForHome(true);
+    go('home');
     toast(`Gasto guardado ✓ — viendo ${dlbl(date)}`,'ok',3500);
   }else{
     refreshCurrent();
