@@ -2043,7 +2043,7 @@ function renderStats(){
     <div style="background:var(--s1);border-radius:14px;border:0.5px solid var(--border);padding:20px;margin-bottom:12px">
       <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);margin-bottom:12px">HORMIS QUE MÁS APARECEN</div>
       <div id="hormi-cat-list"></div>
-      <p style="font-size:11px;color:var(--t3);margin-top:10px">Toca una categoría para ver el detalle →</p>
+      ${hm.length>0?`<p style="font-size:11px;color:var(--t3);margin-top:10px">Toca una categoría para ver el detalle →</p>`:''}
     </div>
     <div class="hrc" style="margin-bottom:16px">
       <div class="sec" style="margin-bottom:8px;display:flex;align-items:center;gap:5px">Dónde gastas más — Hormis <i data-lucide="map-pin" style="width:13px;height:13px"></i></div>
