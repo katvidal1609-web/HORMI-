@@ -884,6 +884,29 @@ REGLAS PARA EL CAMPO 'lugar':
 3. Si hay número de tienda o local, ignóralo — solo nombre comercial + distrito.
 4. Si no puedes identificar el nombre comercial, usa el nombre tal como aparece en la boleta pero elimina términos legales como S.A., S.A.C., E.I.R.L., S.R.L.`;
 
+function openScanOptions(){
+  // En Android, mostrar opciones; en iOS el selector nativo ya da ambas opciones
+  const isAndroid=/android/i.test(navigator.userAgent);
+  if(isAndroid){
+    // Crear mini sheet de opciones
+    const existing=document.getElementById('scan-options-sheet');
+    if(existing)existing.remove();
+    const sheet=document.createElement('div');
+    sheet.id='scan-options-sheet';
+    sheet.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;display:flex;align-items:flex-end;justify-content:center';
+    sheet.innerHTML=`<div style="background:#fff;border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:430px">
+      <div style="font-size:15px;font-weight:700;font-family:var(--font-title);margin-bottom:16px;color:var(--t1)">Agregar imagen</div>
+      <button onclick="document.getElementById('img-in-cam').click();document.getElementById('scan-options-sheet').remove()" style="width:100%;padding:14px;background:var(--lime);border:none;border-radius:14px;font-size:15px;font-weight:700;font-family:var(--font-title);cursor:pointer;margin-bottom:8px;color:#0d0d0d">📷 Tomar foto</button>
+      <button onclick="document.getElementById('img-in').click();document.getElementById('scan-options-sheet').remove()" style="width:100%;padding:14px;background:var(--s2);border:1px solid var(--b2);border-radius:14px;font-size:15px;font-weight:600;font-family:var(--font-body);cursor:pointer;margin-bottom:8px;color:var(--t1)">🖼️ Elegir de galería</button>
+      <button onclick="document.getElementById('scan-options-sheet').remove()" style="width:100%;padding:12px;background:none;border:none;font-size:14px;color:var(--t3);cursor:pointer;font-family:var(--font-body)">Cancelar</button>
+    </div>`;
+    sheet.onclick=e=>{if(e.target===sheet)sheet.remove();};
+    document.body.appendChild(sheet);
+  }else{
+    document.getElementById('img-in').click();
+  }
+}
+
 async function scanImg(input){
   const file=input.files[0];if(!file)return;
   if(!checkScanLimit())return;

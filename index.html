@@ -502,12 +502,13 @@
         <div class="s-title" style="margin:0">Nuevo gasto</div>
         <button class="btn-close" onclick="closeOv('sh-add')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
-      <div class="scan-up" id="scan-drop" onclick="document.getElementById('img-in').click()">
+      <div class="scan-up" id="scan-drop" onclick="openScanOptions()">
         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
         <div class="scan-up-t">Escanear capturas de Yape / Plin ó Boleta</div>
         <div class="scan-up-s">Foto del pago — la IA extrae monto y descripción</div>
       </div>
       <input type="file" id="img-in" accept="image/*" style="display:none" onchange="scanImg(this)">
+      <input type="file" id="img-in-cam" accept="image/*" capture="environment" style="display:none" onchange="scanImg(this)">
       <div id="scan-confirm-banner" style="display:none;background:#FFF9C4;border:1.5px solid #F59E0B;border-radius:10px;padding:10px 13px;font-size:13px;font-weight:600;color:#92400E;margin-bottom:10px">⚠️ Revisa y confirma antes de guardar</div>
       <div id="scan-st" style="min-height:4px;margin-bottom:4px"></div>
       <div class="scan-res" id="scan-res">
