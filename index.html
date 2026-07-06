@@ -507,8 +507,8 @@
         <div class="scan-up-t">Escanear capturas de Yape / Plin ó Boleta</div>
         <div class="scan-up-s">Foto del pago — la IA extrae monto y descripción</div>
       </div>
-      <input type="file" id="img-in" accept="image/*" style="display:none" onchange="scanImg(this)">
-      <input type="file" id="img-in-cam" accept="image/*" capture="environment" style="display:none" onchange="scanImg(this)">
+      <input type="file" id="img-in" accept="image/*" style="position:fixed;opacity:0;pointer-events:none;width:1px;height:1px;top:-100px;left:-100px" onchange="scanImg(this)">
+      <input type="file" id="img-in-cam" accept="image/*" capture="environment" style="position:fixed;opacity:0;pointer-events:none;width:1px;height:1px;top:-100px;left:-100px" onchange="scanImg(this)">
       <div id="scan-confirm-banner" style="display:none;background:#FFF9C4;border:1.5px solid #F59E0B;border-radius:10px;padding:10px 13px;font-size:13px;font-weight:600;color:#92400E;margin-bottom:10px">⚠️ Revisa y confirma antes de guardar</div>
       <div id="scan-st" style="min-height:4px;margin-bottom:4px"></div>
       <div class="scan-res" id="scan-res">
