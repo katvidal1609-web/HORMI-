@@ -882,7 +882,8 @@ REGLAS PARA EL CAMPO 'lugar':
 1. Usa SIEMPRE el nombre comercial conocido, NO la razón social legal. Ejemplos: "COESTI S.A." → "Listo", "Operaciones Arcos Dorados de Peru SA" → "McDonald's", "Supermercados Peruanos S.A." → "Plaza Vea", "Saga Falabella S.A." → "Saga Falabella".
 2. Si la boleta menciona una dirección o distrito, agrégalo al nombre comercial separado por espacio: "Listo Monterrico", "Starbucks Miraflores", "McDonald's San Isidro".
 3. Si hay número de tienda o local, ignóralo — solo nombre comercial + distrito.
-4. Si no puedes identificar el nombre comercial, usa el nombre tal como aparece en la boleta pero elimina términos legales como S.A., S.A.C., E.I.R.L., S.R.L.`;
+4. Si no puedes identificar el nombre comercial, usa el nombre tal como aparece en la boleta pero elimina términos legales como S.A., S.A.C., E.I.R.L., S.R.L.
+5. La boleta suele tener: nombre comercial arriba, razón social y dirección fiscal abajo. USA SOLO el nombre comercial de arriba + distrito si aparece. NUNCA incluyas avenidas, números de calle ni otros códigos internos de local — ejemplo, si ves "LISTO UDLIMA" con dirección en Monterrico, el lugar es "Listo UDLIMA". ASI CON TODOS.`;
 
 function openScanOptions(){
   const isAndroid=/android/i.test(navigator.userAgent);
@@ -994,10 +995,10 @@ async function scanImg(input){
     const multi=items.length>1;
     // show detected items
     document.getElementById('scan-fields').innerHTML=`
-      <div style="font-size:11px;color:var(--t3);letter-spacing:.04em;margin-bottom:5px">DETECTADO${lugar?' · '+lugar:''}</div>
-      ${items.map((it,idx)=>`<div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;margin-bottom:4px;gap:6px"><span style="color:var(--t1);flex:1;">${it.descripcion||'ítem'}</span><span style="font-weight:600;white-space:nowrap;color:var(--t1)">${fmt(it.monto||0)}</span><button onclick="editScanItem(${idx})" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:6px;padding:3px 9px;font-size:11px;color:#fff;cursor:pointer;white-space:nowrap;font-family:var(--font-body)">editar</button></div>`).join('')}
-      ${multi?`<div style="border-top:.5px solid rgba(255,255,255,.2);margin-top:6px;padding-top:6px;display:flex;justify-content:space-between;font-size:13px"><span style="color:rgba(255,255,255,.6)">Total</span><span style="font-weight:700;color:#fff">${fmt(totalAmt)}</span></div>`:''}
-      ${ds?`<div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:4px">${p.fecha||ds}${p.hora?' · '+p.hora:''}</div>`:''}
+      <div style="font-size:11px;color:var(--t3);letter-spacing:.04em;margin-bottom:5px">${lugar||'Detectado'}</div>
+      ${items.map((it,idx)=>`<div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;margin-bottom:4px;gap:6px"><span style="color:var(--t1);flex:1;">${it.descripcion||'ítem'}</span><span style="font-weight:600;white-space:nowrap;color:var(--t1)">${fmt(it.monto||0)}</span><button onclick="editScanItem(${idx})" style="background:rgba(45,81,88,.1);border:1px solid #2d5158;border-radius:6px;padding:3px 10px;font-size:11px;color:#2d5158;cursor:pointer;white-space:nowrap;font-family:var(--font-body);font-weight:600">editar</button></div>`).join('')}
+      ${multi?`<div style="border-top:.5px solid var(--b2);margin-top:6px;padding-top:6px;display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--t3)">Total</span><span style="font-weight:700;color:var(--t1)">${fmt(totalAmt)}</span></div>`:''}
+      ${ds?`<div style="font-size:11px;color:var(--t3);margin-top:4px">${p.fecha||ds}${p.hora?' · '+p.hora:''}</div>`:''}
     `;
     // for single item pre-fill form; for multi-item show "save all" action
     const resEl=document.getElementById('scan-res');
@@ -1096,14 +1097,14 @@ function saveEditScanItem(){
   const lugar=_scanPending.lugar||'';
   const ds=_scanPending.date;
   document.getElementById('scan-fields').innerHTML=`
-    <div style="font-size:11px;color:var(--t3);letter-spacing:.04em;margin-bottom:5px">DETECTADO${lugar?' · '+lugar:''}</div>
+    <div style="font-size:11px;color:var(--t3);letter-spacing:.04em;margin-bottom:5px">${lugar||'Detectado'}</div>
     ${_scanPending.items.map((x,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;margin-bottom:4px;gap:6px">
       <span style="color:var(--t1);flex:1">${x.descripcion||'ítem'}</span>
       <span style="font-weight:600;white-space:nowrap;color:var(--t1)">${fmt(x.monto||0)}</span>
-      <button onclick="editScanItem(${i})" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:6px;padding:3px 9px;font-size:11px;color:#fff;cursor:pointer;white-space:nowrap;font-family:var(--font-body)">editar</button>
+      <button onclick="editScanItem(${i})" style="background:rgba(45,81,88,.1);border:1px solid #2d5158;border-radius:6px;padding:3px 10px;font-size:11px;color:#2d5158;cursor:pointer;white-space:nowrap;font-family:var(--font-body);font-weight:600">editar</button>
     </div>`).join('')}
-    ${_scanPending.items.length>1?`<div style="border-top:.5px solid rgba(255,255,255,.2);margin-top:6px;padding-top:6px;display:flex;justify-content:space-between;font-size:13px"><span style="color:rgba(255,255,255,.6)">Total</span><span style="font-weight:700;color:#fff">${fmt(totalAmt)}</span></div>`:''}
-    ${ds?`<div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:4px">${ds}</div>`:''}
+    ${_scanPending.items.length>1?`<div style="border-top:.5px solid var(--b2);margin-top:6px;padding-top:6px;display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--t3)">Total</span><span style="font-weight:700;color:var(--t1)">${fmt(totalAmt)}</span></div>`:''}
+    ${ds?`<div style="font-size:11px;color:var(--t3);margin-top:4px">${ds}</div>`:''}
   `;
   toast('Ítem actualizado ✓','ok');
 }
