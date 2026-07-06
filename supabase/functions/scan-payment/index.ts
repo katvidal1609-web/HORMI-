@@ -66,7 +66,7 @@ serve(async (req) => {
       headers: { "Content-Type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01" },
       body: JSON.stringify({
         model: "claude-sonnet-4-6",
-        max_tokens: 1024,
+        max_tokens: 800,
         system: "Eres un extractor de datos. Responde ÚNICAMENTE con JSON válido, sin texto previo, sin explicaciones, sin markdown, sin backticks. Solo el objeto JSON.",
         messages,
       }),

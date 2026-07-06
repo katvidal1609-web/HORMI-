@@ -911,8 +911,10 @@ async function scanImg(input){
   const file=input.files[0];if(!file)return;
   if(!checkScanLimit())return;
   const st=document.getElementById('scan-st');
-  st.innerHTML=`<div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--lime-t);margin-bottom:7px"><span class="spin"></span>Leyendo imagen...</div>`;
-  document.getElementById('scan-res').style.display='none';
+  st.innerHTML=`<div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--lime-t);margin-bottom:7px"><span class="spin"></span>Analizando tu boleta con IA...</div>`;
+  document.getElementById('scan-res').style.display='block';
+  document.getElementById('scan-fields').innerHTML=`<div style="display:flex;align-items:center;gap:8px;padding:8px 0;color:var(--t3);font-size:13px"><span class="spin"></span>Extrayendo datos...</div>`;
+  const _scanBtns=document.getElementById('scan-btns');if(_scanBtns)_scanBtns.innerHTML='';
   scanReceiptTs=null;_currentThumb=null;_scanPending=null;
   try{
     const b64=await toJpegBase64(file);
@@ -1288,7 +1290,7 @@ async function toJpegBase64(file){
         canvas.height=img.naturalHeight;
         const ctx=canvas.getContext('2d');
         ctx.drawImage(img,0,0);
-        const dataUrl=canvas.toDataURL('image/jpeg',0.92);
+        const dataUrl=canvas.toDataURL('image/jpeg',0.78);
         res(dataUrl.split(',')[1]);
       };
       img.onerror=()=>rej(new Error('No se pudo leer la imagen'));
