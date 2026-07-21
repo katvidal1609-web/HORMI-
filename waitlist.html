@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HORMI — Lista de espera</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --lime:#C8F65A;
+    --black:#0a0a0a;
+    --white:#ffffff;
+    --gray:#6b7280;
+    --border:#e5e7eb;
+    --radius:14px;
+    --font:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  }
+  html,body{
+    height:100%;
+    background:var(--white);
+    color:var(--black);
+    font-family:var(--font);
+    -webkit-font-smoothing:antialiased;
+  }
+  body{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    min-height:100dvh;
+    padding:24px 20px;
+  }
+  .card{
+    width:100%;
+    max-width:420px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:0;
+  }
+  /* Logo */
+  .logo{
+    font-size:22px;
+    font-weight:800;
+    letter-spacing:-0.5px;
+    color:var(--black);
+    display:flex;
+    align-items:center;
+    gap:6px;
+    margin-bottom:32px;
+  }
+  .logo-ant{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:32px;
+    height:32px;
+    background:var(--lime);
+    border-radius:8px;
+    font-size:17px;
+  }
+  /* Headlines */
+  h1{
+    font-size:clamp(22px,6vw,30px);
+    font-weight:800;
+    line-height:1.2;
+    letter-spacing:-0.6px;
+    text-align:center;
+    margin-bottom:12px;
+  }
+  .sub{
+    font-size:15px;
+    color:var(--gray);
+    text-align:center;
+    line-height:1.55;
+    margin-bottom:28px;
+    max-width:340px;
+  }
+  /* Counter */
+  .counter{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    background:var(--black);
+    color:var(--white);
+    font-size:13px;
+    font-weight:600;
+    padding:6px 14px;
+    border-radius:99px;
+    margin-bottom:28px;
+  }
+  .counter-dot{
+    width:7px;
+    height:7px;
+    background:var(--lime);
+    border-radius:50%;
+    animation:pulse 1.8s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%,100%{opacity:1;transform:scale(1)}
+    50%{opacity:.5;transform:scale(0.8)}
+  }
+  /* Form */
+  form{
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  input{
+    width:100%;
+    padding:14px 16px;
+    border:1.5px solid var(--border);
+    border-radius:var(--radius);
+    font-size:15px;
+    font-family:var(--font);
+    color:var(--black);
+    background:var(--white);
+    outline:none;
+    transition:border-color .15s;
+    -webkit-appearance:none;
+  }
+  input::placeholder{color:#9ca3af}
+  input:focus{border-color:var(--black)}
+  button[type=submit]{
+    width:100%;
+    padding:15px 20px;
+    background:var(--lime);
+    color:var(--black);
+    font-size:15px;
+    font-weight:700;
+    font-family:var(--font);
+    border:none;
+    border-radius:var(--radius);
+    cursor:pointer;
+    transition:opacity .15s,transform .1s;
+    -webkit-appearance:none;
+  }
+  button[type=submit]:active{transform:scale(0.98);opacity:.85}
+  button[type=submit]:disabled{opacity:.5;cursor:not-allowed}
+  .hint{
+    font-size:12px;
+    color:var(--gray);
+    text-align:center;
+    margin-top:4px;
+  }
+  /* Success state */
+  .success{
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    gap:10px;
+    text-align:center;
+    animation:fadeUp .4s ease both;
+  }
+  .success.show{display:flex}
+  .success-icon{
+    font-size:48px;
+    line-height:1;
+    margin-bottom:4px;
+  }
+  .success h2{
+    font-size:20px;
+    font-weight:800;
+    letter-spacing:-0.4px;
+  }
+  .success p{
+    font-size:14px;
+    color:var(--gray);
+    max-width:280px;
+    line-height:1.5;
+  }
+  @keyframes fadeUp{
+    from{opacity:0;transform:translateY(12px)}
+    to{opacity:1;transform:none}
+  }
+  /* Error toast */
+  .toast{
+    position:fixed;
+    bottom:24px;
+    left:50%;
+    transform:translateX(-50%) translateY(80px);
+    background:var(--black);
+    color:var(--white);
+    font-size:13px;
+    padding:10px 18px;
+    border-radius:99px;
+    white-space:nowrap;
+    transition:transform .3s ease;
+    z-index:9;
+  }
+  .toast.show{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<div class="card" id="main-card">
+
+  <div class="logo">
+    <img src="logo-light.png" alt="HORMI" style="height:56px;width:auto;">
+  </div>
+
+  <h1>Sé de los primeros<br>en usar HORMI</h1>
+
+  <p class="sub">Controla tus gastos hormiga con IA. Únete a la lista de espera y obtén acceso anticipado gratis.</p>
+
+  <div class="counter">
+    <span class="counter-dot"></span>
+    <span id="counter-text">47 personas ya en lista</span>
+  </div>
+
+  <form id="waitlist-form">
+    <input type="text" id="f-name" name="name" placeholder="Tu nombre" autocomplete="given-name" required maxlength="80">
+    <input type="email" id="f-email" name="email" placeholder="Tu email" autocomplete="email" required maxlength="120">
+    <button type="submit" id="submit-btn">Quiero acceso anticipado 🐜</button>
+    <p class="hint">Sin spam. Te avisamos cuando esté listo tu acceso.</p>
+  </form>
+
+  <div class="success" id="success-msg">
+    <div class="success-icon">🎉</div>
+    <h2>¡Ya estás en lista!</h2>
+    <p>Te avisaremos cuando tu acceso esté listo. Mientras tanto, sigue controlando esos gastos hormiga.</p>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://joavdkofhurqtfuzneid.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpvYXZka29maHVycXRmdXpuZWlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NzEwMDAsImV4cCI6MjA5MjA0NzAwMH0.zBdEaxj3UoaqZ8-eL8Z0cH6-3svTDUBEdlSPIvmL-j4';
+
+const _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let toastTimer;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3500);
+}
+
+document.getElementById('waitlist-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('submit-btn');
+  const name = document.getElementById('f-name').value.trim();
+  const email = document.getElementById('f-email').value.trim().toLowerCase();
+
+  btn.disabled = true;
+  btn.textContent = 'Guardando…';
+
+  try {
+    const { error } = await _sb
+      .from('waitlist')
+      .insert([{ name, email }]);
+
+    if (error) {
+      if (error.code === '23505') {
+        showToast('Este email ya está en la lista 👀');
+      } else if (error.code === '42P01') {
+        // table doesn't exist — surface clear message
+        showToast('Error de configuración. Contacta al equipo.');
+        console.error('waitlist table missing:', error);
+      } else {
+        showToast('Algo salió mal. Intenta de nuevo.');
+        console.error(error);
+      }
+      btn.disabled = false;
+      btn.textContent = 'Quiero acceso anticipado 🐜';
+      return;
+    }
+
+    // success
+    document.getElementById('waitlist-form').style.display = 'none';
+    document.querySelector('h1').style.display = 'none';
+    document.querySelector('.sub').style.display = 'none';
+    document.querySelector('.counter').style.display = 'none';
+    document.getElementById('success-msg').classList.add('show');
+
+  } catch (err) {
+    showToast('Error de conexión. Intenta de nuevo.');
+    console.error(err);
+    btn.disabled = false;
+    btn.textContent = 'Quiero acceso anticipado 🐜';
+  }
+});
+</script>
+</body>
+</html>

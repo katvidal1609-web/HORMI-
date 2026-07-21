@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hormi Team — HORMI</title>
+<meta name="description" content="Conoce al equipo detrás de HORMI. Construido por personas que también tenían gastos hormiga.">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --lime: #C8F65A;
+    --lime-d: #aede3c;
+    --black: #0d0d0d;
+    --grey: #6b7280;
+    --grey-l: #f5f5f5;
+    --white: #ffffff;
+    --radius: 16px;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    --max: 1100px;
+    --nav-h: 64px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font);
+    background: var(--white);
+    color: var(--black);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    height: var(--nav-h);
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(0,0,0,0.07);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+  }
+
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: var(--black);
+  }
+
+  .nav-logo-icon {
+    width: 32px;
+    height: 32px;
+    background: var(--black);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+
+  .nav-logo-text { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    text-decoration: none;
+    color: var(--grey);
+    font-size: 14px;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 8px;
+    transition: color 0.15s, background 0.15s;
+  }
+
+  .nav-links a:hover { color: var(--black); background: var(--grey-l); }
+  .nav-links a.active { color: var(--black); font-weight: 700; }
+
+  .nav-cta {
+    background: var(--black) !important;
+    color: var(--white) !important;
+    font-weight: 600 !important;
+    padding: 8px 18px !important;
+    border-radius: 50px !important;
+    font-size: 14px !important;
+    transition: opacity 0.15s !important;
+  }
+
+  .nav-cta:hover { opacity: 0.82 !important; background: var(--black) !important; }
+
+  .nav-hamburger {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .nav-hamburger span {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: var(--black);
+    border-radius: 2px;
+  }
+
+  .mobile-menu {
+    display: none;
+    position: fixed;
+    top: var(--nav-h);
+    left: 0; right: 0;
+    background: var(--white);
+    border-bottom: 1px solid rgba(0,0,0,0.07);
+    padding: 12px 0 20px;
+    z-index: 99;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  }
+
+  .mobile-menu.open { display: block; }
+
+  .mobile-menu a {
+    display: block;
+    padding: 14px 24px;
+    text-decoration: none;
+    color: var(--black);
+    font-size: 16px;
+    font-weight: 500;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+  }
+
+  .mobile-menu a:last-child { border-bottom: none; }
+
+  .mobile-menu .mob-cta {
+    margin: 12px 24px 0;
+    display: block;
+    text-align: center;
+    background: var(--black);
+    color: var(--white) !important;
+    border-radius: 50px;
+    padding: 14px !important;
+    font-weight: 700 !important;
+    border-bottom: none !important;
+  }
+
+  /* ── UTILS ── */
+  .container { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
+  .section { padding: 96px 0; }
+
+  .tag {
+    display: inline-block;
+    background: var(--lime);
+    color: var(--black);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 50px;
+    margin-bottom: 20px;
+  }
+
+  .section-title {
+    font-size: clamp(28px, 5vw, 42px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    margin-bottom: 16px;
+  }
+
+  /* ── PAGE HEADER ── */
+  .page-header {
+    background: var(--black);
+    color: var(--white);
+    padding: 80px 0;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .page-header-glow {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(200,246,90,0.1) 0%, transparent 70%);
+    top: -200px;
+    left: 50%;
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+
+  .page-header h1 {
+    font-size: clamp(32px, 5vw, 56px);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    margin-bottom: 16px;
+    position: relative;
+  }
+
+  .page-header h1 em {
+    font-style: normal;
+    background: var(--lime);
+    color: var(--black);
+    padding: 0 6px;
+    border-radius: 6px;
+  }
+
+  .page-header p {
+    font-size: 18px;
+    color: rgba(255,255,255,0.6);
+    max-width: 500px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  /* ── TEAM ── */
+  .team-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 32px;
+    max-width: 560px;
+    margin: 0 auto;
+  }
+
+  .team-card {
+    background: var(--grey-l);
+    border-radius: var(--radius);
+    padding: 48px 32px;
+    text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .team-card:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.08); }
+
+  .team-avatar {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    margin: 0 auto 20px;
+    background: var(--lime);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    font-weight: 900;
+    color: var(--black);
+    letter-spacing: -0.02em;
+    box-shadow: 0 0 0 4px rgba(200,246,90,0.25);
+  }
+
+  .team-name {
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: 6px;
+    letter-spacing: -0.02em;
+  }
+
+  .team-role { font-size: 14px; color: var(--grey); }
+
+  /* ── JOIN CTA ── */
+  .join-cta {
+    text-align: center;
+    margin-top: 64px;
+    padding: 48px 32px;
+    background: var(--grey-l);
+    border-radius: var(--radius);
+    max-width: 560px;
+    margin: 64px auto 0;
+  }
+
+  .join-cta h3 {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 10px;
+  }
+
+  .join-cta p { font-size: 15px; color: var(--grey); margin-bottom: 24px; }
+
+  .join-cta a {
+    display: inline-block;
+    background: var(--black);
+    color: var(--white);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 12px 28px;
+    border-radius: 50px;
+    transition: opacity 0.15s;
+  }
+
+  .join-cta a:hover { opacity: 0.82; }
+
+  /* ── FOOTER ── */
+  footer { background: #0a0a0a; color: rgba(255,255,255,0.4); padding: 48px 24px; }
+
+  .footer-inner {
+    max-width: var(--max);
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .footer-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+
+  .footer-logo-icon {
+    width: 28px;
+    height: 28px;
+    background: #1a1a1a;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  .footer-logo-text { color: rgba(255,255,255,0.6); font-size: 15px; font-weight: 800; }
+  .footer-links { display: flex; gap: 24px; flex-wrap: wrap; }
+
+  .footer-links a {
+    text-decoration: none;
+    color: rgba(255,255,255,0.35);
+    font-size: 13px;
+    transition: color 0.15s;
+  }
+
+  .footer-links a:hover { color: rgba(255,255,255,0.7); }
+  .footer-copy { font-size: 12px; color: rgba(255,255,255,0.2); width: 100%; margin-top: 8px; text-align: center; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 860px) {
+    nav { padding: 0 16px; }
+    .nav-links { display: none; }
+    .nav-hamburger { display: flex; }
+  }
+
+  @media (max-width: 560px) {
+    .section { padding: 72px 0; }
+    .team-grid { grid-template-columns: 1fr; max-width: 280px; }
+    .footer-inner { flex-direction: column; text-align: center; }
+    .footer-links { justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+  <a href="web.html" class="nav-logo">
+    <div class="nav-logo-icon">🐜</div>
+    <span class="nav-logo-text">HORMI</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="web.html#inicio">Inicio</a></li>
+    <li><a href="caracteristicas.html">Características</a></li>
+    <li><a href="web.html#planes">Planes</a></li>
+    <li><a href="team.html" class="active">Hormi Team</a></li>
+    <li><a href="https://www.hormi.com.pe" class="nav-cta">Probar gratis</a></li>
+  </ul>
+  <button class="nav-hamburger" id="ham" onclick="toggleMenu()" aria-label="Menú">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="mobile-menu" id="mob-menu">
+  <a href="web.html#inicio">Inicio</a>
+  <a href="caracteristicas.html">Características</a>
+  <a href="web.html#planes">Planes</a>
+  <a href="team.html">Hormi Team</a>
+  <a href="https://www.hormi.com.pe" class="mob-cta">Probar gratis →</a>
+</div>
+
+<!-- ── PAGE HEADER ── -->
+<div class="page-header">
+  <div class="page-header-glow"></div>
+  <div class="container">
+    <h1>Construido por personas<br>que también tenían <em>hormis</em></h1>
+    <p>Un equipo pequeño y comprometido que decidió resolver sus propios problemas financieros.</p>
+  </div>
+</div>
+
+<!-- ── TEAM ── -->
+<section id="hormi-team" class="section">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:56px">
+      <div class="tag">Hormi Team</div>
+      <h2 class="section-title">Las personas detrás<br>de la app</h2>
+    </div>
+
+    <div class="team-grid">
+      <div class="team-card">
+        <div class="team-avatar">KV</div>
+        <div class="team-name">Katherine Vidal</div>
+        <div class="team-role">Co-fundadora</div>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar">PE</div>
+        <div class="team-name">Pablo Enriquez</div>
+        <div class="team-role">Co-fundador</div>
+      </div>
+    </div>
+
+    <div class="join-cta">
+      <h3>¿Quieres unirte al equipo?</h3>
+      <p>Siempre buscamos personas que compartan nuestra visión de finanzas simples y accesibles.</p>
+      <a href="mailto:contacto@hormi.com.pe">Escríbenos →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="footer-inner">
+    <a href="web.html" class="footer-logo">
+      <img src="logo-light.png" alt="HORMI" style="height:56px;width:auto;">
+    </a>
+    <div class="footer-links">
+      <a href="legal.html">Privacidad</a>
+      <a href="legal.html#terminos">Términos</a>
+      <a href="mailto:contacto@hormi.com.pe">contacto@hormi.com.pe</a>
+      <a href="https://www.hormi.com.pe">App →</a>
+    </div>
+    <div class="footer-copy">© 2026 HORMI. Todos los derechos reservados.</div>
+  </div>
+</footer>
+
+<script>
+  function toggleMenu() {
+    document.getElementById('mob-menu').classList.toggle('open');
+  }
+
+  document.addEventListener('click', function(e) {
+    const menu = document.getElementById('mob-menu');
+    const ham = document.getElementById('ham');
+    if (menu.classList.contains('open') && !menu.contains(e.target) && !ham.contains(e.target)) {
+      menu.classList.remove('open');
+    }
+  });
+</script>
+
+</body>
+</html>

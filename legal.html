@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Legal — HORMI</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#fff;color:#111;line-height:1.7;font-size:15px}
+  a{color:#5a8a00;text-decoration:none}
+  a:hover{text-decoration:underline}
+
+  /* NAV */
+  .nav{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid #e8e8e8;display:flex;align-items:center;gap:0;padding:0 20px}
+  .nav-logo{font-weight:800;font-size:16px;letter-spacing:-.02em;padding:16px 0;margin-right:24px;color:#111}
+  .nav-logo span{background:#C8F65A;border-radius:6px;padding:1px 7px}
+  .nav-tab{padding:16px 14px;font-size:13px;font-weight:600;color:#888;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap}
+  .nav-tab.active{color:#111;border-bottom-color:#C8F65A}
+  .nav-tab:hover{color:#111}
+
+  /* SECTIONS */
+  .section{display:none;max-width:680px;margin:0 auto;padding:40px 24px 80px}
+  .section.active{display:block}
+
+  /* HERO */
+  .hero{margin-bottom:36px}
+  .hero-badge{display:inline-block;background:#C8F65A;color:#1a2e2a;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:20px;margin-bottom:12px}
+  .hero h1{font-size:28px;font-weight:800;line-height:1.2;margin-bottom:8px;letter-spacing:-.02em}
+  .hero-meta{font-size:13px;color:#888}
+
+  /* CONTENT */
+  h2{font-size:17px;font-weight:700;margin:36px 0 10px;padding-top:4px;border-top:1px solid #f0f0f0}
+  h2:first-of-type{border-top:none;margin-top:0}
+  h3{font-size:14px;font-weight:700;margin:20px 0 6px;color:#333}
+  p{margin-bottom:12px;color:#333}
+  ul,ol{padding-left:20px;margin-bottom:12px;color:#333}
+  li{margin-bottom:5px}
+  .highlight{background:#f7ffe0;border-left:3px solid #C8F65A;padding:12px 16px;border-radius:0 8px 8px 0;margin:16px 0;font-size:14px}
+  .contact-box{background:#f8f8f8;border-radius:12px;padding:18px 20px;margin-top:32px;font-size:14px}
+  .contact-box strong{display:block;margin-bottom:6px;font-size:15px}
+  .contact-box a{font-weight:600}
+  .last-updated{font-size:12px;color:#aaa;margin-top:32px;padding-top:16px;border-top:1px solid #f0f0f0}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="web.html" class="nav-logo"><img src="logo-light.png" alt="HORMI" style="height:56px;width:auto;"></a>
+  <div class="nav-tab active" onclick="show('privacy')">Política de Privacidad</div>
+  <div class="nav-tab" onclick="show('terms')">Términos y Condiciones</div>
+  <div class="nav-tab" onclick="show('devoluciones')">Devoluciones</div>
+</nav>
+
+<!-- PRIVACIDAD -->
+<div class="section active" id="privacy">
+  <div class="hero">
+    <div class="hero-badge">Privacidad</div>
+    <h1>Política de Privacidad</h1>
+    <div class="hero-meta">Última actualización: mayo 2025 · Lima, Perú</div>
+  </div>
+
+  <div class="highlight">
+    Tu privacidad nos importa. No vendemos, alquilamos ni compartimos tus datos personales con terceros con fines comerciales.
+  </div>
+
+  <h2>1. Quiénes somos</h2>
+  <p>HORMI es una aplicación web progresiva (PWA) de control de gastos personales, desarrollada y operada por una persona natural domiciliada en Lima, Perú. Puedes contactarnos en <a href="mailto:contacto@hormi.com.pe">contacto@hormi.com.pe</a>.</p>
+
+  <h2>2. Datos que recopilamos</h2>
+  <h3>Datos que tú proporcionas</h3>
+  <ul>
+    <li><strong>Nombre y correo electrónico</strong> al crear tu cuenta.</li>
+    <li><strong>Gastos registrados</strong>: monto, descripción, categoría, fecha y hora.</li>
+    <li><strong>Fotos de boletas o comprobantes</strong> que subas para el escaneo automático.</li>
+    <li><strong>Metas de ahorro y presupuesto</strong> que configures en la app.</li>
+  </ul>
+  <h3>Datos recopilados automáticamente</h3>
+  <ul>
+    <li>Dirección IP y datos básicos de sesión para autenticación.</li>
+    <li>Fecha y hora de acceso.</li>
+  </ul>
+  <p>No recopilamos datos de ubicación, contactos, ni accedemos a información más allá de lo necesario para el funcionamiento de la app.</p>
+
+  <h2>3. Cómo usamos tus datos</h2>
+  <ul>
+    <li>Crear y gestionar tu cuenta de usuario.</li>
+    <li>Almacenar y sincronizar tus registros de gastos entre dispositivos.</li>
+    <li>Procesar imágenes de comprobantes mediante inteligencia artificial para extraer información del gasto.</li>
+    <li>Generar estadísticas y análisis personales dentro de la app.</li>
+    <li>Enviarte comunicaciones relacionadas con tu cuenta (nunca publicidad de terceros).</li>
+  </ul>
+
+  <h2>4. Proveedores de servicios</h2>
+  <p>Para operar HORMI utilizamos los siguientes servicios de terceros, con los que compartimos únicamente los datos estrictamente necesarios:</p>
+  <ul>
+    <li><strong>Supabase</strong> (EE.UU.) — almacenamiento de base de datos y autenticación.</li>
+    <li><strong>Anthropic Claude</strong> (EE.UU.) — procesamiento de imágenes de boletas para extraer información del gasto. Las imágenes son enviadas a la API de Anthropic y no son almacenadas por ellos más allá del procesamiento inmediato.</li>
+    <li><strong>Culqi</strong> (Perú) — procesamiento de pagos para suscripciones Pro. HORMI nunca almacena datos de tarjetas de crédito o débito.</li>
+  </ul>
+  <p>Todos los proveedores están sujetos a sus propias políticas de privacidad y compromisos de seguridad.</p>
+
+  <h2>5. Compartición de datos</h2>
+  <p><strong>No vendemos, alquilamos ni cedemos tus datos personales a terceros</strong> con fines comerciales o publicitarios, bajo ninguna circunstancia.</p>
+  <p>Podríamos divulgar información únicamente si fuera requerido por ley, resolución judicial o autoridad competente peruana.</p>
+
+  <h2>6. Almacenamiento y seguridad</h2>
+  <p>Tus datos se almacenan en servidores seguros provistos por Supabase, protegidos con cifrado en tránsito (TLS) y en reposo. El acceso a la base de datos está restringido y protegido por credenciales seguras.</p>
+  <p>Si bien aplicamos medidas de seguridad razonables, ningún sistema es infalible. En caso de una brecha de seguridad que afecte tus datos, te notificaremos dentro de los plazos establecidos por la ley.</p>
+
+  <h2>7. Tus derechos (Ley N° 29733)</h2>
+  <p>De acuerdo con la Ley Peruana de Protección de Datos Personales (Ley N° 29733) y su reglamento, tienes derecho a:</p>
+  <ul>
+    <li><strong>Acceso</strong>: solicitar una copia de los datos que tenemos sobre ti.</li>
+    <li><strong>Rectificación</strong>: corregir datos inexactos o incompletos.</li>
+    <li><strong>Cancelación</strong>: solicitar la eliminación de tus datos.</li>
+    <li><strong>Oposición</strong>: oponerte al tratamiento de tus datos.</li>
+  </ul>
+  <p>Puedes ejercer estos derechos directamente desde la app (Ajustes → Eliminar cuenta) o escribiéndonos a <a href="mailto:contacto@hormi.com.pe">contacto@hormi.com.pe</a>.</p>
+
+  <h2>8. Eliminación de cuenta y datos</h2>
+  <div class="highlight">
+    Puedes eliminar tu cuenta y todos tus datos en cualquier momento desde Ajustes → Eliminar cuenta. La eliminación es permanente e irreversible. Todos tus gastos, metas, configuración e historial serán borrados de nuestros servidores en un plazo máximo de 30 días.
+  </div>
+
+  <h2>9. Menores de edad</h2>
+  <p>HORMI no está dirigida a menores de 18 años. No recopilamos intencionalmente datos de menores. Si tienes conocimiento de que un menor nos ha proporcionado información personal, contáctanos para eliminarla.</p>
+
+  <h2>10. Cambios a esta política</h2>
+  <p>Podemos actualizar esta política ocasionalmente. Cuando lo hagamos, actualizaremos la fecha al inicio de este documento. Para cambios significativos, te notificaremos por correo electrónico o mediante aviso dentro de la app.</p>
+
+  <div class="contact-box">
+    <strong>¿Preguntas sobre privacidad?</strong>
+    Escríbenos a <a href="mailto:contacto@hormi.com.pe">contacto@hormi.com.pe</a>. Respondemos en un plazo máximo de 5 días hábiles.
+  </div>
+
+  <div class="last-updated">Política vigente desde mayo 2025 · Lima, Perú</div>
+</div>
+
+<!-- TÉRMINOS -->
+<div class="section" id="terms">
+  <div class="hero">
+    <div class="hero-badge">Legal</div>
+    <h1>Términos y Condiciones</h1>
+    <div class="hero-meta">Última actualización: mayo 2025 · Lima, Perú</div>
+  </div>
+
+  <div class="highlight">
+    Al usar HORMI aceptas estos términos. Léelos con calma — son claros y en español simple.
+  </div>
+
+  <h2>1. Aceptación de los términos</h2>
+  <p>Al crear una cuenta o usar HORMI, aceptas estos Términos y Condiciones en su totalidad. Si no estás de acuerdo con alguna parte, por favor no uses la aplicación.</p>
+
+  <h2>2. Descripción del servicio</h2>
+  <p>HORMI es una aplicación web progresiva (PWA) de control de gastos personales que permite registrar gastos cotidianos, escanear boletas mediante inteligencia artificial, establecer metas de ahorro y analizar patrones de consumo.</p>
+  <p>HORMI opera bajo un modelo freemium:</p>
+  <ul>
+    <li><strong>Plan Free</strong>: registro manual de gastos, hasta 3 escaneos de boletas por día, estadísticas básicas.</li>
+    <li><strong>Plan Pro</strong>: escaneos ilimitados, registro por voz, análisis avanzados, y más funcionalidades.</li>
+  </ul>
+
+  <h2>3. Registro y cuenta</h2>
+  <p>Para usar HORMI debes crear una cuenta con un correo electrónico válido y una contraseña segura. Eres responsable de mantener la confidencialidad de tus credenciales y de todas las actividades que ocurran bajo tu cuenta.</p>
+  <p>Debes notificarnos de inmediato ante cualquier uso no autorizado de tu cuenta escribiendo a <a href="mailto:contacto@hormi.com.pe">contacto@hormi.com.pe</a>.</p>
+
+  <h2>4. Pagos y suscripciones</h2>
+  <h3>Plan Pro</h3>
+  <p>El Plan Pro está disponible en modalidad mensual, trimestral o anual. Los precios se muestran en soles peruanos (PEN) e incluyen los impuestos aplicables.</p>
+  <h3>Procesamiento de pagos</h3>
+  <p>Los pagos son procesados de forma segura por <strong>Culqi</strong>, una pasarela de pagos peruana certificada. HORMI nunca almacena datos de tarjetas de crédito o débito.</p>
+  <h3>Política de reembolsos</h3>
+  <p>Ofrecemos reembolso completo dentro de los primeros 7 días calendario desde la activación del plan, siempre que el usuario no haya realizado más de 10 escaneos de boletas. Para solicitar un reembolso, escríbenos a <a href="mailto:contacto@hormi.com.pe">contacto@hormi.com.pe</a>.</p>
+  <h3>Renovación</h3>
+  <p>Las suscripciones no se renuevan automáticamente. Recibirás un aviso antes del vencimiento de tu plan.</p>
+
+  <h2>5. Uso aceptable</h2>
+  <p>Al usar HORMI te comprometes a:</p>
+  <ul>
+    <li>Usar la app únicamente para fines personales y lícitos.</li>
+    <li>No intentar acceder a datos de otros usuarios.</li>
+    <li>No usar herramientas automatizadas para sobrecargar el servicio.</li>
+    <li>No subir imágenes que infrinjan derechos de terceros o que contengan contenido ilegal.</li>
+    <li>No intentar realizar ingeniería inversa, descompilar o copiar la aplicación.</li>
+  </ul>
+
+  <h2>6. Inteligencia artificial y precisión</h2>
+  <p>HORMI usa modelos de inteligencia artificial (Anthropic Claude) para extraer información de comprobantes de pago. Si bien nos esforzamos por ofrecer resultados precisos, <strong>la IA puede cometer errores</strong>. HORMI no se hace responsable de inexactitudes en los datos extraídos de boletas. El usuario es responsable de verificar y confirmar la información antes de guardarla.</p>
+
+  <h2>7. Disponibilidad del servicio</h2>
+  <p>Nos esforzamos por mantener HORMI disponible las 24 horas, los 7 días de la semana. Sin embargo, podemos realizar mantenimientos programados o experimentar interrupciones no planeadas. No garantizamos disponibilidad ininterrumpida del servicio.</p>
+  <p>En caso de interrupciones prolongadas del servicio que afecten el Plan Pro, ofreceremos extensión proporcional de la suscripción.</p>
+
+  <h2>8. Propiedad intelectual</h2>
+  <p>Todo el código, diseño, marca, logotipo y contenido de HORMI son propiedad de su titular. No puedes reproducirlos, distribuirlos ni crear obras derivadas sin autorización escrita previa.</p>
+  <p>Los datos que tú ingresas (gastos, fotos, metas) son de tu propiedad. HORMI solo los utiliza para prestarte el servicio.</p>
+
+  <h2>9. Limitación de responsabilidad</h2>
+  <p>HORMI es una herramienta de apoyo para el control personal de gastos. No somos asesores financieros. Cualquier decisión financiera que tomes basándote en los datos de la app es tu responsabilidad exclusiva.</p>
+  <p>En ningún caso la responsabilidad de HORMI excederá el monto que el usuario haya pagado por el servicio en los últimos 3 meses.</p>
+
+  <h2>10. Cancelación y eliminación</h2>
+  <div class="highlight">
+    Puedes cancelar tu cuenta en cualquier momento desde Ajustes → Eliminar cuenta. Al eliminar tu cuenta, todos tus datos serán borrados permanentemente de nuestros servidores en un plazo máximo de 30 días. Esta acción es irreversible.
+  </div>
+  <p>Nos reservamos el derecho de suspender o cancelar cuentas que violen estos términos, previo aviso cuando sea posible.</p>
+
+  <h2>11. Modificaciones al servicio</h2>
+  <p>Podemos modificar, suspender o discontinuar funcionalidades de HORMI en cualquier momento. En caso de cambios significativos que afecten el Plan Pro, notificaremos con al menos 30 días de anticipación.</p>
+
+  <h2>12. Modificaciones a los términos</h2>
+  <p>Podemos actualizar estos términos. Cuando lo hagamos, actualizaremos la fecha al inicio de este documento. El uso continuado de la app después de la publicación de cambios constituye aceptación de los nuevos términos.</p>
+
+  <h2>13. Ley aplicable y jurisdicción</h2>
+  <p>Estos términos se rigen por la legislación peruana, incluyendo:</p>
+  <ul>
+    <li>Ley N° 29733 — Ley de Protección de Datos Personales.</li>
+    <li>Ley N° 27291 — Ley que modifica el Código Civil permitiendo la utilización de los medios electrónicos.</li>
+    <li>Código de Protección y Defensa del Consumidor (Ley N° 29571).</li>
+  </ul>
+  <p>Cualquier disputa que no pueda resolverse de forma amistosa será sometida a la jurisdicción de los juzgados competentes de Lima, Perú.</p>
+
+  <div class="contact-box">
+    <strong>¿Dudas sobre los términos?</strong>
+    Escríbenos a <a href="mailto:contacto@hormi.com.pe">contacto@hormi.com.pe</a>. Respondemos en un plazo máximo de 5 días hábiles.
+  </div>
+
+  <div class="last-updated">Términos vigentes desde mayo 2025 · Lima, Perú</div>
+</div>
+
+<!-- DEVOLUCIONES -->
+<div class="section" id="devoluciones">
+  <div class="hero">
+    <div class="hero-badge">Devoluciones</div>
+    <h1>Política de Devoluciones</h1>
+    <div class="hero-meta">Última actualización: mayo 2025 · Lima, Perú</div>
+  </div>
+
+  <div class="highlight">
+    Queremos que tu experiencia con HORMI sea justa y transparente. Esta política explica cuándo y cómo puedes solicitar un reembolso.
+  </div>
+
+  <h2>1. Período de prueba gratuito</h2>
+  <p>HORMI ofrece un <strong>período de prueba gratuito de 15 días</strong> para el Plan Pro, sin necesidad de ingresar datos de tarjeta de crédito. Durante este período puedes explorar todas las funcionalidades sin ningún costo. El período de prueba comienza en la fecha de activación y finaliza automáticamente al cumplirse los 15 días calendario.</p>
+
+  <h2>2. Suscripciones canceladas</h2>
+  <p><strong>Los pagos ya procesados no son reembolsables</strong> una vez que la transacción ha sido completada. Al activar un plan de suscripción (mensual, trimestral o anual), aceptas que el cobro es definitivo y que el servicio se entrega de forma inmediata con el inicio del período contratado.</p>
+  <p>Puedes cancelar tu suscripción en cualquier momento desde Ajustes → Suscripción, y no se realizarán cargos futuros. El acceso al Plan Pro se mantiene activo hasta el fin del período ya pagado.</p>
+
+  <h2>3. Errores de cobro</h2>
+  <p>Si detectas un cargo incorrecto, duplicado o no autorizado en tu estado de cuenta, debes contactarnos dentro de las <strong>48 horas siguientes</strong> al cobro para que podamos investigar y resolver el caso.</p>
+  <div class="highlight">
+    Para reportar un error de cobro, escribe a <a href="mailto:contacto@hormi.com.pe">contacto@hormi.com.pe</a> indicando: tu email de cuenta, el monto cobrado, la fecha del cargo y una descripción del error. Respondemos en un máximo de 2 días hábiles.
+  </div>
+  <p>Los errores de cobro confirmados serán reembolsados íntegramente al medio de pago original dentro de los plazos que establezca la entidad financiera (normalmente 5 a 10 días hábiles).</p>
+
+  <h2>4. Interrupciones del servicio</h2>
+  <p>En caso de interrupciones prolongadas e imputables a HORMI que afecten el uso del Plan Pro durante más de 72 horas continuas, ofreceremos una extensión proporcional de la suscripción como compensación. No se realizarán reembolsos por mantenimientos programados o interrupciones de corta duración.</p>
+
+  <h2>5. Cómo solicitar soporte</h2>
+  <ol>
+    <li>Envía un correo a <a href="mailto:contacto@hormi.com.pe">contacto@hormi.com.pe</a> con el asunto "Solicitud de reembolso".</li>
+    <li>Incluye tu nombre, email de cuenta, descripción del problema y número de transacción si lo tienes disponible.</li>
+    <li>Nuestro equipo evaluará tu caso y te responderá dentro de 2 días hábiles.</li>
+  </ol>
+
+  <div class="contact-box">
+    <strong>¿Tienes un problema con un cobro?</strong>
+    Escríbenos a <a href="mailto:contacto@hormi.com.pe">contacto@hormi.com.pe</a> dentro de las 48 horas del cargo. Estamos para ayudarte.
+  </div>
+
+  <div class="last-updated">Política vigente desde mayo 2025 · Lima, Perú</div>
+</div>
+
+<script>
+  function show(id){
+    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    event.currentTarget.classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+</script>
+</body>
+</html>

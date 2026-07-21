@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Para ti — HORMI</title>
+<meta name="description" content="No importa si tu meta es un concierto, un viaje o llegar al viernes. HORMI convierte lo que gastas sin pensar en lo que realmente quieres.">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --lime: #C8F65A;
+    --lime-d: #aede3c;
+    --black: #0d0d0d;
+    --grey: #6b7280;
+    --grey-l: #f5f5f5;
+    --white: #ffffff;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    --max: 1100px;
+    --nav-h: 64px;
+  }
+
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--font); background: var(--white); color: var(--black); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+
+  /* ── NAV ── */
+  nav { position: sticky; top: 0; z-index: 100; height: var(--nav-h); background: rgba(255,255,255,0.92); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0,0,0,0.07); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; }
+  .nav-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--black); }
+  .nav-logo-icon { width: 32px; height: 32px; background: var(--black); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+  .nav-logo-text { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; }
+  .nav-links { display: flex; align-items: center; gap: 8px; list-style: none; }
+  .nav-links a { text-decoration: none; color: var(--grey); font-size: 14px; font-weight: 500; padding: 6px 12px; border-radius: 8px; transition: color 0.15s, background 0.15s; }
+  .nav-links a:hover { color: var(--black); background: var(--grey-l); }
+  .nav-links a.active { color: var(--black); font-weight: 700; }
+  .nav-cta { background: var(--black) !important; color: var(--white) !important; font-weight: 600 !important; padding: 8px 18px !important; border-radius: 50px !important; font-size: 14px !important; transition: opacity 0.15s !important; }
+  .nav-cta:hover { opacity: 0.82 !important; background: var(--black) !important; }
+  .nav-hamburger { display: none; background: none; border: none; cursor: pointer; padding: 4px; flex-direction: column; gap: 5px; }
+  .nav-hamburger span { display: block; width: 22px; height: 2px; background: var(--black); border-radius: 2px; transition: transform 0.2s, opacity 0.2s; }
+  .mobile-menu { display: none; position: fixed; top: var(--nav-h); left: 0; right: 0; background: var(--white); border-bottom: 1px solid rgba(0,0,0,0.07); padding: 12px 0 20px; z-index: 99; box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+  .mobile-menu.open { display: block; }
+  .mobile-menu a { display: block; padding: 14px 24px; text-decoration: none; color: var(--black); font-size: 16px; font-weight: 500; border-bottom: 1px solid rgba(0,0,0,0.05); }
+  .mobile-menu a:last-child { border-bottom: none; }
+  .mobile-menu .mob-cta { margin: 12px 24px 0; display: block; text-align: center; background: var(--black); color: var(--white) !important; border-radius: 50px; padding: 14px !important; font-weight: 700 !important; border-bottom: none !important; }
+
+  /* ── UTILS ── */
+  .container { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
+  .tag { display: inline-block; background: var(--lime); color: var(--black); font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 12px; border-radius: 50px; margin-bottom: 20px; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font); font-size: 15px; font-weight: 700; padding: 14px 28px; border-radius: 50px; border: none; cursor: pointer; text-decoration: none; transition: transform 0.15s, background 0.15s; }
+  .btn:hover { transform: translateY(-1px); }
+  .btn-lime { background: var(--lime); color: var(--black); }
+  .btn-lime:hover { background: var(--lime-d); }
+
+  /* ── PAGE HERO ── */
+  .page-hero { background: var(--black); color: var(--white); padding: 100px 0 96px; position: relative; overflow: hidden; }
+
+  .ph-glow { position: absolute; width: 800px; height: 800px; background: radial-gradient(circle, rgba(200,246,90,0.07) 0%, transparent 65%); top: -200px; right: -200px; pointer-events: none; }
+
+  .ph-bg-word { position: absolute; bottom: -48px; left: -16px; font-size: clamp(120px, 22vw, 280px); font-weight: 900; letter-spacing: -0.06em; color: #fff; opacity: 0.025; line-height: 1; pointer-events: none; user-select: none; }
+
+  .ph-eyebrow { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.65); font-size: 12px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; padding: 6px 14px; border-radius: 50px; margin-bottom: 32px; }
+  .ph-dot { width: 7px; height: 7px; background: var(--lime); border-radius: 50%; flex-shrink: 0; }
+
+  .ph-title { font-size: clamp(38px, 6.5vw, 78px); font-weight: 900; letter-spacing: -0.045em; line-height: 1.06; margin-bottom: 24px; position: relative; max-width: 820px; }
+  .ph-title em { font-style: normal; background: var(--lime); color: var(--black); padding: 2px 10px; border-radius: 8px; }
+
+  .ph-sub { font-size: 18px; color: rgba(255,255,255,0.5); max-width: 520px; line-height: 1.65; position: relative; }
+
+  /* ── PERSONAS SECTION ── */
+  .personas-section { padding: 96px 0; background: var(--white); }
+
+  .personas-header { margin-bottom: 56px; }
+  .personas-header h2 { font-size: clamp(24px, 4vw, 38px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.15; margin-bottom: 8px; }
+  .personas-header h3 { font-size: clamp(16px, 2.2vw, 22px); font-weight: 400; color: #666666; letter-spacing: -0.01em; }
+
+  /* 5-column asymmetric grid */
+  .personas-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px; }
+  .persona-card:nth-child(1) { grid-column: span 3; }
+  .persona-card:nth-child(2) { grid-column: span 2; }
+  .persona-card:nth-child(3) { grid-column: span 2; }
+  .persona-card:nth-child(4) { grid-column: span 3; }
+  .persona-card:nth-child(5) { grid-column: span 3; }
+  .persona-card:nth-child(6) { grid-column: span 2; }
+
+  /* Card base */
+  .persona-card { border-radius: 24px; padding: 40px 36px; position: relative; overflow: hidden; transition: transform 0.25s, border-color 0.25s; }
+  .persona-card:hover { transform: translateY(-4px); }
+
+  .persona-card--dark { background: #0d0d0d; border: 1.5px solid rgba(255,255,255,0.07); }
+  .persona-card--dark:hover { border-color: var(--lime); }
+
+  .persona-card--light { background: #f8f8f6; border: 1.5px solid rgba(0,0,0,0.07); }
+  .persona-card--light:hover { border-color: var(--lime); }
+
+  /* Big cards get more padding */
+  .persona-card:nth-child(1),
+  .persona-card:nth-child(4),
+  .persona-card:nth-child(5) { padding: 52px 48px; }
+
+  /* Illustration */
+  .persona-illo { margin-bottom: 28px; display: block; }
+
+  /* Name */
+  .persona-name { font-size: 28px; font-weight: 900; letter-spacing: -0.04em; line-height: 1; margin-bottom: 4px; }
+  .persona-card--dark .persona-name { color: var(--white); }
+  .persona-card--light .persona-name { color: var(--black); }
+
+  .persona-card:nth-child(1) .persona-name,
+  .persona-card:nth-child(4) .persona-name,
+  .persona-card:nth-child(5) .persona-name { font-size: 36px; }
+
+  /* Age chip */
+  .persona-age { display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; padding: 2px 10px; border-radius: 50px; margin-bottom: 24px; }
+  .persona-card--dark .persona-age { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.5); }
+  .persona-card--light .persona-age { background: rgba(0,0,0,0.07); color: var(--grey); }
+
+  /* Quote */
+  .persona-quote { font-size: 17px; font-weight: 700; font-style: italic; line-height: 1.45; margin-bottom: 16px; }
+  .persona-card--dark .persona-quote { color: var(--lime); }
+  .persona-card--light .persona-quote { color: var(--black); border-left: 3px solid var(--lime); padding-left: 14px; }
+
+  .persona-card:nth-child(1) .persona-quote,
+  .persona-card:nth-child(4) .persona-quote,
+  .persona-card:nth-child(5) .persona-quote { font-size: 21px; }
+
+  /* Copy */
+  .persona-copy { font-size: 14px; line-height: 1.7; }
+  .persona-card--dark .persona-copy { color: rgba(255,255,255,0.45); }
+  .persona-card--light .persona-copy { color: var(--grey); }
+
+  /* Decorative large number bg */
+  .persona-num { position: absolute; bottom: -16px; right: -8px; font-size: 120px; font-weight: 900; letter-spacing: -0.05em; opacity: 0.04; line-height: 1; pointer-events: none; user-select: none; }
+  .persona-card--dark .persona-num { color: #fff; }
+  .persona-card--light .persona-num { color: #000; }
+
+  /* ── SCROLL REVEAL ── */
+  [data-reveal] { opacity: 0; transform: translateY(24px); transition: opacity 0.55s ease, transform 0.55s ease; }
+  [data-reveal].visible { opacity: 1; transform: none; }
+
+  /* ── CTA ── */
+  .cta-section { background: var(--black); color: var(--white); text-align: center; padding: 100px 24px; position: relative; overflow: hidden; }
+  .cta-glow { position: absolute; width: 600px; height: 600px; background: radial-gradient(circle, rgba(200,246,90,0.1) 0%, transparent 70%); top: 50%; left: 50%; transform: translate(-50%,-50%); pointer-events: none; }
+  .cta-label { font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--lime); margin-bottom: 20px; position: relative; }
+  .cta-section h2 { font-size: clamp(30px, 5vw, 54px); font-weight: 900; letter-spacing: -0.04em; margin-bottom: 16px; position: relative; }
+  .cta-section h2 em { font-style: normal; background: var(--lime); color: var(--black); padding: 0 6px; border-radius: 6px; }
+  .cta-section p { font-size: 17px; color: rgba(255,255,255,0.5); margin-bottom: 36px; position: relative; }
+  .cta-fine { font-size: 13px; color: rgba(255,255,255,0.3); margin-top: 16px; position: relative; }
+
+  /* ── FOOTER ── */
+  footer { background: #0a0a0a; color: rgba(255,255,255,0.4); padding: 48px 24px; }
+  .footer-inner { max-width: var(--max); margin: 0 auto; display: grid; grid-template-columns: auto 1fr auto; align-items: start; gap: 32px; }
+  .footer-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+  .footer-logo-icon { width: 28px; height: 28px; background: #1a1a1a; border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+  .footer-logo-text { color: rgba(255,255,255,0.6); font-size: 15px; font-weight: 800; }
+  .footer-center { display: flex; flex-direction: column; gap: 12px; align-items: center; }
+  .footer-links { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+  .footer-links a { text-decoration: none; color: rgba(255,255,255,0.35); font-size: 13px; transition: color 0.15s; }
+  .footer-links a:hover { color: rgba(255,255,255,0.7); }
+  .footer-info { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: rgba(255,255,255,0.25); text-align: right; }
+  .footer-info a { color: rgba(255,255,255,0.25); text-decoration: none; transition: color 0.15s; }
+  .footer-info a:hover { color: rgba(255,255,255,0.6); }
+  .footer-social { display: flex; gap: 12px; }
+  .footer-social a { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.4); text-decoration: none; transition: background 0.15s, color 0.15s; }
+  .footer-social a:hover { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.8); }
+  .footer-copy { font-size: 12px; color: rgba(255,255,255,0.2); width: 100%; margin-top: 8px; text-align: center; grid-column: 1 / -1; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .personas-grid { grid-template-columns: 1fr 1fr; }
+    .persona-card:nth-child(n) { grid-column: span 1; padding: 36px 28px !important; }
+    .persona-card:nth-child(1) .persona-name,
+    .persona-card:nth-child(4) .persona-name,
+    .persona-card:nth-child(5) .persona-name { font-size: 28px; }
+    .persona-card:nth-child(1) .persona-quote,
+    .persona-card:nth-child(4) .persona-quote,
+    .persona-card:nth-child(5) .persona-quote { font-size: 17px; }
+  }
+
+  @media (max-width: 860px) {
+    nav { padding: 0 16px; }
+    .nav-links { display: none; }
+    .nav-hamburger { display: flex; }
+    .footer-inner { grid-template-columns: 1fr; justify-items: center; text-align: center; }
+    .footer-info { text-align: center; align-items: center; }
+    .footer-social { justify-content: center; }
+  }
+
+  @media (max-width: 560px) {
+    .personas-grid { grid-template-columns: 1fr; }
+    .persona-card:nth-child(n) { grid-column: span 1; }
+    .page-hero { padding: 72px 0 64px; }
+    .personas-section { padding: 72px 0; }
+    .footer-links { justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+  <a href="web.html" class="nav-logo">
+    <img src="logo-light.png" alt="HORMI" style="height:56px;width:auto;">
+  </a>
+  <ul class="nav-links">
+    <li><a href="web.html#inicio">Inicio</a></li>
+    <li><a href="caracteristicas.html" class="active">Características</a></li>
+    <li><a href="web.html#planes">Planes</a></li>
+    <li><a href="team.html">Hormi Team</a></li>
+    <li><a href="https://www.hormi.com.pe" class="nav-cta">Probar gratis</a></li>
+  </ul>
+  <button class="nav-hamburger" id="ham" onclick="toggleMenu()" aria-label="Menú">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="mobile-menu" id="mob-menu">
+  <a href="web.html#inicio" onclick="closeMenu()">Inicio</a>
+  <a href="caracteristicas.html">Características</a>
+  <a href="web.html#planes" onclick="closeMenu()">Planes</a>
+  <a href="team.html">Hormi Team</a>
+  <a href="https://www.hormi.com.pe" class="mob-cta">Probar gratis →</a>
+</div>
+
+<!-- ── PAGE HERO ── -->
+<section class="page-hero">
+  <div class="ph-glow"></div>
+  <div class="ph-bg-word">HORMI</div>
+  <div class="container">
+    <div class="ph-eyebrow">
+      <span class="ph-dot"></span>
+      No es una app de finanzas
+    </div>
+    <h1 class="ph-title">
+      Tus hormis pueden<br>
+      pagarte lo que <em>quieres.</em>
+    </h1>
+    <p class="ph-sub">No importa si tu meta es un concierto, un viaje o simplemente llegar al viernes. HORMI convierte lo que gastas sin pensar en lo que realmente quieres.</p>
+  </div>
+</section>
+
+<!-- ── PERSONAS ── -->
+<section class="personas-section">
+  <div class="container">
+
+    <div class="personas-header" data-reveal>
+      <h2>De hormis a planes reales.</h2>
+      <h3>¿Con cuál te identificas?</h3>
+    </div>
+
+    <div class="personas-grid">
+
+      <!-- 1. Valentina — dark, big -->
+      <article class="persona-card persona-card--dark" data-reveal>
+        <span class="persona-num">01</span>
+        <div class="persona-illo">
+          <svg width="96" height="96" viewBox="0 0 96 96" fill="none">
+            <!-- Long hair back -->
+            <path d="M22 44Q19 76 32 86Q48 94 64 86Q77 76 74 44Q66 30 48 29Q30 30 22 44Z" fill="#1a0a00"/>
+            <!-- Face -->
+            <ellipse cx="48" cy="56" rx="20" ry="24" fill="#c8956a"/>
+            <!-- Hair top -->
+            <ellipse cx="48" cy="38" rx="21" ry="14" fill="#1a0a00"/>
+            <!-- Eyes -->
+            <circle cx="40" cy="52" r="3.2" fill="#1a0a00"/>
+            <circle cx="56" cy="52" r="3.2" fill="#1a0a00"/>
+            <circle cx="41.2" cy="50.8" r="1.1" fill="white"/>
+            <circle cx="57.2" cy="50.8" r="1.1" fill="white"/>
+            <!-- Nose -->
+            <circle cx="48" cy="60" r="1.5" fill="#a07050" opacity="0.7"/>
+            <!-- Smile -->
+            <path d="M42 66Q48 72 54 66" stroke="#a07050" stroke-width="2" fill="none" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="persona-name">Valentina</div>
+        <div class="persona-age">23 años</div>
+        <p class="persona-quote">"Cobré el viernes. El miércoles ya no tengo."</p>
+        <p class="persona-copy">No quiere quedarse en cero. Solo quiere llegar a fin de mes sin angustia. HORMI le muestra en qué se le va el dinero antes de que desaparezca.</p>
+      </article>
+
+      <!-- 2. Diego — light, small -->
+      <article class="persona-card persona-card--light" data-reveal style="transition-delay:.1s">
+        <span class="persona-num">02</span>
+        <div class="persona-illo">
+          <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+            <!-- Hair short top -->
+            <rect x="18" y="17" width="44" height="20" rx="10" fill="#3a2010"/>
+            <!-- Face -->
+            <ellipse cx="40" cy="46" rx="19" ry="22" fill="#f0c090"/>
+            <!-- Hair side left -->
+            <rect x="17" y="26" width="5" height="16" rx="3" fill="#3a2010"/>
+            <!-- Hair side right -->
+            <rect x="58" y="26" width="5" height="16" rx="3" fill="#3a2010"/>
+            <!-- Eyes -->
+            <circle cx="33" cy="42" r="2.8" fill="#2a1e0f"/>
+            <circle cx="47" cy="42" r="2.8" fill="#2a1e0f"/>
+            <circle cx="34.2" cy="40.8" r="1" fill="white"/>
+            <circle cx="48.2" cy="40.8" r="1" fill="white"/>
+            <!-- Nose -->
+            <circle cx="40" cy="49" r="1.3" fill="#c09060" opacity="0.7"/>
+            <!-- Smile -->
+            <path d="M35 55Q40 61 45 55" stroke="#c09060" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="persona-name">Diego</div>
+        <div class="persona-age">25 años</div>
+        <p class="persona-quote">"Quiero ir al concierto — la entrada está S/280."</p>
+        <p class="persona-copy">Meta de corto plazo, 3 semanas. HORMI le calcula exactamente cuántas hormis tiene que eliminar para lograrlo.</p>
+      </article>
+
+      <!-- 3. Camila — light, small -->
+      <article class="persona-card persona-card--light" data-reveal style="transition-delay:.05s">
+        <span class="persona-num">03</span>
+        <div class="persona-illo">
+          <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+            <!-- Curly hair mass -->
+            <circle cx="40" cy="26" r="20" fill="#0a0500"/>
+            <circle cx="21" cy="36" r="10" fill="#0a0500"/>
+            <circle cx="59" cy="36" r="10" fill="#0a0500"/>
+            <!-- Face -->
+            <ellipse cx="40" cy="50" rx="17" ry="20" fill="#a07050"/>
+            <!-- Eyes -->
+            <circle cx="33" cy="46" r="2.8" fill="#0a0500"/>
+            <circle cx="47" cy="46" r="2.8" fill="#0a0500"/>
+            <circle cx="34.2" cy="44.8" r="1" fill="white"/>
+            <circle cx="48.2" cy="44.8" r="1" fill="white"/>
+            <!-- Nose -->
+            <circle cx="40" cy="53" r="1.3" fill="#7a5030" opacity="0.7"/>
+            <!-- Smile wide -->
+            <path d="M34 59Q40 66 46 59" stroke="#7a5030" stroke-width="2" fill="none" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="persona-name">Camila</div>
+        <div class="persona-age">26 años</div>
+        <p class="persona-quote">"Paracas con mis amigas el feriado largo — S/350."</p>
+        <p class="persona-copy">Short trip en 4 semanas. HORMI le arma el plan semana a semana para llegar al viaje.</p>
+      </article>
+
+      <!-- 4. Sebastián — dark, big -->
+      <article class="persona-card persona-card--dark" data-reveal style="transition-delay:.15s">
+        <span class="persona-num">04</span>
+        <div class="persona-illo">
+          <svg width="96" height="96" viewBox="0 0 96 96" fill="none">
+            <!-- Hair -->
+            <ellipse cx="48" cy="30" rx="22" ry="16" fill="#1a0a00"/>
+            <!-- Hair sides -->
+            <rect x="24" y="28" width="6" height="20" rx="3" fill="#1a0a00"/>
+            <rect x="66" y="28" width="6" height="20" rx="3" fill="#1a0a00"/>
+            <!-- Face -->
+            <ellipse cx="48" cy="54" rx="21" ry="25" fill="#c08060"/>
+            <!-- Beard shadow -->
+            <ellipse cx="48" cy="70" rx="17" ry="9" fill="#2a1500" opacity="0.5"/>
+            <!-- Beard -->
+            <ellipse cx="48" cy="73" rx="14" ry="7" fill="#2a1500" opacity="0.4"/>
+            <!-- Eyes -->
+            <circle cx="40" cy="49" r="3.2" fill="#1a0a00"/>
+            <circle cx="56" cy="49" r="3.2" fill="#1a0a00"/>
+            <circle cx="41.2" cy="47.8" r="1.1" fill="white"/>
+            <circle cx="57.2" cy="47.8" r="1.1" fill="white"/>
+            <!-- Nose -->
+            <circle cx="48" cy="57" r="1.6" fill="#a06040" opacity="0.7"/>
+            <!-- Mouth -->
+            <path d="M42 64Q48 69 54 64" stroke="#a06040" stroke-width="2" fill="none" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="persona-name">Sebastián</div>
+        <div class="persona-age">28 años</div>
+        <p class="persona-quote">"Quiero ir a Cartagena en diciembre — S/2,000."</p>
+        <p class="persona-copy">Meta de largo plazo, 8 meses. Necesita disciplina mes a mes. HORMI le muestra el progreso cada mes y ajusta el plan si se desvía.</p>
+      </article>
+
+      <!-- 5. Lucía — light, big -->
+      <article class="persona-card persona-card--light" data-reveal style="transition-delay:.1s">
+        <span class="persona-num">05</span>
+        <div class="persona-illo">
+          <svg width="96" height="96" viewBox="0 0 96 96" fill="none">
+            <!-- Bob hair outer -->
+            <path d="M22 40Q20 62 26 74Q38 80 48 80Q58 80 70 74Q76 62 74 40Q66 26 48 25Q30 26 22 40Z" fill="#8a6040"/>
+            <!-- Face -->
+            <ellipse cx="48" cy="50" rx="18" ry="22" fill="#f4c8a0"/>
+            <!-- Hair top -->
+            <ellipse cx="48" cy="34" rx="19" ry="12" fill="#8a6040"/>
+            <!-- Eyes -->
+            <circle cx="40" cy="46" r="3" fill="#3a2810"/>
+            <circle cx="56" cy="46" r="3" fill="#3a2810"/>
+            <circle cx="41.2" cy="44.8" r="1.1" fill="white"/>
+            <circle cx="57.2" cy="44.8" r="1.1" fill="white"/>
+            <!-- Nose -->
+            <circle cx="48" cy="53" r="1.4" fill="#c09070" opacity="0.7"/>
+            <!-- Smile -->
+            <path d="M42 60Q48 66 54 60" stroke="#c09070" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="persona-name">Lucía</div>
+        <div class="persona-age">27 años</div>
+        <p class="persona-quote">"Quiero poner S/200/mes en mi cuenta de ahorros."</p>
+        <p class="persona-copy">Quiere invertir pero no sabe de dónde sacar los S/200. HORMI identifica las hormis que pueden convertirse en su ahorro mensual.</p>
+      </article>
+
+      <!-- 6. Mateo — dark, small -->
+      <article class="persona-card persona-card--dark" data-reveal style="transition-delay:.2s">
+        <span class="persona-num">06</span>
+        <div class="persona-illo">
+          <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+            <!-- Hair -->
+            <ellipse cx="40" cy="24" rx="21" ry="14" fill="#1a0a00"/>
+            <!-- Face -->
+            <ellipse cx="40" cy="44" rx="19" ry="22" fill="#c07850"/>
+            <!-- Glasses left -->
+            <rect x="19" y="37" width="16" height="12" rx="5" stroke="#0d0d0d" stroke-width="2.5" fill="rgba(200,246,90,0.08)"/>
+            <!-- Glasses right -->
+            <rect x="38" y="37" width="16" height="12" rx="5" stroke="#0d0d0d" stroke-width="2.5" fill="rgba(200,246,90,0.08)"/>
+            <!-- Bridge -->
+            <line x1="35" y1="43" x2="38" y2="43" stroke="#0d0d0d" stroke-width="2"/>
+            <!-- Left temple -->
+            <line x1="19" y1="43" x2="14" y2="43" stroke="#0d0d0d" stroke-width="2"/>
+            <!-- Right temple -->
+            <line x1="54" y1="43" x2="59" y2="43" stroke="#0d0d0d" stroke-width="2"/>
+            <!-- Eyes -->
+            <circle cx="27" cy="43" r="2.4" fill="#1a0a00"/>
+            <circle cx="46" cy="43" r="2.4" fill="#1a0a00"/>
+            <circle cx="28" cy="42" r="0.9" fill="white"/>
+            <circle cx="47" cy="42" r="0.9" fill="white"/>
+            <!-- Nose -->
+            <circle cx="40" cy="52" r="1.3" fill="#a06030" opacity="0.7"/>
+            <!-- Smile slight -->
+            <path d="M35 58Q40 63 45 58" stroke="#a06030" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="persona-name">Mateo</div>
+        <div class="persona-age">24 años</div>
+        <p class="persona-quote">"Gasto demasiado en delivery y ni me doy cuenta."</p>
+        <p class="persona-copy">Quiere romper un hábito de consumo impulsivo. HORMI le muestra el número real. Eso solo ya cambia el hábito.</p>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ── -->
+<section class="cta-section">
+  <div class="cta-glow"></div>
+  <div class="container">
+    <p class="cta-label">¿Y tú qué harás?</p>
+    <h2>Empieza a eliminar tus<br><em>hormis</em> hoy</h2>
+    <p>15 días Pro gratis. Sin tarjeta. Cancela cuando quieras.</p>
+    <a href="https://www.hormi.com.pe" class="btn btn-lime">Empieza gratis →</a>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="footer-inner">
+    <a href="web.html" class="footer-logo">
+      <img src="logo-light.png" alt="HORMI" style="height:48px;width:auto;">
+    </a>
+    <div class="footer-center">
+      <div class="footer-links">
+        <a href="legal.html">Privacidad</a>
+        <a href="legal.html">Términos</a>
+        <a href="legal.html">Devoluciones</a>
+        <a href="reclamaciones.html">Libro de Reclamaciones</a>
+        <a href="mailto:contacto@hormi.com.pe">contacto@hormi.com.pe</a>
+        <a href="https://www.hormi.com.pe">App →</a>
+      </div>
+      <div class="footer-social">
+        <a href="https://instagram.com/hormiapp" target="_blank" rel="noopener" title="Instagram">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+        </a>
+        <a href="https://tiktok.com/@hormiapp" target="_blank" rel="noopener" title="TikTok">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.17 8.17 0 004.77 1.52V6.76a4.85 4.85 0 01-1-.07z"/></svg>
+        </a>
+      </div>
+    </div>
+    <div class="footer-info">
+      <span>+51 970 300 434</span>
+      <span>Lima, Perú</span>
+    </div>
+    <div class="footer-copy">© 2026 HORMI. Todos los derechos reservados.</div>
+  </div>
+</footer>
+
+<script>
+  function toggleMenu() { document.getElementById('mob-menu').classList.toggle('open'); }
+  function closeMenu()  { document.getElementById('mob-menu').classList.remove('open'); }
+
+  document.addEventListener('click', function(e) {
+    const menu = document.getElementById('mob-menu');
+    const ham  = document.getElementById('ham');
+    if (menu.classList.contains('open') && !menu.contains(e.target) && !ham.contains(e.target)) {
+      menu.classList.remove('open');
+    }
+  });
+
+  const revealObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); revealObs.unobserve(e.target); }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('[data-reveal]').forEach(el => revealObs.observe(el));
+</script>
+
+</body>
+</html>
