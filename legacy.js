@@ -2210,7 +2210,7 @@ async function shareProgress(){
     // Load isotipo
     const logo = new Image();
     await new Promise(res => {
-      fetch('/isotipo-dark.png')
+      fetch('/logo-white.svg')
         .then(r=>r.blob())
         .then(b=>{
           const url=URL.createObjectURL(b);
