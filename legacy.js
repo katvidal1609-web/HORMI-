@@ -1963,6 +1963,13 @@ function closeHormiDetail(){
   document.getElementById('hc-panel-bg').classList.remove('open');
 }
 async function loadPersonalizedTips(desc,ci,total,veces,avgD){
+  if(!isPro()){
+    const el=document.getElementById('hc-alt-content');
+    if(el)el.innerHTML=`<div class="hc-alt-card" style="cursor:pointer;border:1.5px dashed var(--accent)" onclick="requirePro('sugerencias',null)">
+      <span>🔒</span><p><strong>Sugerencias personalizadas con IA</strong> — disponible en HORMI Pro. Toca para activar tu prueba gratis.</p>
+    </div>`;
+    return;
+  }
   try{
     const {data:{session}}=await _sb.auth.getSession();
     const token=session?.access_token;if(!token)return;
