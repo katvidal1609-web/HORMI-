@@ -800,12 +800,20 @@ function checkAndShowDuplicate(desc){
     el.style.display='';
     el.innerHTML=`<div>¿Gasto duplicado? Encontré <strong>"${dup.description}"</strong> (${fmt(dup.amount)}) hace ${daysAgo} día${daysAgo!==1?'s':''}</div>
       <div style="display:flex;gap:8px;margin-top:7px">
-        <button onclick="hideDupWarn()" style="flex:1;padding:7px;background:var(--amber-bg);border:1px solid rgba(217,119,6,.25);border-radius:var(--rsm);color:var(--amber-t);font-size:12px;font-weight:600;cursor:pointer">Sí, el mismo</button>
+        <button onclick="confirmSameExpense()" style="flex:1;padding:7px;background:var(--amber-bg);border:1px solid rgba(217,119,6,.25);border-radius:var(--rsm);color:var(--amber-t);font-size:12px;font-weight:600;cursor:pointer">Sí, el mismo</button>
         <button onclick="hideDupWarn()" style="flex:1;padding:7px;background:transparent;border:1px solid var(--b2);border-radius:var(--rsm);color:var(--t2);font-size:12px;cursor:pointer">No, diferente</button>
       </div>`;
   }else{el.style.display='none';}
 }
 function hideDupWarn(){const el=document.getElementById('dup-warn');if(el)el.style.display='none';}
+function confirmSameExpense(){
+  // Usuario confirma que es el mismo gasto ya registrado — limpiar el form para no duplicarlo
+  hideDupWarn();
+  document.getElementById('a-amt').value='';
+  document.getElementById('tx-consumo').value='';
+  document.getElementById('tx-lugar').value='';
+  toast('Gasto no registrado — ya lo tenías guardado','ok');
+}
 
 function startVoice(){
   if(!isPro()){requirePro('voz',null);return;}
@@ -1007,7 +1015,7 @@ async function scanImg(input){
     }
     // for single item pre-fill form; for multi-item show "save all" action
     const resEl=document.getElementById('scan-res');
-    const btnsEl=resEl.querySelector('div[style*="display:flex;gap:7px"]');
+    const btnsEl=resEl.querySelector('div[style*="display:flex;gap:7px;margin-top:9px"]');
     if(multi&&btnsEl){
       btnsEl.style.display='flex';
       btnsEl.innerHTML=`<button class="ms-disc" style="flex:1;color:rgba(255,255,255,.6);border-color:rgba(255,255,255,.2)" onclick="discardScan()">× Descartar</button>
