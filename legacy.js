@@ -51,6 +51,7 @@ const DA=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 let D={name:'',budget:30,threshold:25,hormis:[],goals:[],transactions:[],customCats:[],aliases:{},
   isPro:false,trialStart:null,trialUsed:false,scanCount:0,scanCountDate:'',onboarded:false,
   proCode:null,proSince:null,tooltipsSeen:[],guideSeen:false,trialUserData:null,plan:null,planChecked:{},planOutput:null};
+let _statsMonth = new Date().toISOString().slice(0,7); // YYYY-MM seleccionado en Análisis
 let aCat='food',aHormi=true,obGoalHormi=null,mgHormi=null;
 let wkOffset=0,calY=new Date().getFullYear(),calM=new Date().getMonth();
 let txDate=null,scanReceiptTs=null,_currentThumb=null,_scanPending=null,_dayDs=null,_selDay=null,_txSource='manual';
@@ -1848,7 +1849,7 @@ function calcDiaPico(txs){
   return max>0?days[byD.indexOf(max)]:null;
 }
 function buildHormiCategories(){
-  const tm=new Date().toISOString().slice(0,7);
+  const tm=_statsMonth;
   const hm=D.transactions.filter(t=>t.isHormi&&t.date&&t.date.startsWith(tm));
   const byCat={};
   hm.forEach(t=>{
@@ -2029,9 +2030,18 @@ function updateSavePct(pct){
   }
 }
 
+function statsChangeMonth(dir){
+  const [y,m]=_statsMonth.split('-').map(Number);
+  const d=new Date(y,m-1+dir,1);
+  const newTm=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+  const today=new Date().toISOString().slice(0,7);
+  if(newTm>today)return; // no permitir meses futuros
+  _statsMonth=newTm;
+  renderStats();
+}
 function renderStats(){
   const all=D.transactions,hm=all.filter(t=>t.isHormi);
-  const tm=new Date().toISOString().slice(0,7);
+  const tm=_statsMonth;
   const mhm=all.filter(t=>t.date&&t.date.startsWith(tm)&&t.isHormi);
   const txsMes=all.filter(t=>t.date&&t.date.startsWith(tm));
   const tH=hm.reduce((s,t)=>s+t.amount,0);
@@ -2052,8 +2062,19 @@ function renderStats(){
   const daysLeft=fH?(15-dayP):(new Date(nowP.getFullYear(),nowP.getMonth()+1,0).getDate()-dayP);
   const proj=avg>0?thisTotal+(avg*daysLeft):0;
   _saveCardAvg=avg;
+  const monthLabel=(()=>{
+    const [y,m]=tm.split('-');
+    const meses=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    return `${meses[parseInt(m)-1]} ${y}`;
+  })();
+  const isCurrentMonth = tm === new Date().toISOString().slice(0,7);
   document.getElementById('stats-c').innerHTML=`
     <div style="font-family:var(--font-title);font-size:25px;font-weight:800;margin-bottom:16px">Análisis</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:0 18px 12px">
+      <button onclick="statsChangeMonth(-1)" style="width:32px;height:32px;border-radius:50%;border:1px solid var(--b2);background:var(--s2);display:flex;align-items:center;justify-content:center;cursor:pointer">‹</button>
+      <span style="font-size:13px;font-weight:700;color:var(--t1);text-transform:capitalize">${monthLabel}</span>
+      <button onclick="statsChangeMonth(1)" ${isCurrentMonth?'disabled style="opacity:.3"':''} style="width:32px;height:32px;border-radius:50%;border:1px solid var(--b2);background:var(--s2);display:flex;align-items:center;justify-content:center;cursor:pointer">›</button>
+    </div>
     <button class="share-btn" onclick="shareProgress()">
       <i data-lucide="share-2" style="width:16px;height:16px"></i>
       Compartir progreso
@@ -2112,7 +2133,7 @@ function renderStats(){
 const PIE_COLORS=['#407178','#d3e458','#a6b1e7','#E63946','#5A9430','#8aada8','#1a2e2a','#F59E0B','#2d5158','#c0d1c7','#92400E','#dde1f5','#b8cc38','#2d3a8c'];
 function buildPieChart(sc,total){
   if(!sc.length||total<=0)return'';
-  const tm=new Date().toISOString().slice(0,7);
+  const tm=_statsMonth;
   const mSc=[];
   const byCatM={};
   D.transactions.filter(t=>t.date.startsWith(tm)&&t.isHormi).forEach(t=>{byCatM[t.category]=(byCatM[t.category]||0)+t.amount;});
@@ -2152,7 +2173,7 @@ function buildPieChart(sc,total){
 }
 function showPieDetail(ci,nm,amtStr){
   const el=document.getElementById('pie-detail');if(!el)return;
-  const tm=new Date().toISOString().slice(0,7);
+  const tm=_statsMonth;
   const txs=D.transactions.filter(t=>t.date.startsWith(tm)&&t.category===ci);
   el.style.display='block';
   el.innerHTML=`<strong>${nm}</strong> · ${amtStr}<br><span style="color:var(--t3)">${txs.length} transacciones este mes</span>`;
