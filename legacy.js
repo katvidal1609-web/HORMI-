@@ -83,7 +83,7 @@ _sb.auth.onAuthStateChange(async(event,session)=>{
     if(_supaUser?.id===session.user.id)return;
     _supaUser=session.user;
     // Show s-ready — título neutro porque D.onboarded no está cargado aún
-    document.getElementById('ready-title').textContent='¡Hola! 🐜';
+    document.getElementById('ready-title').textContent='¡Hola!';
     document.getElementById('ready-msg').textContent='Cargando tu cuenta...';
     const btn=document.getElementById('ready-btn');
     if(btn){btn.textContent='Comencemos';btn.disabled=false;}
@@ -118,7 +118,7 @@ async function initApp(){
     if(session?.user){
       _supaUser=session.user;
       // Show s-ready — título neutro porque D.onboarded no está cargado aún
-      document.getElementById('ready-title').textContent='¡Hola! 🐜';
+      document.getElementById('ready-title').textContent='¡Hola!';
       document.getElementById('ready-msg').textContent='Cargando tu cuenta...';
       const btn=document.getElementById('ready-btn');
       if(btn){btn.textContent='Comencemos';btn.disabled=false;}
