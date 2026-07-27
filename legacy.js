@@ -1990,24 +1990,49 @@ async function loadPersonalizedTips(desc,ci,total,veces,avgD){
     </div>`;
     return;
   }
+  // Cache por descripción — no vuelve a gastar tokens si ya se generaron
+  const cacheKey='hormi_tips_'+desc.toLowerCase().trim().slice(0,60);
+  try{
+    const cached=localStorage.getItem(cacheKey);
+    if(cached){
+      const tips=JSON.parse(cached);
+      const el=document.getElementById('hc-alt-content');
+      if(el&&Array.isArray(tips)&&tips.length){
+        el.innerHTML=tips.map(a=>`<div class="hc-alt-card"><span>💡</span><p>${a}</p></div>`).join('');
+        return;
+      }
+    }
+  }catch(e){}
   try{
     const {data:{session}}=await _sb.auth.getSession();
     const token=session?.access_token;if(!token)return;
-    const prompt=`Eres un asesor financiero peruano. El usuario gasta en: "${desc}" (categoría: ${ci}). Apareció ${veces} vez(es) este mes, gastando ${fmt(total)} en total, promedio ${fmt(avgD)} c/u. Dame EXACTAMENTE 2 sugerencias breves, específicas y personalizadas para reducir este gasto puntual (no genéricas). Responde SOLO un array JSON de 2 strings cortos (max 12 palabras c/u), sin explicación: ["sugerencia1","sugerencia2"]`;
+    const prompt=`Usuario en Lima, Perú. Gasto analizado: "${desc}" (categoría: ${ci}). Registrado ${veces} vez(es) este mes, total ${fmt(total)}, promedio ${fmt(avgD)} por vez.
+
+Busca en internet precios reales y actuales en Perú de alternativas concretas a este gasto específico. Prioriza: marcas exactas, nombres de tiendas o locales reales, precios verificables.
+
+Reglas estrictas:
+- NO des consejos obvios ("cocina en casa", "compra marca propia", "busca alternativas más baratas")
+- NO inventes precios ni porcentajes. Si no encontraste el dato en la búsqueda, escribe la sugerencia sin cifra
+- Cada sugerencia debe ser accionable hoy y específica de Lima
+
+Responde SOLO un array JSON de exactamente 2 strings (máx 18 palabras c/u): ["sugerencia1","sugerencia2"]`;
     const res=await fetch(SCAN_URL,{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},
-      body:JSON.stringify({prompt})
+      body:JSON.stringify({prompt,mode:'tips'})
     });
     const text=await res.text();
     const match=text.match(/\[[\s\S]*\]/);
     if(!match)throw new Error('no json');
     const tips=JSON.parse(match[0]);
     const el=document.getElementById('hc-alt-content');
-    if(el&&tips.length)el.innerHTML=tips.map(a=>`<div class="hc-alt-card"><span>💡</span><p>${a}</p></div>`).join('');
+    if(el&&tips.length){
+      el.innerHTML=tips.map(a=>`<div class="hc-alt-card"><span>💡</span><p>${a}</p></div>`).join('');
+      try{localStorage.setItem(cacheKey,JSON.stringify(tips));}catch(e){}
+    }
   }catch(e){
     const el=document.getElementById('hc-alt-content');
-    if(el)el.innerHTML=`<div class="hc-alt-card"><span>💡</span><p>Evalúa si es un gasto necesario</p></div>`;
+    if(el)el.innerHTML=`<div class="hc-alt-card"><span>💡</span><p>No pudimos generar sugerencias ahora. Intenta de nuevo más tarde.</p></div>`;
   }
 }
 
