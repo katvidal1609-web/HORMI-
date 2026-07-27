@@ -915,7 +915,7 @@ async function scanImg(input){
   const file=input.files[0];if(!file)return;
   if(!checkScanLimit())return;
   const st=document.getElementById('scan-st');
-  st.innerHTML=`<div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--lime-t);margin-bottom:7px"><span class="spin"></span>Analizando tu boleta con IA...</div>`;
+  st.innerHTML='';
   document.getElementById('scan-res').style.display='block';
   document.getElementById('scan-fields').innerHTML=`<div style="display:flex;align-items:center;gap:8px;padding:8px 0;color:var(--t3);font-size:13px"><span class="spin"></span>Extrayendo datos...</div>`;
   const _scanBtns=document.getElementById('scan-btns');if(_scanBtns)_scanBtns.innerHTML='';
@@ -994,22 +994,33 @@ async function scanImg(input){
     _scanPending={items,lugar,date:ds||td()};
     const totalAmt=items.reduce((s,it)=>s+(it.monto||0),0);
     const multi=items.length>1;
-    // show detected items
-    document.getElementById('scan-fields').innerHTML=`
-      <div style="font-size:11px;color:var(--t3);letter-spacing:.04em;margin-bottom:5px">${lugar||'Detectado'}</div>
-      ${items.map((it,idx)=>`<div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;margin-bottom:4px;gap:6px"><span style="color:var(--t1);flex:1;">${it.descripcion||'ítem'}</span><span style="font-weight:600;white-space:nowrap;color:var(--t1)">${fmt(it.monto||0)}</span><button onclick="editScanItem(${idx})" style="background:rgba(45,81,88,.1);border:1px solid #2d5158;border-radius:6px;padding:3px 10px;font-size:11px;color:#2d5158;cursor:pointer;white-space:nowrap;font-family:var(--font-body);font-weight:600">editar</button></div>`).join('')}
-      ${multi?`<div style="border-top:.5px solid var(--b2);margin-top:6px;padding-top:6px;display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--t3)">Total</span><span style="font-weight:700;color:var(--t1)">${fmt(totalAmt)}</span></div>`:''}
-      ${ds?`<div style="font-size:11px;color:var(--t3);margin-top:4px">${p.fecha||ds}${p.hora?' · '+p.hora:''}</div>`:''}
-    `;
+    // show detected items — solo box completo si es multi; si es 1 solo gasto, mensaje simple
+    if(multi){
+      document.getElementById('scan-fields').innerHTML=`
+        <div style="font-size:11px;color:var(--t3);letter-spacing:.04em;margin-bottom:5px">${lugar||'Detectado'}</div>
+        ${items.map((it,idx)=>`<div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;margin-bottom:4px;gap:6px"><span style="color:var(--t1);flex:1;">${it.descripcion||'ítem'}</span><span style="font-weight:600;white-space:nowrap;color:var(--t1)">${fmt(it.monto||0)}</span><button onclick="editScanItem(${idx})" style="background:rgba(45,81,88,.1);border:1px solid #2d5158;border-radius:6px;padding:3px 10px;font-size:11px;color:#2d5158;cursor:pointer;white-space:nowrap;font-family:var(--font-body);font-weight:600">editar</button></div>`).join('')}
+        <div style="border-top:.5px solid var(--b2);margin-top:6px;padding-top:6px;display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--t3)">Total</span><span style="font-weight:700;color:var(--t1)">${fmt(totalAmt)}</span></div>
+        ${ds?`<div style="font-size:11px;color:var(--t3);margin-top:4px">${p.fecha||ds}${p.hora?' · '+p.hora:''}</div>`:''}
+      `;
+    }else{
+      document.getElementById('scan-fields').innerHTML=`<div style="font-size:12px;color:var(--t3)">Revisa y ajusta los campos de abajo si es necesario</div>`;
+    }
     // for single item pre-fill form; for multi-item show "save all" action
     const resEl=document.getElementById('scan-res');
     const btnsEl=resEl.querySelector('div[style*="display:flex;gap:7px"]');
     if(multi&&btnsEl){
+      btnsEl.style.display='flex';
       btnsEl.innerHTML=`<button class="ms-disc" style="flex:1;color:rgba(255,255,255,.6);border-color:rgba(255,255,255,.2)" onclick="discardScan()">× Descartar</button>
         <button class="ms-disc" style="flex:1;background:#d3e458;color:#0d0d0d;border-color:#d3e458;font-weight:700" onclick="saveAllScan()">Guardar ${items.length} gastos</button>`;
     }else if(btnsEl){
-      btnsEl.innerHTML=`<button class="ms-disc" style="flex:1" onclick="discardScan()">× Descartar</button>
-        <button class="ms-disc" style="flex:1;color:var(--amber);border-color:rgba(255,187,51,.3)" onclick="saveDraft()">Guardar borrador</button>`;
+      // para 1 solo gasto: ocultar estos botones de aquí, se muestran junto a "guardar gasto" al final
+      btnsEl.style.display='none';
+      const bottomBtns=document.getElementById('scan-bottom-btns');
+      if(bottomBtns){
+        bottomBtns.style.display='flex';
+        bottomBtns.innerHTML=`<button class="ms-disc" style="flex:1" onclick="discardScan()">× Descartar</button>
+          <button class="ms-disc" style="flex:1;color:var(--amber);border-color:rgba(255,187,51,.3)" onclick="saveDraft()">Guardar borrador</button>`;
+      }
     }
     // ocultar formulario manual cuando hay scan múltiple
     const scanMultiMode=document.getElementById('scan-multi-hide');
@@ -1132,6 +1143,7 @@ function saveAllScan(){
   else toast('Sin montos válidos','warn');
 }
 function discardScan(){
+  const bb=document.getElementById('scan-bottom-btns');if(bb){bb.style.display='none';bb.innerHTML='';}
   document.getElementById('scan-res').style.display='none';
   document.getElementById('scan-st').innerHTML='';
   document.getElementById('a-amt').value='';
