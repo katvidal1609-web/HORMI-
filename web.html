@@ -943,7 +943,7 @@
 <!-- ── EL PROBLEMA ── -->
 <section id="problema">
   <div class="container">
-    <div class="problema-inner">
+    <div class="problema-inner" data-reveal>
       <div class="tag">El problema</div>
       <h2>¿A dónde se fue lo que te sobraba?</h2>
       <p>No es tu sueldo. Son los <strong>S/10 de café</strong>, el taxi de <strong>S/15</strong>, el postre no planeado de <strong>S/18</strong>. Solos parecen nada. Juntos, pueden ser más de <strong>S/3,000 al año</strong>.</p>
@@ -954,7 +954,7 @@
 <!-- ── DIFERENCIADOR ── -->
 <section id="diferenciador">
   <div class="container">
-    <div class="dif-inner">
+    <div class="dif-inner" data-reveal>
       <p>Las otras apps conectan con tu banco, pero tus gastos hormiga no siempre pasan por el banco. Pasan por <strong>Yape</strong>, por <strong>efectivo</strong>, por un café al paso. Los agentes de WhatsApp te leen una vez y no tienen estructura. <strong>HORMI recuerda TODO</strong>: acumula cada gasto, detecta tus patrones reales y te da un plan visual basado en lo que tú gastas, no en promedios genéricos. No es un chat. <strong>Es tu segundo cerebro para tu bolsillo.</strong></p>
     </div>
   </div>
@@ -972,14 +972,14 @@
     <!-- Toggle -->
     <div class="billing-toggle">
       <button class="billing-btn" id="btn-mensual" onclick="setBilling('mensual')">Mensual</button>
-      <button class="billing-btn active" id="btn-anual" onclick="setBilling('anual')">Anual <span class="billing-save-tag">Ahorra 53%</span></button>
+      <button class="billing-btn active" id="btn-anual" onclick="setBilling('anual')">Anual <span class="billing-save-tag">Ahorra 35%</span></button>
     </div>
 
     <!-- ── GRID ANUAL (por defecto) ── -->
     <div class="plans-grid-annual" id="grid-anual">
 
       <!-- Free -->
-      <div class="plan-card">
+      <div class="plan-card" data-reveal>
         <div class="plan-name">Free</div>
         <div class="plan-price">S/ <span style="font-size:48px;font-weight:900">0</span></div>
         <div class="plan-price-note">Siempre gratis</div>
@@ -997,13 +997,13 @@
       </div>
 
       <!-- Pro Anual (recomendado) -->
-      <div class="plan-card featured">
+      <div class="plan-card featured" data-reveal>
         <div class="plan-badge">Recomendado</div>
         <div class="plan-name">Pro Anual</div>
-        <div class="savings-badge">Ahorras 53%</div>
-        <div class="plan-price"><span>S/</span>89.90</div>
+        <div class="savings-badge">Ahorras 35%</div>
+        <div class="plan-price"><span>S/</span>179.90</div>
         <div class="plan-price-note">al año</div>
-        <div class="plan-equiv">equivale a S/7.49/mes · 15 días gratis</div>
+        <div class="plan-equiv">equivale a S/14.99/mes · 15 días gratis</div>
         <div class="plan-divider"></div>
         <ul class="plan-features">
           <li>Escaneos ilimitados</li>
@@ -1018,9 +1018,9 @@
       </div>
 
       <!-- Pro Mensual (sin badge, sin highlight) -->
-      <div class="plan-card">
+      <div class="plan-card" data-reveal>
         <div class="plan-name">Pro Mensual</div>
-        <div class="plan-price"><span>S/</span>15.90</div>
+        <div class="plan-price"><span>S/</span>22.90</div>
         <div class="plan-price-note">por mes · 15 días gratis</div>
         <div class="plan-divider"></div>
         <ul class="plan-features">
@@ -1041,7 +1041,7 @@
     <div class="plans-grid-monthly" id="grid-mensual" style="display:none">
 
       <!-- Free -->
-      <div class="plan-card">
+      <div class="plan-card" data-reveal>
         <div class="plan-name">Free</div>
         <div class="plan-price">S/ <span style="font-size:48px;font-weight:900">0</span></div>
         <div class="plan-price-note">Siempre gratis</div>
@@ -1059,10 +1059,10 @@
       </div>
 
       <!-- Pro Mensual (featured) -->
-      <div class="plan-card featured">
+      <div class="plan-card featured" data-reveal>
         <div class="plan-badge">Más popular</div>
         <div class="plan-name">Pro</div>
-        <div class="plan-price"><span>S/</span>15.90</div>
+        <div class="plan-price"><span>S/</span>22.90</div>
         <div class="plan-price-note">por mes · 15 días gratis</div>
         <div class="plan-divider"></div>
         <ul class="plan-features">
