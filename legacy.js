@@ -1982,6 +1982,17 @@ function closeHormiDetail(){
   document.getElementById('hc-detail-panel').classList.remove('open');
   document.getElementById('hc-panel-bg').classList.remove('open');
 }
+function renderTipCards(tips){
+  if(!Array.isArray(tips)||!tips.length){
+    return `<div class="hc-alt-card"><span>🔍</span><p>No encontramos una opción más barata verificable para este gasto.</p></div>`;
+  }
+  return tips.map(t=>{
+    if(typeof t==='string')return `<div class="hc-alt-card"><span>💡</span><p>${t}</p></div>`;
+    const ahorro=t.ahorro?`<div style="font-size:12px;font-weight:700;color:#407178;margin-top:4px">Ahorras ${t.ahorro}</div>`:'';
+    const link=t.url?`<a href="${t.url}" target="_blank" rel="noopener" style="font-size:12px;color:#407178;text-decoration:underline;margin-top:4px;display:inline-block">Ver fuente ↗</a>`:'';
+    return `<div class="hc-alt-card"><span>💡</span><div style="flex:1"><p style="margin:0">${t.texto||''}</p>${ahorro}${link}</div></div>`;
+  }).join('');
+}
 async function loadPersonalizedTips(desc,ci,total,veces,avgD){
   if(!isPro()){
     const el=document.getElementById('hc-alt-content');
@@ -1991,14 +2002,14 @@ async function loadPersonalizedTips(desc,ci,total,veces,avgD){
     return;
   }
   // Cache por descripción — no vuelve a gastar tokens si ya se generaron
-  const cacheKey='hormi_tips_'+desc.toLowerCase().trim().slice(0,60);
+  const cacheKey='hormi_tips_v2_'+desc.toLowerCase().trim().slice(0,60);
   try{
     const cached=localStorage.getItem(cacheKey);
     if(cached){
       const tips=JSON.parse(cached);
       const el=document.getElementById('hc-alt-content');
       if(el&&Array.isArray(tips)&&tips.length){
-        el.innerHTML=tips.map(a=>`<div class="hc-alt-card"><span>💡</span><p>${a}</p></div>`).join('');
+        el.innerHTML=renderTipCards(tips);
         return;
       }
     }
@@ -2006,16 +2017,21 @@ async function loadPersonalizedTips(desc,ci,total,veces,avgD){
   try{
     const {data:{session}}=await _sb.auth.getSession();
     const token=session?.access_token;if(!token)return;
-    const prompt=`Usuario en Lima, Perú. Gasto analizado: "${desc}" (categoría: ${ci}). Registrado ${veces} vez(es) este mes, total ${fmt(total)}, promedio ${fmt(avgD)} por vez.
+    const prompt=`Usuario en Lima, Perú. Gasto: "${desc}" (categoría: ${ci}). Registrado ${veces} vez(es) este mes, total ${fmt(total)}, promedio ${fmt(avgD)} por vez.
 
-Busca en internet precios reales y actuales en Perú de alternativas concretas a este gasto específico. Prioriza: marcas exactas, nombres de tiendas o locales reales, precios verificables.
+Tu única misión: encontrar 2 formas concretas de que este usuario GASTE MENOS en esto. No des alternativas laterales ni observaciones sobre el precio: cada sugerencia debe representar un ahorro real frente a los ${fmt(avgD)} que paga hoy.
 
-Reglas estrictas:
-- NO des consejos obvios ("cocina en casa", "compra marca propia", "busca alternativas más baratas")
-- NO inventes precios ni porcentajes. Si no encontraste el dato en la búsqueda, escribe la sugerencia sin cifra
-- Cada sugerencia debe ser accionable hoy y específica de Lima
+Busca en internet precios reales y actuales en Lima para lograrlo.
 
-Responde SOLO un array JSON de exactamente 2 strings (máx 18 palabras c/u): ["sugerencia1","sugerencia2"]`;
+REGLAS OBLIGATORIAS para cada sugerencia:
+1. Debe implicar pagar menos de ${fmt(avgD)}. Si algo cuesta igual o más, NO lo incluyas.
+2. Debe incluir el ahorro estimado por vez, calculado sobre ${fmt(avgD)}.
+3. Debe incluir la URL exacta de la página donde encontraste el precio. Solo URLs que realmente visitaste en la búsqueda — si no tienes URL real, deja url como "".
+4. Prohibido: consejos genéricos ("cocina en casa", "compra marca propia"), comparaciones de precio sin ahorro, o sugerir que revise descuentos.
+5. Si tras buscar no encuentras ninguna opción más barata verificable, devuelve un array vacío [].
+
+Responde SOLO este JSON, sin markdown:
+[{"texto":"acción concreta en máx 18 palabras","ahorro":"S/X por vez","url":"https://..."},{"texto":"...","ahorro":"S/X por vez","url":"https://..."}]`;
     const res=await fetch(SCAN_URL,{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},
@@ -2027,7 +2043,7 @@ Responde SOLO un array JSON de exactamente 2 strings (máx 18 palabras c/u): ["s
     const tips=JSON.parse(match[0]);
     const el=document.getElementById('hc-alt-content');
     if(el&&tips.length){
-      el.innerHTML=tips.map(a=>`<div class="hc-alt-card"><span>💡</span><p>${a}</p></div>`).join('');
+      el.innerHTML=renderTipCards(tips);
       try{localStorage.setItem(cacheKey,JSON.stringify(tips));}catch(e){}
     }
   }catch(e){

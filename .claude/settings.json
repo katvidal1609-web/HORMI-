@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -n \"async function loadPersonalizedTips\\\\|const cacheKey\\\\|const prompt=\\\\`Usuario en Lima\\\\|el.innerHTML=tips.map\\\\|const res=await fetch\\(SCAN_URL\" legacy.js)"
+    ]
+  }
+}
