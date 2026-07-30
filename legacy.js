@@ -2072,7 +2072,7 @@ Responde SOLO este JSON, sin markdown:
     if(!match)throw new Error('no json');
     const tips=JSON.parse(match[0]);
     const el=document.getElementById('hc-alt-content');
-    if(el&&tips.length){
+    if(el&&Array.isArray(tips)){
       el.innerHTML=renderTipCards(tips);
       try{localStorage.setItem(cacheKey,JSON.stringify(tips));}catch(e){}
     }
