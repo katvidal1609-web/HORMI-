@@ -867,6 +867,20 @@ Para Yape/Plin busca específicamente:
 Responde SOLO con este JSON sin texto adicional ni backticks:
 {"items":[{"descripcion":"concepto o nombre del destinatario","monto":0.00}],"lugar":"nombre comercial + distrito (ej: Listo Monterrico)","fecha":"YYYY-MM-DD","hora":"HH:MM","categoria_sugerida":"ID"}
 
+DECODIFICACIÓN DE CÓDIGOS ABREVIADOS (para cada item.descripcion):
+Los supermercados y tiendas de conveniencia suelen imprimir el producto como un código abreviado en vez del nombre completo. Antes de devolver descripcion, revisa si el texto cumple CUALQUIERA de estas señales de código:
+- Tokens en mayúsculas de 2 a 6 letras que no son palabra en español ni inglés
+- Faltan vocales: JUI, PROT, CONC, YOG, GALL, BEB, CHOC
+- Medida pegada al final: 45G, 295ML, X6, 1L, X12
+- Palabras truncadas o unidas con punto: YOG.BOLSA, SM CERDO
+Si se lee como frase natural ("Café Americano", "Uber") NO es código, úsalo tal cual. Si SÍ es código:
+1. Separa el string en MARCA + TIPO DE PRODUCTO + SABOR/VARIANTE + TAMAÑO.
+2. Expande cada truncamiento. Regla general: una abreviatura suele ser las primeras letras de la palabra completa, o la palabra sin vocales. Ejemplos del patrón, NO una lista cerrada: PROT→proteína · CONC→concentrado · JUI→jugo · CF→cold foam · YOG→yogurt · BEB→bebida · GALL→galleta · CHOC→chocolate · BAR→barra · H+fruta→esa fruta (HLUCUMA→lúcuma).
+3. Usa 'lugar' como contexto para acotar: cafetería (Starbucks, Juan Valdez)→bebidas y snacks de café; conveniencia (OXXO, Tambo, Listo, Repshop)→snacks, bebidas, golosinas; supermercado (Metro, Wong, Plaza Vea, Tottus, Vivanda)→abarrotes; farmacia (Inkafarma, Mifarma)→salud y cuidado personal.
+4. Usa web_search con "{código completo} {lugar}". Si no da resultado, intenta "{marca expandida} {tipo de producto} Perú".
+5. Devuelve nombre legible en español, formato "Tipo Marca Sabor Tamaño". Ejemplos de resultado esperado: "DYFF BAR HLUCUMA 45G" en OXXO → "Barra Dayfit Lúcuma 45g" · "Vainilla CF PROT" en Starbucks → "Cold Foam Proteína Vainilla" · "WEL JUI CONC 295ML" en Metro → "Jugo Concentrado Welchs 295ml".
+Si NO logras resolverlo con certeza, deja el código original tal cual en descripcion. NUNCA inventes una marca ni un producto que no confirmaste — es preferible el código crudo a un nombre inventado.
+
 Para categoria_sugerida elige UNO de estos IDs según el tipo de gasto:
 - food: restaurantes, fast food, menús, cualquier comida preparada. Ej: McDonald's, KFC, Bembos, Norky's, cualquier plato o combo
 - drink: café, bebidas, jugos, cocteles. Ej: Starbucks, Juan Valdez, cualquier bebida
@@ -882,6 +896,8 @@ Para categoria_sugerida elige UNO de estos IDs según el tipo de gasto:
 - soc: bares, discotecas, alcohol, salidas sociales
 - enter: cine, teatro, conciertos. Ej: Cineplanet, Cinemark
 - other: todo lo demás
+
+Decide la categoría por el ESTABLECIMIENTO primero, el producto después. Usa "other" ÚNICAMENTE si el establecimiento es desconocido Y el producto no se pudo identificar — nunca uses "other" para un establecimiento conocido (ej: si es Starbucks, es "drink" aunque el producto sea ilegible).
 
 IMPORTANTE: usa tu conocimiento de establecimientos peruanos para categorizar correctamente aunque el nombre en la boleta sea la razón social legal.
 
