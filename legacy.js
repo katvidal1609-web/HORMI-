@@ -1951,11 +1951,12 @@ function openHormiDetail(idx){
   const hp=calcHoraPico(txs);
   const dp=calcDiaPico(txs);
   const alts=['Cargando sugerencias...','Cargando sugerencias...'];
+  const calificaComoHormiga=veces>=3||total>=40;
   const insight=veces>=5
-    ?`Aparece <strong>${veces} veces</strong> este mes, sumando <strong>${fmt(total)}</strong>. Reducir a la mitad liberaría <strong>${fmt(total/2)}</strong> al mes.`
+    ?`Aparece <strong>${veces} veces</strong> este mes, sumando <strong>${fmt(total)}</strong>. Reducir a la mitad liberaría <strong>${fmt(total/2)}</strong> al mes. Al ritmo actual, esto es <strong>${fmt(total*12)}</strong> al año.`
     :veces>=2
-    ?`Con ${veces} apariciones a <strong>${fmt(avgD)}</strong> cada una, ya acumulaste <strong>${fmt(total)}</strong> en esto este mes.`
-    :`Un solo gasto de <strong>${fmt(total)}</strong>. Si se vuelve hábito podría costar <strong>${fmt(total*20)}</strong> al año.`;
+    ?`Con ${veces} apariciones a <strong>${fmt(avgD)}</strong> cada una, ya acumulaste <strong>${fmt(total)}</strong> en esto este mes. Al ritmo actual, esto es <strong>${fmt(total*12)}</strong> al año.`
+    :`Un solo gasto de <strong>${fmt(total)}</strong>. Si lo repites 2 veces al mes, son <strong>${fmt(total*24)}</strong> al año.`;
   document.getElementById('hc-panel-body').innerHTML=`
     <div style="background:#1a2e2a;border-radius:20px 20px 0 0;padding:28px 20px 24px;text-align:center">
       <div style="font-size:44px;margin-bottom:10px">${cm.e}</div>
@@ -1972,10 +1973,22 @@ function openHormiDetail(idx){
     <div style="padding:12px 16px 0"><div class="hc-insight">${insight}</div></div>
     <div class="hc-alt-section" style="margin-top:12px" id="hc-alt-section">
       <div class="hc-alt-title">alternativas</div>
-      <div id="hc-alt-content">${alts.map(a=>`<div class="hc-alt-card"><span>💡</span><p>${a}</p></div>`).join('')}</div>
+      <div id="hc-alt-content">${calificaComoHormiga
+        ?alts.map(a=>`<div class="hc-alt-card"><span>💡</span><p>${a}</p></div>`).join('')
+        :`<button class="hc-alt-card" style="cursor:pointer;border:none;width:100%;text-align:left;background:var(--s2);font:inherit;color:var(--t1)" onclick="requestPersonalizedTips(${idx})"><span>🔍</span><p>Buscar alternativas →</p></button>`
+      }</div>
     </div>`;
   document.getElementById('hc-detail-panel').classList.add('open');
   document.getElementById('hc-panel-bg').classList.add('open');
+  if(calificaComoHormiga)loadPersonalizedTips(desc,ci,total,veces,avgD);
+}
+function requestPersonalizedTips(idx){
+  const item=_hcItemStore[idx];if(!item)return;
+  const {desc,txs,total,ci}=item;
+  const veces=txs.length;
+  const avgD=total/veces;
+  const el=document.getElementById('hc-alt-content');
+  if(el)el.innerHTML=`<div class="hc-alt-card"><span>💡</span><p>Cargando sugerencias...</p></div>`;
   loadPersonalizedTips(desc,ci,total,veces,avgD);
 }
 function closeHormiDetail(){
@@ -1989,9 +2002,21 @@ function renderTipCards(tips){
   return tips.map(t=>{
     if(typeof t==='string')return `<div class="hc-alt-card"><span>💡</span><p>${t}</p></div>`;
     const ahorro=t.ahorro?`<div style="font-size:12px;font-weight:700;color:#407178;margin-top:4px">Ahorras ${t.ahorro}</div>`:'';
-    const link=t.url?`<a href="${t.url}" target="_blank" rel="noopener" style="font-size:12px;color:#407178;text-decoration:underline;margin-top:4px;display:inline-block">Ver fuente ↗</a>`:'';
-    return `<div class="hc-alt-card"><span>💡</span><div style="flex:1"><p style="margin:0">${t.texto||''}</p>${ahorro}${link}</div></div>`;
+    let links='';
+    if(Array.isArray(t.fuentes)&&t.fuentes.length){
+      links=`<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px">${t.fuentes.map(f=>`<a href="${f.url}" target="_blank" rel="noopener" style="font-size:12px;color:#407178;text-decoration:underline;display:inline-block">${f.label||(f.tipo==='social'?'Ver video ↗':'Ver tienda ↗')}</a>`).join('')}</div>`;
+    }else if(t.url){
+      links=`<a href="${t.url}" target="_blank" rel="noopener" style="font-size:12px;color:#407178;text-decoration:underline;margin-top:4px;display:inline-block">Ver fuente ↗</a>`;
+    }
+    return `<div class="hc-alt-card"><span>💡</span><div style="flex:1"><p style="margin:0">${t.texto||''}</p>${ahorro}${links}</div></div>`;
   }).join('');
+}
+function normalizeMerchant(desc){
+  return desc.normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g,' ')
+    .replace(/\s+/g,' ')
+    .trim();
 }
 async function loadPersonalizedTips(desc,ci,total,veces,avgD){
   if(!isPro()){
@@ -2002,7 +2027,7 @@ async function loadPersonalizedTips(desc,ci,total,veces,avgD){
     return;
   }
   // Cache por descripción — no vuelve a gastar tokens si ya se generaron
-  const cacheKey='hormi_tips_v2_'+desc.toLowerCase().trim().slice(0,60);
+  const cacheKey='hormi_tips_v2_'+normalizeMerchant(desc).slice(0,60);
   try{
     const cached=localStorage.getItem(cacheKey);
     if(cached){
@@ -2026,17 +2051,22 @@ Busca en internet precios reales y actuales en Lima para lograrlo.
 REGLAS OBLIGATORIAS para cada sugerencia:
 1. Debe implicar pagar menos de ${fmt(avgD)}. Si algo cuesta igual o más, NO lo incluyas.
 2. Debe incluir el ahorro estimado por vez, calculado sobre ${fmt(avgD)}.
-3. Debe incluir la URL exacta de la página donde encontraste el precio. Solo URLs que realmente visitaste en la búsqueda — si no tienes URL real, deja url como "".
+3. Debe incluir entre 1 y 2 fuentes verificables (ver reglas de fuentes abajo). Solo URLs reales de tu búsqueda — nunca inventadas.
 4. Prohibido: consejos genéricos ("cocina en casa", "compra marca propia"), comparaciones de precio sin ahorro, o sugerir que revise descuentos.
 5. Si tras buscar no encuentras ninguna opción más barata verificable, devuelve un array vacío [].
+6. Prioriza como primera fuente contenido social peruano reciente (TikTok, Reels, IG) de los últimos 12 meses si existe uno relevante con comentarios útiles (tipo:'social'). Si encuentras también una tienda online donde se pueda verificar el precio, agrégala como segunda fuente (tipo:'tienda'). Mínimo 1 fuente, máximo 2. Las URLs deben venir de resultados reales de web_search, nunca inventadas.
 
 Responde SOLO este JSON, sin markdown:
-[{"texto":"acción concreta en máx 18 palabras","ahorro":"S/X por vez","url":"https://..."},{"texto":"...","ahorro":"S/X por vez","url":"https://..."}]`;
+[{"texto":"acción concreta en máx 18 palabras","ahorro":"S/X por vez","fuentes":[{"tipo":"social","url":"https://...","label":"..."}]},{"texto":"...","ahorro":"S/X por vez","fuentes":[{"tipo":"tienda","url":"https://...","label":"..."}]}]`;
+    const ac=new AbortController();
+    const tipsTimeout=setTimeout(()=>ac.abort(),45000);
     const res=await fetch(SCAN_URL,{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},
-      body:JSON.stringify({prompt,mode:'tips'})
+      body:JSON.stringify({prompt,mode:'tips'}),
+      signal:ac.signal
     });
+    clearTimeout(tipsTimeout);
     const text=await res.text();
     const match=text.match(/\[[\s\S]*\]/);
     if(!match)throw new Error('no json');
@@ -2048,7 +2078,8 @@ Responde SOLO este JSON, sin markdown:
     }
   }catch(e){
     const el=document.getElementById('hc-alt-content');
-    if(el)el.innerHTML=`<div class="hc-alt-card"><span>💡</span><p>No pudimos generar sugerencias ahora. Intenta de nuevo más tarde.</p></div>`;
+    const msg=e.name==='AbortError'?'Se está demorando más de lo normal. Intenta de nuevo.':'No pudimos generar sugerencias ahora. Intenta de nuevo más tarde.';
+    if(el)el.innerHTML=`<div class="hc-alt-card"><span>💡</span><p>${msg}</p></div>`;
   }
 }
 
@@ -2174,8 +2205,8 @@ function renderStats(){
       <div class="save-t" id="save-pct-lbl">si reduces 50% tus hormigas</div>
       <input type="range" id="save-pct-slider" min="10" max="90" step="10" value="50" style="width:100%;margin-bottom:12px;accent-color:rgb(166,177,231);-webkit-appearance:none;height:6px;border-radius:3px;background:linear-gradient(to right, rgb(166,177,231) 50%, #d1d5db 50%)" oninput="updateSavePct(this.value)">
       <div class="save-g">
-        <div class="save-i"><div class="save-il">al mes</div><div class="save-iv" id="save-mes-val">+${fmt(avg*15)}</div></div>
-        <div class="save-i"><div class="save-il">al año</div><div class="save-iv" id="save-ano-val">+${fmt(avg*182)}</div></div>
+        <div class="save-i"><div class="save-il">al mes</div><div class="save-iv" id="save-mes-val">+${fmt(avg*30*0.5)}</div></div>
+        <div class="save-i"><div class="save-il">al año</div><div class="save-iv" id="save-ano-val">+${fmt(avg*365*0.5)}</div></div>
       </div>
     </div>
     ${buildPieChart(sc,mc)}
@@ -2378,7 +2409,7 @@ async function doShareProgress(){
 
 function buildIns(hm,mhm,pkH,sc,avg){
   const ins=[];
-  if(avg>0)ins.push(`Si reduces tus hormigas a la mitad, ahorras <strong>S/ ${(avg*15).toFixed(0)} cada 15 días</strong>. En un año: <strong>S/ ${(avg*182).toFixed(0)}</strong>.`);
+  if(avg>0)ins.push(`Si reduces tus hormigas a la mitad, ahorras <strong>S/ ${(avg*30*0.5).toFixed(0)} cada 15 días</strong>. En un año: <strong>S/ ${(avg*365*0.5).toFixed(0)}</strong>.`);
   if(sc.length){const t=CATS.find(c=>c.id===sc[0][0])||CATS[13];ins.push(`Tu categoría más cara es <strong>${t.e} ${t.l}</strong> con ${fmt(sc[0][1])}. ¿Vale lo que gastas?`);}
   if(pkH>=11&&pkH<=14)ins.push(`Gastas más a las <strong>${pkH}:00 (almuerzo)</strong>. Llevar comida 3 días/semana puede hacer diferencia real.`);
   else if(pkH>=18&&pkH<=22)ins.push(`Tu hora pico es las <strong>${pkH}:00</strong>. El cansancio del día activa el gasto impulsivo.`);
