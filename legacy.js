@@ -1966,8 +1966,6 @@ function openHormiDetail(idx){
   const avgD=total/veces;
   const hp=calcHoraPico(txs);
   const dp=calcDiaPico(txs);
-  const alts=['Cargando sugerencias...','Cargando sugerencias...'];
-  const calificaComoHormiga=veces>=3||total>=40;
   const insight=veces>=5
     ?`Aparece <strong>${veces} veces</strong> este mes, sumando <strong>${fmt(total)}</strong>. Reducir a la mitad liberaría <strong>${fmt(total/2)}</strong> al mes. Al ritmo actual, esto es <strong>${fmt(total*12)}</strong> al año.`
     :veces>=2
@@ -1986,26 +1984,9 @@ function openHormiDetail(idx){
       ${veces>=3?`<div class="hc-stat-box"><label>Hora pico</label><strong>${hp!==null?String(hp).padStart(2,'0')+':00':'—'}</strong><span>más frecuente</span></div>
       <div class="hc-stat-box"><label>Día pico</label><strong>${dp||'—'}</strong><span>más frecuente</span></div>`:''}
     </div>
-    <div style="padding:12px 16px 0"><div class="hc-insight">${insight}</div></div>
-    <div class="hc-alt-section" style="margin-top:12px" id="hc-alt-section">
-      <div class="hc-alt-title">alternativas</div>
-      <div id="hc-alt-content">${calificaComoHormiga
-        ?alts.map(a=>`<div class="hc-alt-card"><span>💡</span><p>${a}</p></div>`).join('')
-        :`<button class="hc-alt-card" style="cursor:pointer;border:none;width:100%;text-align:left;background:var(--s2);font:inherit;color:var(--t1)" onclick="requestPersonalizedTips(${idx})"><span>🔍</span><p>Buscar alternativas →</p></button>`
-      }</div>
-    </div>`;
+    <div style="padding:12px 16px 0"><div class="hc-insight">${insight}</div></div>`;
   document.getElementById('hc-detail-panel').classList.add('open');
   document.getElementById('hc-panel-bg').classList.add('open');
-  if(calificaComoHormiga)loadPersonalizedTips(desc,ci,total,veces,avgD);
-}
-function requestPersonalizedTips(idx){
-  const item=_hcItemStore[idx];if(!item)return;
-  const {desc,txs,total,ci}=item;
-  const veces=txs.length;
-  const avgD=total/veces;
-  const el=document.getElementById('hc-alt-content');
-  if(el)el.innerHTML=`<div class="hc-alt-card"><span>💡</span><p>Cargando sugerencias...</p></div>`;
-  loadPersonalizedTips(desc,ci,total,veces,avgD);
 }
 function closeHormiDetail(){
   document.getElementById('hc-detail-panel').classList.remove('open');
@@ -2034,7 +2015,7 @@ function normalizeMerchant(desc){
     .replace(/\s+/g,' ')
     .trim();
 }
-async function loadPersonalizedTips(desc,ci,total,veces,avgD){
+async function loadPersonalizedTips_DEPRECATED(desc,ci,total,veces,avgD){
   if(!isPro()){
     const el=document.getElementById('hc-alt-content');
     if(el)el.innerHTML=`<div class="hc-alt-card" style="cursor:pointer;border:1.5px dashed var(--accent)" onclick="requirePro('sugerencias',null)">
