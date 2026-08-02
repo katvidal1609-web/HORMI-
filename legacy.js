@@ -2005,7 +2005,11 @@ function renderTipCards(tips){
     }else if(t.url){
       links=`<a href="${t.url}" target="_blank" rel="noopener" style="font-size:12px;color:#407178;text-decoration:underline;margin-top:4px;display:inline-block">Ver fuente ↗</a>`;
     }
-    return `<div class="hc-alt-card"><span>💡</span><div style="flex:1"><p style="margin:0">${t.texto||''}</p>${ahorro}${links}</div></div>`;
+    const tipoIcon=t.tipo==='sustitucion'?'🔁':t.tipo==='optimizacion'?'💳':'💡';
+    const tipoLabel=t.tipo==='sustitucion'?'<div style="font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#2d5158;margin-bottom:3px">🔁 Alternativa</div>'
+      :t.tipo==='optimizacion'?'<div style="font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#8a6d00;margin-bottom:3px">💳 Ahorra aquí mismo</div>'
+      :'';
+    return `<div class="hc-alt-card"><span>${tipoIcon}</span><div style="flex:1">${tipoLabel}<p style="margin:0">${t.texto||''}</p>${ahorro}${links}</div></div>`;
   }).join('');
 }
 function normalizeMerchant(desc){
