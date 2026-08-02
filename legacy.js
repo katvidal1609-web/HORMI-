@@ -1031,7 +1031,8 @@ async function scanImg(input){
     }
     // for single item pre-fill form; for multi-item show "save all" action
     const resEl=document.getElementById('scan-res');
-    const btnsEl=resEl.querySelector('div[style*="display:flex;gap:7px;margin-top:9px"]');
+    const btnsEl=document.getElementById('scan-res-btns');
+    console.log('SCAN multi:', multi, 'btnsEl:', !!btnsEl, 'items:', items.length);
     if(multi&&btnsEl){
       btnsEl.style.display='flex';
       btnsEl.innerHTML=`<button class="ms-disc" style="flex:1;color:rgba(255,255,255,.6);border-color:rgba(255,255,255,.2)" onclick="discardScan()">× Descartar</button>
@@ -1187,6 +1188,7 @@ function saveDraft(){
   const amt=parseFloat(document.getElementById('a-amt').value);
   const consumo=document.getElementById('tx-consumo').value.trim();
   const lugar=document.getElementById('tx-lugar').value.trim();
+  if(_scanPending&&_scanPending.items&&_scanPending.items.length>1){saveAllScan();return;}
   if(!amt||amt<=0){toast('Sin monto para el borrador','warn');return;}
   const cat=allCats().find(c=>c.id===aCat)||CATS[13];
   const dateFieldVal=document.getElementById('a-date')?.value;
