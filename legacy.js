@@ -184,7 +184,7 @@ function showMain(){
     D._welcomeShown=true;
     const h=new Date().getHours();
     const g=h<12?'Buenos días':h<19?'Buenas tardes':'Buenas noches';
-    setTimeout(()=>toast(`${g}, ${D.name} 🐜`,'ok'),500);
+    setTimeout(()=>toast(`${g}, ${esc(D.name)} 🐜`,'ok'),500);
   }
 }
 
@@ -299,7 +299,7 @@ async function doGoogleAuth(){
       queryParams:{access_type:'offline',prompt:'consent'}
     }
   });
-  if(error){toast(_authErrMsg(error),'err');_gDisable(['reg-google-btn','login-google-btn'],false);}
+  if(error){toast(esc(_authErrMsg(error)),'err');_gDisable(['reg-google-btn','login-google-btn'],false);}
 }
 
 let _lastRegEmail='';
@@ -326,7 +326,7 @@ async function doResendEmail(){
   if(btn){btn.disabled=true;btn.textContent='Enviando...';}
   try{
     const{error}=await _sb.auth.resend({type:'signup',email:_lastRegEmail});
-    if(error)toast(_authErrMsg(error),'err');
+    if(error)toast(esc(_authErrMsg(error)),'err');
     else toast('Email reenviado 📬','ok');
   }catch(e){toast('Error al reenviar','err');}
   if(btn){btn.disabled=false;btn.textContent='Reenviar email';}
@@ -338,7 +338,7 @@ async function doForgotPassword(){
     document.getElementById('login-err').textContent='Ingresa tu email arriba primero';return;
   }
   const{error}=await _sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.href});
-  if(error){toast(_authErrMsg(error),'err');return;}
+  if(error){toast(esc(_authErrMsg(error)),'err');return;}
   toast('Te enviamos un email para recuperar tu contraseña 📬');
 }
 function showForgotPassword(){
@@ -834,7 +834,7 @@ function startVoice(){
     }else{document.getElementById('tx-consumo').value=text;}
     toast('✓ Capturado','ok');
   };
-  rec.onerror=(e)=>{toast('Error de voz: '+e.error,'err');};
+  rec.onerror=(e)=>{toast('Error de voz: '+esc(e.error),'err');};
   rec.onend=()=>{if(btn){btn.classList.remove('active');btn.textContent='🎤';}};
   rec.start();toast('Habla ahora...','ok');
 }
@@ -865,7 +865,7 @@ Para Yape/Plin busca específicamente:
 - El concepto/mensaje: texto opcional que acompaña el pago
 
 Responde SOLO con este JSON sin texto adicional ni backticks:
-{"items":[{"descripcion":"concepto o nombre del destinatario","monto":0.00}],"lugar":"nombre comercial + distrito (ej: Listo Monterrico)","fecha":"YYYY-MM-DD","hora":"HH:MM","categoria_sugerida":"ID"}
+{"items":[{"descripcion":"concepto o nombre del destinatario","monto":0.00,"categoria":"ID"}],"lugar":"nombre comercial + distrito (ej: Listo Monterrico)","fecha":"YYYY-MM-DD","hora":"HH:MM","categoria_sugerida":"ID"}
 
 DECODIFICACIÓN DE CÓDIGOS ABREVIADOS (para cada item.descripcion):
 Los supermercados y tiendas de conveniencia suelen imprimir el producto como un código abreviado en vez del nombre completo. Antes de devolver descripcion, revisa si el texto cumple CUALQUIERA de estas señales de código:
@@ -880,6 +880,9 @@ Si se lee como frase natural ("Café Americano", "Uber") NO es código, úsalo t
 4. Usa web_search con "{código completo} {lugar}". Si no da resultado, intenta "{marca expandida} {tipo de producto} Perú".
 5. Devuelve nombre legible en español, formato "Tipo Marca Sabor Tamaño". Ejemplos de resultado esperado: "DYFF BAR HLUCUMA 45G" en OXXO → "Barra Dayfit Lúcuma 45g" · "Vainilla CF PROT" en Starbucks → "Cold Foam Proteína Vainilla" · "WEL JUI CONC 295ML" en Metro → "Jugo Concentrado Welchs 295ml".
 Si NO logras resolverlo con certeza, deja el código original tal cual en descripcion. NUNCA inventes una marca ni un producto que no confirmaste — es preferible el código crudo a un nombre inventado.
+
+ABREVIATURAS Y LETRAS SUELTAS — REGLA GENERAL:
+Expande una abreviatura SOLO si (a) la expansión es inequívoca por contexto del rubro, o (b) la verificaste con web_search. Si una letra o sigla admite más de una expansión posible y no la verificaste, consérvala tal cual. Nunca agregues al nombre palabras que el ticket no contiene y que no confirmaste. Es preferible un nombre parcialmente crudo a un nombre inventado con seguridad falsa.
 
 Para categoria_sugerida elige UNO de estos IDs según el tipo de gasto:
 - food: restaurantes, fast food, menús, cualquier comida preparada. Ej: McDonald's, KFC, Bembos, Norky's, cualquier plato o combo
@@ -897,7 +900,34 @@ Para categoria_sugerida elige UNO de estos IDs según el tipo de gasto:
 - enter: cine, teatro, conciertos. Ej: Cineplanet, Cinemark
 - other: todo lo demás
 
-Decide la categoría por el ESTABLECIMIENTO primero, el producto después. Usa "other" ÚNICAMENTE si el establecimiento es desconocido Y el producto no se pudo identificar — nunca uses "other" para un establecimiento conocido (ej: si es Starbucks, es "drink" aunque el producto sea ilegible).
+MÉTODO DE CATEGORIZACIÓN — aplícalo a CADA item por separado, en este orden:
+
+PASO 1 — PREGUNTA QUÉ ES EL PRODUCTO, no dónde se compró.
+Responde: ¿qué haría el usuario con esto?
+- ¿Se come preparado/listo (plato, menú, combo, porción)? → food
+- ¿Se bebe? → drink
+- ¿Es un antojo empaquetado o dulce (se come sin preparación)? → snack
+- ¿Es un insumo crudo o del hogar (se cocina, se almacena, se usa para limpiar)? → no existe ID de supermercado/abarrotes en la lista real: usa food para comestibles crudos y shop para no comestibles
+- ¿Es un servicio de transporte o combustible? → trans
+- ¿Es medicina o atención de salud? → health
+- ¿Es cuidado personal o estética? → beauty
+- ¿Se viste o se usa como accesorio? → shop
+- ¿Es digital o una suscripción? → subs
+- ¿Es una entrada, evento o diversión? → enter / soc según contexto
+- ¿Es educativo (libro, curso, matrícula)? → edu
+- ¿Es deporte o gimnasio? → sport
+- ¿Es un pedido por app de delivery? → del
+
+La pregunta funcional ('¿qué hace el usuario con esto?') decide, no una lista de palabras. Un producto que se bebe es drink aunque se compre en una farmacia; una pastilla es health aunque se compre en un supermercado.
+
+PASO 2 — SI EL PRODUCTO NO DA SEÑAL (código ilegible, nombre genérico como 'ITEM 001'), usa el TIPO de establecimiento como proxy: restaurante→food, cafetería→drink, farmacia→health, grifo→trans, y así según su rubro principal.
+
+PASO 3 — 'other' SOLO si ni el producto ni el establecimiento dan señal alguna. 'other' es el último recurso, nunca un atajo.
+
+REGLAS TRANSVERSALES:
+- Items de la misma boleta PUEDEN Y DEBEN tener categorías distintas si sus productos son de tipos distintos.
+- En pagos Yape/Plin a personas, usa el concepto escrito; si no hay concepto, aplica PASO 2 con lo que sepas del contexto.
+- categoria_sugerida a nivel boleta = la categoría del item de mayor monto.
 
 IMPORTANTE: usa tu conocimiento de establecimientos peruanos para categorizar correctamente aunque el nombre en la boleta sea la razón social legal.
 
@@ -1153,7 +1183,8 @@ function saveAllScan(){
     const amt=parseFloat(it.monto)||0;if(amt<=0)return;
     const consumo=it.descripcion||'';
     const description=lugar?`${consumo} en ${lugar}`:consumo;
-    const cat=guessCat(consumo||lugar||'');
+    const catId=it.categoria;
+    const cat=(catId&&allCats().find(c=>c.id===catId))||guessCat(consumo||lugar||'');
     const itemDate=it.date||date;
     const itemTime=it.time?('T'+it.time+':00'):'T12:00:00';
     const ts=scanReceiptTs?(scanReceiptTs):(itemDate+itemTime);
@@ -1162,8 +1193,8 @@ function saveAllScan(){
   });
   if(count>0){
     const savedDate=date;
-    save();discardScan();closeOv('sh-add');refreshCurrent();
-    toast(`${count} gasto${count!==1?'s':''} guardado${count!==1?'s':''} ✓ — <span style="text-decoration:underline;cursor:pointer" onclick="openDaySheet('${savedDate}')">Ver →</span>`,'ok',5000);
+    save();discardScan();closeOv('sh-add');selectDay(savedDate>td()?td():savedDate);
+    toast(`${count} gasto${count!==1?'s':''} guardado${count!==1?'s':''} ✓`,'ok');
   }
   else toast('Sin montos válidos','warn');
 }
@@ -1202,7 +1233,7 @@ function saveDraft(){
   const draftTx={id:Date.now(),date,ts,amount:amt,description,category:cat.id,emoji:cat.e,isHormi:aHormi,hasTime,isDraft:true,imageThumb:_currentThumb||undefined,source:_txSource};
   _txSource='manual';
   D.transactions.unshift(draftTx);
-  save();saveTx(draftTx);discardScan();closeOv('sh-add');refreshCurrent();toast('Borrador guardado','ok');
+  save();saveTx(draftTx);discardScan();closeOv('sh-add');selectDay(date>td()?td():date);toast('Borrador guardado','ok');
 }
 // ── MULTI-SCAN ────────────────────────────────────────────────────────────────
 let msQueue=[];// {id,status,data,confirmed,hash,thumb}
@@ -1304,6 +1335,7 @@ function msConfirm(id){const it=msQueue.find(x=>x.id===id);if(it)it.confirmed=!i
 function saveAllMulti(){
   const toSave=msQueue.filter(x=>x.status==='done'&&x.confirmed&&x.data);
   let count=0;
+  let lastDate=null;
   toSave.forEach(item=>{
     const p=item.data;
     const amt=parseFloat(p.amount)||0;if(amt<=0)return;
@@ -1315,8 +1347,9 @@ function saveAllMulti(){
     const mTx={id:Date.now()+Math.random(),date:ds,ts,amount:amt,description:p.description||cat.l,category:cat.id,emoji:cat.e,isHormi:amt<=D.threshold,hasTime,source:'scan'};
     D.transactions.unshift(mTx);saveTx(mTx);
     count++;
+    lastDate=ds;
   });
-  if(count>0){save();closeOv('sh-multi');refreshCurrent();toast(`${count} gasto${count!==1?'s':''} guardado${count!==1?'s':''}  ✓`,'ok');}
+  if(count>0){save();closeOv('sh-multi');selectDay(lastDate>td()?td():lastDate);toast(`${count} gasto${count!==1?'s':''} guardado${count!==1?'s':''}  ✓`,'ok');}
   else toast('Sin gastos confirmados','warn');
 }
 
@@ -3472,7 +3505,12 @@ function guessCat(desc){
   return CATS[13];
 }
 
-function toast(msg,type=''){const el=document.getElementById('toast');el.textContent=msg;el.className=`toast show ${type}`;setTimeout(()=>el.className='toast',2600);}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+// toast() usa innerHTML: todo contenido dinámico (variables, errores
+// de API, datos de IA/boletas) DEBE pasar por esc() antes de
+// interpolarse. Solo HTML literal escrito aquí en el código puede
+// ir sin escapar.
+function toast(msg,type='',ms=2600){const el=document.getElementById('toast');el.innerHTML=msg;el.className=`toast show ${type}`;clearTimeout(el._t);el._t=setTimeout(()=>el.className='toast',ms);}
 
 // ── FULLSCREEN IMAGE ──────────────────────────────────────────────────────────
 function openFullImg(b64){
