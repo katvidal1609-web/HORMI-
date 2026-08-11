@@ -36,7 +36,7 @@ const CATS=[
   {id:'del',e:'📦',l:'delivery'},{id:'trans',e:'🚗',l:'transporte'},{id:'subs',e:'📱',l:'apps/subs'},
   {id:'health',e:'💊',l:'salud'},{id:'beauty',e:'💅',l:'belleza'},{id:'sport',e:'🏋️',l:'deporte'},
   {id:'edu',e:'📚',l:'educación'},{id:'shop',e:'👗',l:'ropa'},{id:'soc',e:'🥂',l:'social'},
-  {id:'enter',e:'🎮',l:'entret.'},{id:'other',e:'🫙',l:'otros'}
+  {id:'enter',e:'🎮',l:'entret.'},{id:'market',e:'🛒',l:'mercado'},{id:'other',e:'🫙',l:'otros'}
 ];
 const HP=[
   {e:'☕',l:'café diario'},{e:'🍪',l:'snacks'},{e:'🥤',l:'gaseosa'},{e:'🥐',l:'empanadas'},
@@ -756,18 +756,19 @@ function openModal(id){
 // ── HELPERS: DATE / THUMB / DUPLICATE / VOICE ─────────────────────────────────
 function parseReceiptDate(str){
   if(!str)return null;
-  // Handle ISO format YYYY-MM-DD returned by AI — use string directly, no UTC conversion
-  if(/^\d{4}-\d{2}-\d{2}$/.test(str)){
-    let ds=str;
-    if(ds>td()){const dt=new Date(ds+'T12:00:00');dt.setMonth(dt.getMonth()-1);ds=dt.toISOString().slice(0,10);}
-    return ds;
+  let y,mo,d;
+  const iso=str.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if(iso){y=+iso[1];mo=iso[2];d=iso[3];}
+  else{
+    const m=str.match(/(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})/);
+    if(!m)return null;
+    y=+(m[3].length===2?'20'+m[3]:m[3]);mo=m[2].padStart(2,'0');d=m[1].padStart(2,'0');
   }
-  // Support DD/MM/YY, DD/MM/YYYY — year is ALWAYS the last group
-  const m=str.match(/(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})/);
-  if(!m)return null;
-  const y=m[3].length===2?'20'+m[3]:m[3];
-  let ds=`${y}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
-  if(ds>td()){const dt=new Date(ds+'T12:00:00');dt.setMonth(dt.getMonth()-1);ds=dt.toISOString().slice(0,10);}
+  let ds=`${y}-${mo}-${d}`;
+  // Si cae en el futuro, el año suele ser lo mal leído: resta años (máx 3).
+  let guard=0;
+  while(ds>td()&&guard<3){y--;ds=`${y}-${mo}-${d}`;guard++;}
+  if(ds>td())return null; // no se pudo corregir: mejor null que fecha falsa
   return ds;
 }
 
@@ -898,6 +899,7 @@ Para categoria_sugerida elige UNO de estos IDs según el tipo de gasto:
 - shop: ropa, calzado, accesorios, tiendas. Ej: Saga Falabella, Ripley, Zara, Topitop
 - soc: bares, discotecas, alcohol, salidas sociales
 - enter: cine, teatro, conciertos. Ej: Cineplanet, Cinemark
+- market: supermercados, mercados, abarrotes, insumos crudos para cocinar, productos de limpieza y hogar. Ej: Tottus, Metro, Wong, Plaza Vea, Vivanda, Makro, mercados de barrio
 - other: todo lo demás
 
 MÉTODO DE CATEGORIZACIÓN — aplícalo a CADA item por separado, en este orden:
@@ -907,7 +909,7 @@ Responde: ¿qué haría el usuario con esto?
 - ¿Se come preparado/listo (plato, menú, combo, porción)? → food
 - ¿Se bebe? → drink
 - ¿Es un antojo empaquetado o dulce (se come sin preparación)? → snack
-- ¿Es un insumo crudo o del hogar (se cocina, se almacena, se usa para limpiar)? → no existe ID de supermercado/abarrotes en la lista real: usa food para comestibles crudos y shop para no comestibles
+- ¿Es un insumo crudo o del hogar (se cocina, se almacena, se usa para limpiar)? → market
 - ¿Es un servicio de transporte o combustible? → trans
 - ¿Es medicina o atención de salud? → health
 - ¿Es cuidado personal o estética? → beauty
@@ -967,6 +969,9 @@ function openScanOptions(){
 
 async function scanImg(input){
   const file=input.files[0];if(!file)return;
+  if(window._scanning){toast('Espera a que termine el escaneo actual','warn');input.value='';return;}
+  window._scanning=true;
+  try{
   if(!checkScanLimit())return;
   const st=document.getElementById('scan-st');
   st.innerHTML='';
@@ -1065,7 +1070,7 @@ async function scanImg(input){
     console.log('SCAN multi:', multi, 'btnsEl:', !!btnsEl, 'items:', items.length);
     if(multi&&btnsEl){
       btnsEl.style.display='flex';
-      btnsEl.innerHTML=`<button class="ms-disc" style="flex:1;color:rgba(255,255,255,.6);border-color:rgba(255,255,255,.2)" onclick="discardScan()">× Descartar</button>
+      btnsEl.innerHTML=`<button class="ms-disc" style="flex:1" onclick="discardScan()">× Descartar</button>
         <button class="ms-disc" style="flex:1;background:#d3e458;color:#0d0d0d;border-color:#d3e458;font-weight:700" onclick="saveAllScan()">Guardar ${items.length} gastos</button>`;
     }else if(btnsEl){
       // para 1 solo gasto: ocultar estos botones de aquí, se muestran junto a "guardar gasto" al final
@@ -1104,6 +1109,7 @@ async function scanImg(input){
     toast('✓ Datos extraídos','ok');
   }catch(e){st.innerHTML=`<div style="font-size:12px;color:var(--red);margin-bottom:7px">Error: ${e.message}</div>`;}
   input.value='';
+  }finally{window._scanning=false;}
 }
 let _editScanIdx=null,_esiCatSel=null;
 function editScanItem(idx){
@@ -1115,19 +1121,11 @@ function editScanItem(idx){
   document.getElementById('esi-lugar').value=it.lugar||_scanPending.lugar||'';
   document.getElementById('esi-date').value=it.date||_scanPending.date||td();
   document.getElementById('esi-time').value=it.time||'';
-  const isHormi=it.isHormi!==undefined?it.isHormi:!!(it.monto&&it.monto<=D.threshold);
-  document.getElementById('esi-hormi-pill').classList.toggle('on',isHormi);
-  const cats=[
-    {id:'food',e:'🍔',l:'comida'},{id:'drink',e:'☕',l:'café/bebidas'},
-    {id:'snack',e:'🍪',l:'snacks'},{id:'del',e:'📦',l:'delivery'},
-    {id:'trans',e:'🚕',l:'transporte'},{id:'subs',e:'📱',l:'apps/subs'},
-    {id:'health',e:'💊',l:'salud'},{id:'beauty',e:'💅',l:'belleza'},
-    {id:'sport',e:'🏋️',l:'deporte'},{id:'shop',e:'👕',l:'ropa'},
-    {id:'soc',e:'🥂',l:'social'},{id:'enter',e:'🎬',l:'entrete.'},
-    {id:'edu',e:'📚',l:'educación'},{id:'other',e:'📌',l:'otros'}
-  ];
+  const cats=allCats();
   const guess=guessCat(it.descripcion||'');
   _esiCatSel=it.categoria||guess.id;
+  const isHormi=it.isHormi!==undefined?it.isHormi:_esiCatSel!=='market';
+  document.getElementById('esi-hormi-pill').classList.toggle('on',isHormi);
   document.getElementById('esi-cats').innerHTML=cats.map(c=>`
     <button onclick="esiSelCat('${c.id}',this)" style="display:flex;align-items:center;gap:6px;padding:9px 12px;border-radius:12px;border:1.5px solid ${_esiCatSel===c.id?'var(--lime-t)':'var(--b2)'};background:${_esiCatSel===c.id?'rgba(200,246,90,.15)':'var(--bg)'};cursor:pointer;font-size:13px;font-family:var(--font-body);color:var(--t1);font-weight:${_esiCatSel===c.id?'700':'400'};transition:all .15s;-webkit-tap-highlight-color:transparent">
       <span style="font-size:16px">${c.e}</span><span>${c.l}</span>
@@ -1188,7 +1186,7 @@ function saveAllScan(){
     const itemDate=it.date||date;
     const itemTime=it.time?('T'+it.time+':00'):'T12:00:00';
     const ts=scanReceiptTs?(scanReceiptTs):(itemDate+itemTime);
-    const mTx={id:Date.now()+i,date:itemDate,ts,amount:amt,description:description||cat.l,category:cat.id,emoji:cat.e,isHormi:amt<=D.threshold,hasTime:!!scanReceiptTs,imageThumb:i===0?(_currentThumb||undefined):undefined,source:'scan'};
+    const mTx={id:Date.now()+i,date:itemDate,ts,amount:amt,description:description||cat.l,category:cat.id,emoji:cat.e,isHormi:cat.id!=='market',hasTime:!!scanReceiptTs,imageThumb:i===0?(_currentThumb||undefined):undefined,source:'scan'};
     D.transactions.unshift(mTx);saveTx(mTx);count++;
   });
   if(count>0){
@@ -1200,6 +1198,8 @@ function saveAllScan(){
 }
 function discardScan(){
   const bb=document.getElementById('scan-bottom-btns');if(bb){bb.style.display='none';bb.innerHTML='';}
+  const srb=document.getElementById('scan-res-btns');
+  if(srb)srb.innerHTML=`<button class="ms-disc" style="flex:1" onclick="discardScan()">× Descartar</button><button class="ms-disc" style="flex:1;color:var(--amber);border-color:rgba(255,187,51,.3)" onclick="saveDraft()">Guardar borrador</button>`;
   document.getElementById('scan-res').style.display='none';
   document.getElementById('scan-st').innerHTML='';
   document.getElementById('a-amt').value='';
@@ -1221,7 +1221,7 @@ function saveDraft(){
   const lugar=document.getElementById('tx-lugar').value.trim();
   if(_scanPending&&_scanPending.items&&_scanPending.items.length>1){saveAllScan();return;}
   if(!amt||amt<=0){toast('Sin monto para el borrador','warn');return;}
-  const cat=allCats().find(c=>c.id===aCat)||CATS[13];
+  const cat=allCats().find(c=>c.id===aCat)||CATS[14];
   const dateFieldVal=document.getElementById('a-date')?.value;
   const timeFieldVal=document.getElementById('a-time')?.value||'';
   const date=dateFieldVal||txDate||td();
@@ -1344,7 +1344,7 @@ function saveAllMulti(){
     if(p.time&&/^\d{1,2}:\d{2}$/.test(p.time)){ts=`${ds}T${p.time.padStart(5,'0')}:00`;hasTime=true;}
     const catId=item.catSel||p.categoria_sugerida;
     const cat=catId?allCats().find(c=>c.id===catId)||guessCat(p.description||''):guessCat(p.description||'');
-    const mTx={id:Date.now()+Math.random(),date:ds,ts,amount:amt,description:p.description||cat.l,category:cat.id,emoji:cat.e,isHormi:amt<=D.threshold,hasTime,source:'scan'};
+    const mTx={id:Date.now()+Math.random(),date:ds,ts,amount:amt,description:p.description||cat.l,category:cat.id,emoji:cat.e,isHormi:cat.id!=='market',hasTime,source:'scan'};
     D.transactions.unshift(mTx);saveTx(mTx);
     count++;
     lastDate=ds;
@@ -1414,7 +1414,7 @@ function addTx(){
   const consumo=document.getElementById('tx-consumo').value.trim();
   const lugar=document.getElementById('tx-lugar').value.trim();
   if(!amt||amt<=0){toast('Ingresa un monto','warn');return;}
-  const cat=allCats().find(c=>c.id===aCat)||CATS[13];
+  const cat=allCats().find(c=>c.id===aCat)||CATS[14];
   const dateFieldVal=document.getElementById('a-date')?.value;
   const timeFieldVal=document.getElementById('a-time')?.value||'';
   const date=dateFieldVal||txDate||td();
@@ -1672,7 +1672,7 @@ function renderDayForHome(animate){
     if(window.lucide)lucide.createIcons();
     return;
   }
-  feedEl.innerHTML=txs.map(t=>{const tt=ttime(t);const catName=(allCats().find(c=>c.id===t.category)||CATS[13]).l;return`<div class="tx${t.isHormi?' hm':''}${t.isDraft?' draft':''}" onclick="openTxDetail(${t.id})" style="${t.isDraft?'border-color:rgba(255,187,51,.3)':''}">
+  feedEl.innerHTML=txs.map(t=>{const tt=ttime(t);const catName=(allCats().find(c=>c.id===t.category)||CATS[14]).l;return`<div class="tx${t.isHormi?' hm':''}${t.isDraft?' draft':''}" onclick="openTxDetail(${t.id})" style="${t.isDraft?'border-color:rgba(255,187,51,.3)':''}">
     <div class="tx-ic">${t.emoji||'🫙'}</div>
     <div class="tx-nfo"><div class="tx-nm">${t.description}</div><div class="tx-ct">${catName}${tt?` · ${tt}`:''}</div></div>
     <div class="tx-r"><div class="tx-am">${fmt(t.amount)}</div>${t.isDraft?'<div class="draft-badge">borrador</div>':t.isHormi?'<div class="hm-tag">hormiga</div>':''}</div>
@@ -1704,7 +1704,7 @@ function openTxDetail(id){
     ${t.imageThumb?`<img src="data:image/jpeg;base64,${t.imageThumb}" onclick="openFullImg('${t.imageThumb}')" style="width:64px;height:64px;border-radius:10px;object-fit:cover;margin-bottom:10px;display:block;border:.5px solid var(--b2);cursor:pointer" title="Ver imagen">`:''}
     <div style="font-size:16px;font-weight:600;margin-bottom:4px">${t.emoji||'🫙'} ${t.description}</div>
     <div style="font-family:var(--font-title);font-size:22px;font-weight:800;color:var(--t1);margin-bottom:6px">${fmt(t.amount)}</div>
-    <div style="font-size:12px;color:var(--t3)">${t.date}${tt?' · '+tt:''} · ${(allCats().find(c=>c.id===t.category)||CATS[13]).l}${t.isHormi?' · <span style="color:var(--red)">hormiga</span>':''}</div>`;
+    <div style="font-size:12px;color:var(--t3)">${t.date}${tt?' · '+tt:''} · ${(allCats().find(c=>c.id===t.category)||CATS[14]).l}${t.isHormi?' · <span style="color:var(--red)">hormiga</span>':''}</div>`;
   // show/hide buttons
   const isDraft=!!t.isDraft;
   document.getElementById('m-tx-confirm-btn').style.display=isDraft?'':'none';
@@ -1787,7 +1787,7 @@ function saveTxEdit(){
   t.description=editConsumo?(editLugar?`${editConsumo} en ${editLugar}`:editConsumo):t.description;
   t.alias=editLugar||null;
   t.date=date;t.category=_editCat;
-  t.emoji=(allCats().find(c=>c.id===_editCat)||CATS[13]).e;
+  t.emoji=(allCats().find(c=>c.id===_editCat)||CATS[14]).e;
   t.isHormi=_editHormi;
   if(timeVal){t.ts=`${date}T${timeVal}:00`;t.hasTime=true;}
   else{t.ts=`${date}T12:00:00`;t.hasTime=false;}
@@ -1939,7 +1939,7 @@ function renderHormiCategories(){
   const entries=Object.entries(byCat).sort((a,b)=>b[1].total-a[1].total);
   if(!entries.length){el.innerHTML='<div style="font-size:13px;color:var(--t3);padding:8px 0">Sin hormis este mes.</div>';return;}
   el.innerHTML=entries.map(([ci,{txs,total}])=>{
-    const cm=allCats().find(c=>c.id===ci)||CATS[13];
+    const cm=allCats().find(c=>c.id===ci)||CATS[14];
     const avg=total/txs.length;
     const imp=total>100
       ?{l:'⚡ Alto',bg:'#FFEDED',c:'#CC0000'}
@@ -2246,7 +2246,7 @@ function renderStats(){
       </div>
     </div>
     ${buildPieChart(sc,mc)}
-    ${sc.length?`<div class="catlist"><div class="sec" style="margin-bottom:4px">general por categoría · ${fmt(totalMes)}</div><div style="font-size:11px;color:var(--t3);margin-bottom:10px;line-height:1.4">Incluye todos tus gastos del mes, no solo hormigas — por eso el total es mayor</div>${sc.map(([ci,a])=>{const cm=allCats().find(c=>c.id===ci)||CATS[13];return`<div class="ctr"><div class="ctr-ic">${cm.e}</div><div class="ctr-nm">${capFirst(cm.l)}</div><div class="ctr-bar"><div class="ctr-fill" style="width:${Math.round(a/mc*100)}%"></div></div><div class="ctr-amt">${fmt(a)}</div></div>`;}).join('')}</div>`:''}
+    ${sc.length?`<div class="catlist"><div class="sec" style="margin-bottom:4px">general por categoría · ${fmt(totalMes)}</div><div style="font-size:11px;color:var(--t3);margin-bottom:10px;line-height:1.4">Incluye todos tus gastos del mes, no solo hormigas — por eso el total es mayor</div>${sc.map(([ci,a])=>{const cm=allCats().find(c=>c.id===ci)||CATS[14];return`<div class="ctr"><div class="ctr-ic">${cm.e}</div><div class="ctr-nm">${capFirst(cm.l)}</div><div class="ctr-bar"><div class="ctr-fill" style="width:${Math.round(a/mc*100)}%"></div></div><div class="ctr-amt">${fmt(a)}</div></div>`;}).join('')}</div>`:''}
     <div style="background:var(--s1);border-radius:14px;border:0.5px solid var(--border);padding:20px;margin-bottom:12px">
       <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);margin-bottom:12px">HORMIS QUE MÁS APARECEN</div>
       <div id="hormi-cat-list"></div>
@@ -2289,11 +2289,11 @@ function buildPieChart(sc,total){
     const large=slice>Math.PI?1:0;
     const color=PIE_COLORS[i%PIE_COLORS.length];
     const gradId=`pieGrad${i}`;
-    const cm=allCats().find(c=>c.id===ci)||CATS[13];
+    const cm=allCats().find(c=>c.id===ci)||CATS[14];
     gradDefs+=`<radialGradient id="${gradId}" cx="35%" cy="30%" r="75%"><stop offset="0%" stop-color="${color}" stop-opacity="1"/><stop offset="100%" stop-color="${color}" stop-opacity=".75"/></radialGradient>`;
     paths+=`<path d="M${cx},${cy} L${x1.toFixed(1)},${y1.toFixed(1)} A${r},${r} 0 ${large},1 ${x2.toFixed(1)},${y2.toFixed(1)} Z" fill="url(#${gradId})" style="cursor:pointer;filter:drop-shadow(0 3px 5px rgba(0,0,0,.18))" onclick="showPieDetail('${ci}','${cm.l}','${fmt(amt).replace(/'/g,'')}')" />`;
   });
-  const legend=mScEntries.map(([ci,amt],i)=>{const cm=allCats().find(c=>c.id===ci)||CATS[13];return`<div class="pie-leg-it" onclick="showPieDetail('${ci}','${capFirst(cm.l)}','${fmt(amt).replace(/'/g,'')}')"><div class="pie-leg-dot" style="background:${PIE_COLORS[i%PIE_COLORS.length]}"></div><div class="pie-leg-nm">${cm.e} ${capFirst(cm.l)}</div><div class="pie-leg-amt">${fmt(amt)}</div></div>`;}).join('');
+  const legend=mScEntries.map(([ci,amt],i)=>{const cm=allCats().find(c=>c.id===ci)||CATS[14];return`<div class="pie-leg-it" onclick="showPieDetail('${ci}','${capFirst(cm.l)}','${fmt(amt).replace(/'/g,'')}')"><div class="pie-leg-dot" style="background:${PIE_COLORS[i%PIE_COLORS.length]}"></div><div class="pie-leg-nm">${cm.e} ${capFirst(cm.l)}</div><div class="pie-leg-amt">${fmt(amt)}</div></div>`;}).join('');
   const onlyOneCat=mScEntries.length===1;
   return`<div class="pie-wrap">
     <div class="sec" style="margin-bottom:10px">distribución este mes — hormis</div>
@@ -2356,7 +2356,7 @@ async function shareProgress(){
   // top category this week
   const byCat={};D.transactions.filter(t=>t.isHormi&&new Date(t.date+'T12:00:00')>=new Date(now-7*86400000)).forEach(t=>{byCat[t.category]=(byCat[t.category]||0)+t.amount;});
   const topCatEntry=Object.entries(byCat).sort((a,b)=>b[1]-a[1])[0];
-  const topCatObj=topCatEntry?(allCats().find(c=>c.id===topCatEntry[0])||CATS[13]):null;
+  const topCatObj=topCatEntry?(allCats().find(c=>c.id===topCatEntry[0])||CATS[14]):null;
   const daysUnder=[...new Set(D.transactions.filter(t=>t.isHormi&&new Date(t.date+'T12:00:00')>=new Date(now-7*86400000)).map(t=>t.date))].filter(d=>D.transactions.filter(t=>t.date===d&&t.isHormi).reduce((s,t)=>s+t.amount,0)<=bud).length;
   try{
     const W=400,H=600,scale=3;
@@ -2446,7 +2446,7 @@ async function doShareProgress(){
 function buildIns(hm,mhm,pkH,sc,avg){
   const ins=[];
   if(avg>0)ins.push(`Si reduces tus hormigas a la mitad, ahorras <strong>S/ ${(avg*30*0.5).toFixed(0)} cada 15 días</strong>. En un año: <strong>S/ ${(avg*365*0.5).toFixed(0)}</strong>.`);
-  if(sc.length){const t=CATS.find(c=>c.id===sc[0][0])||CATS[13];ins.push(`Tu categoría más cara es <strong>${t.e} ${t.l}</strong> con ${fmt(sc[0][1])}. ¿Vale lo que gastas?`);}
+  if(sc.length){const t=CATS.find(c=>c.id===sc[0][0])||CATS[14];ins.push(`Tu categoría más cara es <strong>${t.e} ${t.l}</strong> con ${fmt(sc[0][1])}. ¿Vale lo que gastas?`);}
   if(pkH>=11&&pkH<=14)ins.push(`Gastas más a las <strong>${pkH}:00 (almuerzo)</strong>. Llevar comida 3 días/semana puede hacer diferencia real.`);
   else if(pkH>=18&&pkH<=22)ins.push(`Tu hora pico es las <strong>${pkH}:00</strong>. El cansancio del día activa el gasto impulsivo.`);
   if(D.hormis.length>0)ins.push(`Identificaste <strong>${D.hormis.length} hormiga${D.hormis.length!==1?'s':''}</strong>: ${D.hormis.slice(0,3).join(', ')}${D.hormis.length>3?'...':''}. Cada semana sin ellas es un ahorro real.`);
@@ -2507,8 +2507,8 @@ function renderGoals(){
     <div style="font-size:13px;color:var(--t3);margin-bottom:16px">${MO[new Date().getMonth()]} ${new Date().getFullYear()}</div>
     ${mg.map(g=>{
       const isHG=!!g.hormi;
-      const label=isHG?g.hormi:(CATS.find(c=>c.id===g.cat)||CATS[13]).l;
-      const emoji=isHG?'🐜':(CATS.find(c=>c.id===g.cat)||CATS[13]).e;
+      const label=isHG?g.hormi:(CATS.find(c=>c.id===g.cat)||CATS[14]).l;
+      const emoji=isHG?'🐜':(CATS.find(c=>c.id===g.cat)||CATS[14]).e;
       const sp=calcGoalSpent(g);
       const pct=Math.min(sp/g.budget*100,100);
       const fc=sp>g.budget?'var(--red)':sp>g.budget*.75?'var(--amber)':'var(--lime)';
@@ -3267,7 +3267,7 @@ function _pTopH(txs){
   txs.forEach(t=>{const k=t.description||'Otro';if(!by[k])by[k]={total:0,count:0,firstTx:t};by[k].total+=t.amount;by[k].count++;});
   return Object.entries(by).sort((a,b)=>b[1].total-a[1].total).slice(0,3).map(([name,d])=>{
     const ci=d.firstTx?.category||'other';
-    const cm=allCats().find(c=>c.id===ci)||CATS[13];
+    const cm=allCats().find(c=>c.id===ci)||CATS[14];
     return {name,total:d.total,count:d.count,impact:d.total>150?'alto':'medio',emoji:cm.e,catName:capFirst(cm.l),detail:`Aparece ${d.count} veces este mes.`,alternatives:['Evalúa si puedes reducir esta categoría','Busca alternativas más económicas']};
   });
 }
@@ -3344,7 +3344,7 @@ function _pOpenHormi(monthIdx,hormiIdx){
     hormiTxs=(_planCachedPastMonths[monthIdx]?.txs||[]).filter(t=>(t.description||'Otro')===h.name);
   }
   const ci=hormiTxs[0]?.category||'other';
-  const cm=allCats().find(c=>c.id===ci)||CATS[13];
+  const cm=allCats().find(c=>c.id===ci)||CATS[14];
   const hp=calcHoraPico(hormiTxs);
   const dp=calcDiaPico(hormiTxs);
   h.catName=h.catName||capFirst(cm.l);
@@ -3490,19 +3490,21 @@ function planShowOutput(p){_pRenderOut(p);}
 
 function guessCat(desc){
   const d=desc.toLowerCase();
-  if(/café|coffee|starbucks|bembos|kfc|mc|burger|pizza|sushi|restaur|almuerzo|comida|chifa|pollo|menú/.test(d))return CATS[0];
-  if(/bebida|jugo|gaseosa|smoothie|té|limonada/.test(d))return CATS[1];
-  if(/snack|dulce|galleta|choc|helad|cheesecake|empanada|golos|candy/.test(d))return CATS[2];
-  if(/rappi|pedidos|ya|delivery|glovo|uber\s*eat/.test(d))return CATS[3];
-  if(/uber|taxi|cabify|bus|metro|transporte|gasolina/.test(d))return CATS[4];
-  if(/netflix|spotify|amazon|prime|disney|youtube|apple|suscri|app/.test(d))return CATS[5];
-  if(/farmacia|clinica|médico|doctor|salud|medicina|psicolog/.test(d))return CATS[6];
-  if(/salon|peluquería|manicure|pedicure|estétic|beauty|cosmético/.test(d))return CATS[7];
-  if(/gimnasio|gym|deporte|voley|natación|entren/.test(d))return CATS[8];
-  if(/univ|curso|libro|educaci|máster|escuela|taller/.test(d))return CATS[9];
-  if(/ropa|zapatilla|tienda|saga|ripley|falabella|zara/.test(d))return CATS[10];
-  if(/bar|cerveza|disco|club|karaoke|cine|tragos/.test(d))return CATS[11];
-  return CATS[13];
+  if(/café|coffee|starbucks|bembos|kfc|mc|burger|pizza|sushi|restaur|almuerzo|comida|chifa|pollo|menú/.test(d))return CATS.find(c=>c.id==='food');
+  if(/bebida|jugo|gaseosa|smoothie|té|limonada/.test(d))return CATS.find(c=>c.id==='drink');
+  if(/snack|dulce|galleta|choc|helad|cheesecake|empanada|golos|candy/.test(d))return CATS.find(c=>c.id==='snack');
+  if(/rappi|pedidos|ya|delivery|glovo|uber\s*eat/.test(d))return CATS.find(c=>c.id==='del');
+  if(/uber|taxi|cabify|bus|transporte|gasolina|tren|metropolitano|linea 1|estación/.test(d))return CATS.find(c=>c.id==='trans');
+  if(/netflix|spotify|amazon|prime|disney|youtube|apple|suscri|app/.test(d))return CATS.find(c=>c.id==='subs');
+  if(/farmacia|clinica|médico|doctor|salud|medicina|psicolog/.test(d))return CATS.find(c=>c.id==='health');
+  if(/salon|peluquería|manicure|pedicure|estétic|beauty|cosmético/.test(d))return CATS.find(c=>c.id==='beauty');
+  if(/gimnasio|gym|deporte|voley|natación|entren/.test(d))return CATS.find(c=>c.id==='sport');
+  if(/univ|curso|libro|educaci|máster|escuela|taller/.test(d))return CATS.find(c=>c.id==='edu');
+  if(/ropa|zapatilla|tienda|saga|ripley|falabella|zara/.test(d))return CATS.find(c=>c.id==='shop');
+  if(/bar|cerveza|disco|club|karaoke|tragos/.test(d))return CATS.find(c=>c.id==='soc');
+  if(/cine|teatro|concierto|cineplanet|cinemark|entrada/.test(d))return CATS.find(c=>c.id==='enter');
+  if(/mercado|supermercado|tottus|wong|\bmetro\b|plaza vea|vivanda|makro|verduler|carnicer|abarrote/.test(d))return CATS.find(c=>c.id==='market');
+  return CATS.find(c=>c.id==='other');
 }
 
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}

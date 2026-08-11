@@ -266,7 +266,7 @@
 .ms-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
 .ms-lbl{font-size:12px;color:var(--t3)}
 .ms-acts{display:flex;gap:6px;margin-top:9px}
-.ms-disc{flex:1;padding:9px;background:transparent;border:1px solid var(--b2);border-radius:var(--rsm);color:var(--t3);font-size:13px;cursor:pointer;font-family:var(--font-title)}
+.ms-disc{flex:1;padding:9px;background:transparent;border:1px solid var(--b2);border-radius:var(--rsm);color:var(--t1);font-size:13px;cursor:pointer;font-family:var(--font-title)}
 .ms-ok{flex:2;padding:9px;background:var(--lime);border:none;border-radius:var(--rsm);color:#080808;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font-title)}
 
 /* QUINCENAL CARDS */
