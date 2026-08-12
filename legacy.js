@@ -865,6 +865,14 @@ Para Yape/Plin busca específicamente:
 - La hora: si está visible en el comprobante (formato HH:MM), inclúyela. Si no se ve, pon null
 - El concepto/mensaje: texto opcional que acompaña el pago
 
+FECHA — REGLA CRÍTICA (aplica a TODOS los tipos de comprobante):
+- En boletas y facturas peruanas la fecha de emisión aparece etiquetada explícitamente: "FECHA:", "FECHA DE EMISION:", "F. EMISION:". Usa SOLO ese campo etiquetado. Está normalmente en la cabecera, cerca del número de boleta y el terminal/caja.
+- NUNCA uses: fechas de vencimiento, vigencia de promociones, fechas de garantía, correlativos, números de operación, ni cualquier número que no esté junto a una etiqueta de fecha de emisión.
+- El formato peruano es DD/MM/AAAA: el PRIMER número es el DÍA, el SEGUNDO es el MES, el ÚLTIMO es el AÑO. "27/07/2026" = 27 de julio de 2026. Nunca lo interpretes como MM/DD.
+- Devuélvela SIEMPRE convertida a "YYYY-MM-DD".
+- El año se lee COMPLETO del comprobante. No asumas el año actual ni ningún otro: cópialo tal como aparece.
+- Si NO encuentras un campo de fecha de emisión claramente etiquetado, devuelve "fecha":null. NUNCA inventes ni aproximes una fecha — es preferible null a una fecha equivocada.
+
 Responde SOLO con este JSON sin texto adicional ni backticks:
 {"items":[{"descripcion":"concepto o nombre del destinatario","monto":0.00,"categoria":"ID"}],"lugar":"nombre comercial + distrito (ej: Listo Monterrico)","fecha":"YYYY-MM-DD","hora":"HH:MM","categoria_sugerida":"ID"}
 
@@ -1005,7 +1013,7 @@ async function scanImg(input){
     }
     // parse date/time — use string directly, never new Date(str) to avoid UTC shift
     let ds=null;
-    if(p.fecha){ds=parseReceiptDate(p.fecha);if(ds){txDate=ds;document.getElementById('a-date').value=ds;}}
+    if(p.fecha){ds=parseReceiptDate(p.fecha);if(ds){txDate=ds;document.getElementById('a-date').value=ds;}else{toast('No pudimos leer la fecha de la boleta — revísala antes de guardar','warn',4000);}}
     else{
       const dateIn=document.getElementById('a-date');
       if(dateIn){
@@ -1059,7 +1067,7 @@ async function scanImg(input){
         <div style="font-size:11px;color:var(--t3);letter-spacing:.04em;margin-bottom:5px">${lugar||'Detectado'}</div>
         ${items.map((it,idx)=>`<div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;margin-bottom:4px;gap:6px"><span style="color:var(--t1);flex:1;">${it.descripcion||'ítem'}</span><span style="font-weight:600;white-space:nowrap;color:var(--t1)">${fmt(it.monto||0)}</span><button onclick="editScanItem(${idx})" style="background:rgba(45,81,88,.1);border:1px solid #2d5158;border-radius:6px;padding:3px 10px;font-size:11px;color:#2d5158;cursor:pointer;white-space:nowrap;font-family:var(--font-body);font-weight:600">editar</button></div>`).join('')}
         <div style="border-top:.5px solid var(--b2);margin-top:6px;padding-top:6px;display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--t3)">Total</span><span style="font-weight:700;color:var(--t1)">${fmt(totalAmt)}</span></div>
-        ${ds?`<div style="font-size:11px;color:var(--t3);margin-top:4px">${p.fecha||ds}${p.hora?' · '+p.hora:''}</div>`:''}
+        ${ds?`<div style="font-size:11px;color:${p.fecha?'var(--t3)':'var(--amber-t)'};margin-top:4px">${p.fecha||ds}${p.fecha?'':' (verificar)'}${p.hora?' · '+p.hora:''}</div>`:''}
       `;
     }else{
       document.getElementById('scan-fields').innerHTML=`<div style="font-size:12px;color:var(--t3)">Revisa y ajusta los campos de abajo si es necesario</div>`;
@@ -2182,21 +2190,25 @@ function renderStats(){
   const tH=hm.reduce((s,t)=>s+t.amount,0);
   const mHA=mhm.reduce((s,t)=>s+t.amount,0);
   const totalMes=txsMes.reduce((s,t)=>s+t.amount,0);
+  // días transcurridos del mes seleccionado (mes completo si es pasado,
+  // día actual si es el mes en curso)
+  const [yTm,mTm]=tm.split('-').map(Number);
+  const nowD=new Date();
+  const esMesActual = tm === new Date().toISOString().slice(0,7);
+  const diasDelMes = new Date(yTm,mTm,0).getDate();
+  const diasTranscurridos = esMesActual ? nowD.getDate() : diasDelMes;
+  const avgMes = mHA / diasTranscurridos;
   const byCat={};txsMes.forEach(t=>{byCat[t.category]=(byCat[t.category]||0)+t.amount;});
   const sc=Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
   const mc=sc[0]?.[1]||1;
   const byH=Array(24).fill(0);all.forEach(t=>{byH[new Date(t.ts).getHours()]+=t.amount;});
   const mxH=Math.max(...byH)||1;const pkH=byH.indexOf(Math.max(...byH));
   const days=[...new Set(hm.map(t=>t.date))].length||1;const avg=tH/days;
-  // proyección al cierre de quincena
-  const nowP=new Date();const dayP=nowP.getDate();const fH=dayP<=15;
-  const qStart=new Date(nowP.getFullYear(),nowP.getMonth(),fH?1:16).toISOString().slice(0,10);
-  const qEnd=new Date(nowP.getFullYear(),nowP.getMonth(),fH?15:new Date(nowP.getFullYear(),nowP.getMonth()+1,0).getDate()).toISOString().slice(0,10);
-  const thisQ=hm.filter(t=>t.date>=qStart&&t.date<=qEnd);
-  const thisTotal=thisQ.reduce((s,t)=>s+t.amount,0);
-  const daysLeft=fH?(15-dayP):(new Date(nowP.getFullYear(),nowP.getMonth()+1,0).getDate()-dayP);
-  const proj=avg>0?thisTotal+(avg*daysLeft):0;
-  _saveCardAvg=avg;
+  // proyección al cierre del mes seleccionado
+  const proj = esMesActual && diasTranscurridos>0
+    ? mHA + (avgMes * (diasDelMes - diasTranscurridos))
+    : 0;
+  _saveCardAvg=avgMes;
   const monthLabel=(()=>{
     const [y,m]=tm.split('-');
     const meses=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
@@ -2220,12 +2232,12 @@ function renderStats(){
     </div>
     ${proj>0?`<div class="hrc" style="margin-bottom:10px;display:flex;align-items:center;gap:10px;padding:13px 15px">
       <i data-lucide="target" style="width:18px;height:18px;color:#407178;flex-shrink:0"></i>
-      <div><div class="sec" style="margin:0 0 2px">Proyección al cierre</div><div style="font-size:13px;color:var(--t2)">Con tu ritmo actual: <strong>${fmt(proj)}</strong> hormis este mes</div></div>
+      <div><div class="sec" style="margin:0 0 2px">Proyección al cierre</div><div style="font-size:13px;color:var(--t2)">Con tu ritmo actual: <strong>${fmt(proj)}</strong> hormis al cierre del mes</div></div>
     </div>`:''}
-    ${(()=>{
+    ${esMesActual?(()=>{
   const nowW=Date.now();
-  const weeklyHmW=hm.filter(t=>new Date(t.date+'T12:00:00')>=new Date(nowW-7*86400000)).reduce((s,t)=>s+t.amount,0);
-  const prevWeekHmW=hm.filter(t=>new Date(t.date+'T12:00:00')>=new Date(nowW-14*86400000)&&new Date(t.date+'T12:00:00')<new Date(nowW-7*86400000)).reduce((s,t)=>s+t.amount,0);
+  const weeklyHmW=mhm.filter(t=>new Date(t.date+'T12:00:00')>=new Date(nowW-7*86400000)).reduce((s,t)=>s+t.amount,0);
+  const prevWeekHmW=mhm.filter(t=>new Date(t.date+'T12:00:00')>=new Date(nowW-14*86400000)&&new Date(t.date+'T12:00:00')<new Date(nowW-7*86400000)).reduce((s,t)=>s+t.amount,0);
   if(prevWeekHmW<=0)return'';
   const weekDiffW=weeklyHmW-prevWeekHmW;
   const icon=weekDiffW<0?'trending-down':weekDiffW>0?'trending-up':'minus';
@@ -2236,13 +2248,13 @@ function renderStats(){
     <i data-lucide="${icon}" style="width:18px;height:18px;color:${color};flex-shrink:0"></i>
     <div><div class="sec" style="margin:0 0 2px">${msg}</div><div style="font-size:13px;color:var(--t2)">${sub}</div></div>
   </div>`;
-})()}
+})():''}
     <div class="save-c">
       <div class="save-t" id="save-pct-lbl">si reduces 50% tus hormigas</div>
       <input type="range" id="save-pct-slider" min="10" max="90" step="10" value="50" style="width:100%;margin-bottom:12px;accent-color:rgb(166,177,231);-webkit-appearance:none;height:6px;border-radius:3px;background:linear-gradient(to right, rgb(166,177,231) 50%, #d1d5db 50%)" oninput="updateSavePct(this.value)">
       <div class="save-g">
-        <div class="save-i"><div class="save-il">al mes</div><div class="save-iv" id="save-mes-val">+${fmt(avg*30*0.5)}</div></div>
-        <div class="save-i"><div class="save-il">al año</div><div class="save-iv" id="save-ano-val">+${fmt(avg*365*0.5)}</div></div>
+        <div class="save-i"><div class="save-il">al mes</div><div class="save-iv" id="save-mes-val">+${fmt(avgMes*30*0.5)}</div></div>
+        <div class="save-i"><div class="save-il">al año</div><div class="save-iv" id="save-ano-val">+${fmt(avgMes*365*0.5)}</div></div>
       </div>
     </div>
     ${buildPieChart(sc,mc)}
