@@ -873,8 +873,17 @@ FECHA — REGLA CRÍTICA (aplica a TODOS los tipos de comprobante):
 - El año se lee COMPLETO del comprobante. No asumas el año actual ni ningún otro: cópialo tal como aparece.
 - Si NO encuentras un campo de fecha de emisión claramente etiquetado, devuelve "fecha":null. NUNCA inventes ni aproximes una fecha — es preferible null a una fecha equivocada.
 
+CALIDAD DE LA IMAGEN — EVALÚA ANTES DE EXTRAER:
+Si la imagen está borrosa, cortada, con reflejos, muy oscura, o si no puedes leer con certeza los montos, el total o la fecha, responde SOLO:
+{"error":"low_quality","message":"La foto no se lee con claridad"}
+No intentes adivinar valores de una imagen ilegible.
+Además, si SÍ pudiste extraer pero tienes dudas en algún dato, agrega al JSON el campo "confianza":"baja" (o "alta" si estás seguro de todo).
+
+AUTOVERIFICACIÓN: después de extraer los items, suma sus montos y compárala con el total impreso del ticket. Si la diferencia es mayor a S/1.00, o si la cantidad de items que extrajiste no coincide con el 'NUMERO DE ITEMS' impreso, marca confianza:'baja'. Nunca ajustes montos para que cuadren — reporta lo que leíste y marca la confianza.
+"total_impreso" es el IMPORTE TOTAL / TOTAL que aparece impreso en el ticket, o null si no se ve. "num_items_impreso" es el campo "NUMERO DE ITEMS" si aparece, o null si no aparece.
+
 Responde SOLO con este JSON sin texto adicional ni backticks:
-{"items":[{"descripcion":"concepto o nombre del destinatario","monto":0.00,"categoria":"ID"}],"lugar":"nombre comercial + distrito (ej: Listo Monterrico)","fecha":"YYYY-MM-DD","hora":"HH:MM","categoria_sugerida":"ID"}
+{"items":[{"descripcion":"concepto o nombre del destinatario","monto":0.00,"categoria":"ID"}],"lugar":"nombre comercial + distrito (ej: Listo Monterrico)","fecha":"YYYY-MM-DD","hora":"HH:MM","categoria_sugerida":"ID","total_impreso":0.00,"num_items_impreso":0,"confianza":"alta"}
 
 DECODIFICACIÓN DE CÓDIGOS ABREVIADOS (para cada item.descripcion):
 Los supermercados y tiendas de conveniencia suelen imprimir el producto como un código abreviado en vez del nombre completo. Antes de devolver descripcion, revisa si el texto cumple CUALQUIERA de estas señales de código:
@@ -1011,6 +1020,10 @@ async function scanImg(input){
       if(p.fecha){const ds2=parseReceiptDate(p.fecha);if(ds2){txDate=ds2;document.getElementById('a-date').value=ds2;}}
       input.value='';return;
     }
+    if(p.error==='low_quality'){
+      st.innerHTML=`<div style="background:var(--red-bg);border:1px solid var(--red-b);border-radius:var(--rsm);padding:10px 13px;font-size:13px;color:var(--red);margin-bottom:7px">⚠️ ${p.message||'La foto no se lee con claridad'}<br><button onclick="openScanOptions()" style="margin-top:8px;background:var(--red);color:#fff;border:none;border-radius:var(--rsm);padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer">Volver a tomar foto</button></div>`;
+      input.value='';return;
+    }
     // parse date/time — use string directly, never new Date(str) to avoid UTC shift
     let ds=null;
     if(p.fecha){ds=parseReceiptDate(p.fecha);if(ds){txDate=ds;document.getElementById('a-date').value=ds;}else{toast('No pudimos leer la fecha de la boleta — revísala antes de guardar','warn',4000);}}
@@ -1058,66 +1071,86 @@ async function scanImg(input){
     }
     // store for multi-save
     _txSource='scan';
-    _scanPending={items,lugar,date:ds||td()};
-    const totalAmt=items.reduce((s,it)=>s+(it.monto||0),0);
-    const multi=items.length>1;
-    // show detected items — solo box completo si es multi; si es 1 solo gasto, mensaje simple
-    if(multi){
-      document.getElementById('scan-fields').innerHTML=`
-        <div style="font-size:11px;color:var(--t3);letter-spacing:.04em;margin-bottom:5px">${lugar||'Detectado'}</div>
-        ${items.map((it,idx)=>`<div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;margin-bottom:4px;gap:6px"><span style="color:var(--t1);flex:1;">${it.descripcion||'ítem'}</span><span style="font-weight:600;white-space:nowrap;color:var(--t1)">${fmt(it.monto||0)}</span><button onclick="editScanItem(${idx})" style="background:rgba(45,81,88,.1);border:1px solid #2d5158;border-radius:6px;padding:3px 10px;font-size:11px;color:#2d5158;cursor:pointer;white-space:nowrap;font-family:var(--font-body);font-weight:600">editar</button></div>`).join('')}
-        <div style="border-top:.5px solid var(--b2);margin-top:6px;padding-top:6px;display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--t3)">Total</span><span style="font-weight:700;color:var(--t1)">${fmt(totalAmt)}</span></div>
-        ${ds?`<div style="font-size:11px;color:${p.fecha?'var(--t3)':'var(--amber-t)'};margin-top:4px">${p.fecha||ds}${p.fecha?'':' (verificar)'}${p.hora?' · '+p.hora:''}</div>`:''}
-      `;
-    }else{
-      document.getElementById('scan-fields').innerHTML=`<div style="font-size:12px;color:var(--t3)">Revisa y ajusta los campos de abajo si es necesario</div>`;
-    }
-    // for single item pre-fill form; for multi-item show "save all" action
-    const resEl=document.getElementById('scan-res');
-    const btnsEl=document.getElementById('scan-res-btns');
-    console.log('SCAN multi:', multi, 'btnsEl:', !!btnsEl, 'items:', items.length);
-    if(multi&&btnsEl){
-      btnsEl.style.display='flex';
-      btnsEl.innerHTML=`<button class="ms-disc" style="flex:1" onclick="discardScan()">× Descartar</button>
-        <button class="ms-disc" style="flex:1;background:#d3e458;color:#0d0d0d;border-color:#d3e458;font-weight:700" onclick="saveAllScan()">Guardar ${items.length} gastos</button>`;
-    }else if(btnsEl){
-      // para 1 solo gasto: ocultar estos botones de aquí, se muestran junto a "guardar gasto" al final
-      btnsEl.style.display='none';
-      const bottomBtns=document.getElementById('scan-bottom-btns');
-      if(bottomBtns){
-        bottomBtns.style.display='flex';
-        bottomBtns.innerHTML=`<button class="ms-disc" style="flex:1" onclick="discardScan()">× Descartar</button>
-          <button class="ms-disc" style="flex:1;color:var(--amber);border-color:rgba(255,187,51,.3)" onclick="saveDraft()">Guardar borrador</button>`;
-      }
-    }
-    // ocultar formulario manual cuando hay scan múltiple
-    const scanMultiMode=document.getElementById('scan-multi-hide');
-    if(multi){
-      if(!scanMultiMode){
-        const hideDiv=document.createElement('style');
-        hideDiv.id='scan-multi-hide';
-        hideDiv.textContent=`#sh-add .f-lbl,#sh-add .amt-wr,#sh-add .txt-in,#sh-add .eg,#sh-add .tog-row,#sh-add #btn-add-tx,#sh-add #dup-warn{display:none!important}`;
-        document.head.appendChild(hideDiv);
-      }
-    }else{
-      const s=document.getElementById('scan-multi-hide');if(s)s.remove();
-    }
-    if(!multi){
-      const it=items[0];
-      document.getElementById('a-amt').value=it.monto||'';
-      document.getElementById('tx-consumo').value=it.descripcion||'';
-      document.getElementById('tx-lugar').value=lugar;
-      aHormi=!!(it.monto&&it.monto<=D.threshold);
-      document.getElementById('h-pill').classList.toggle('on',aHormi);
-      const cg=p.categoria_sugerida?{id:p.categoria_sugerida}:guessCat(it.descripcion||lugar||'');selAddCat(cg.id);
-      if((it.descripcion||'').length>=5)checkAndShowDuplicate(it.descripcion);
-      const cb=document.getElementById('scan-confirm-banner');if(cb)cb.style.display='';
-    }
-    resEl.style.display='block';
+    _scanPending={
+      items,lugar,date:ds||td(),
+      fechaOriginal:p.fecha||null,
+      hora:p.hora||null,
+      categoriaSugerida:p.categoria_sugerida||null,
+      totalImpreso:(typeof p.total_impreso==='number')?p.total_impreso:null,
+      numItemsImpreso:(typeof p.num_items_impreso==='number')?p.num_items_impreso:null,
+      confianza:p.confianza||null
+    };
+    rerenderScanPreview();
     toast('✓ Datos extraídos','ok');
   }catch(e){st.innerHTML=`<div style="font-size:12px;color:var(--red);margin-bottom:7px">Error: ${e.message}</div>`;}
   input.value='';
   }finally{window._scanning=false;}
+}
+function rerenderScanPreview(){
+  if(!_scanPending)return;
+  const {items,lugar,date,fechaOriginal,hora,categoriaSugerida,totalImpreso,numItemsImpreso,confianza}=_scanPending;
+  const totalAmt=items.reduce((s,it)=>s+(it.monto||0),0);
+  const multi=items.length>1;
+  const banners=[];
+  if(confianza==='baja')banners.push(`<div style="background:var(--amber-bg);border:1px solid rgba(217,119,6,.3);border-radius:var(--rsm);padding:10px 13px;font-size:13px;color:var(--amber-t);margin-bottom:7px">⚠️ Algunos datos podrían estar mal leídos — revísalos antes de guardar</div>`);
+  if(totalImpreso!=null&&Math.abs(totalAmt-totalImpreso)>1)banners.push(`<div style="background:var(--amber-bg);border:1px solid rgba(217,119,6,.3);border-radius:var(--rsm);padding:10px 13px;font-size:13px;color:var(--amber-t);margin-bottom:7px">⚠️ El total detectado (${fmt(totalAmt)}) no coincide con el del ticket (${fmt(totalImpreso)}) — revisa los montos o vuelve a tomar la foto</div>`);
+  if(numItemsImpreso!=null&&numItemsImpreso!==items.length)banners.push(`<div style="background:var(--amber-bg);border:1px solid rgba(217,119,6,.3);border-radius:var(--rsm);padding:10px 13px;font-size:13px;color:var(--amber-t);margin-bottom:7px">⚠️ Detectamos ${items.length} de ${numItemsImpreso} productos</div>`);
+  if(multi){
+    document.getElementById('scan-fields').innerHTML=`
+      ${banners.join('')}
+      <div style="font-size:11px;color:var(--t3);letter-spacing:.04em;margin-bottom:5px">${lugar||'Detectado'}</div>
+      ${items.map((it,idx)=>`<div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;margin-bottom:4px;gap:6px"><span style="color:var(--t1);flex:1;">${it.descripcion||'ítem'}</span><span style="font-weight:600;white-space:nowrap;color:var(--t1)">${fmt(it.monto||0)}</span><button onclick="editScanItem(${idx})" style="background:rgba(45,81,88,.1);border:1px solid #2d5158;border-radius:6px;padding:3px 10px;font-size:11px;color:#2d5158;cursor:pointer;white-space:nowrap;font-family:var(--font-body);font-weight:600">editar</button><button onclick="removeScanItem(${idx})" style="background:none;border:none;color:var(--red);font-size:16px;font-weight:700;cursor:pointer;padding:0 6px;line-height:1">×</button></div>`).join('')}
+      <div style="border-top:.5px solid var(--b2);margin-top:6px;padding-top:6px;display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--t3)">Total</span><span style="font-weight:700;color:var(--t1)">${fmt(totalAmt)}</span></div>
+      ${date?`<div style="font-size:11px;color:${fechaOriginal?'var(--t3)':'var(--amber-t)'};margin-top:4px">${fechaOriginal||date}${fechaOriginal?'':' (verificar)'}${hora?' · '+hora:''}</div>`:''}
+    `;
+  }else{
+    document.getElementById('scan-fields').innerHTML=`${banners.join('')}<div style="font-size:12px;color:var(--t3)">Revisa y ajusta los campos de abajo si es necesario</div>`;
+  }
+  const resEl=document.getElementById('scan-res');
+  const btnsEl=document.getElementById('scan-res-btns');
+  console.log('SCAN multi:', multi, 'btnsEl:', !!btnsEl, 'items:', items.length);
+  if(multi&&btnsEl){
+    btnsEl.style.display='flex';
+    btnsEl.innerHTML=`<button class="ms-disc" style="flex:1" onclick="discardScan()">× Descartar</button>
+      <button class="ms-disc" style="flex:1;background:#d3e458;color:#0d0d0d;border-color:#d3e458;font-weight:700" onclick="saveAllScan()">Guardar ${items.length} gastos</button>`;
+  }else if(btnsEl){
+    // para 1 solo gasto: ocultar estos botones de aquí, se muestran junto a "guardar gasto" al final
+    btnsEl.style.display='none';
+    const bottomBtns=document.getElementById('scan-bottom-btns');
+    if(bottomBtns){
+      bottomBtns.style.display='flex';
+      bottomBtns.innerHTML=`<button class="ms-disc" style="flex:1" onclick="discardScan()">× Descartar</button>
+        <button class="ms-disc" style="flex:1;color:var(--amber);border-color:rgba(255,187,51,.3)" onclick="saveDraft()">Guardar borrador</button>`;
+    }
+  }
+  // ocultar formulario manual cuando hay scan múltiple
+  const scanMultiMode=document.getElementById('scan-multi-hide');
+  if(multi){
+    if(!scanMultiMode){
+      const hideDiv=document.createElement('style');
+      hideDiv.id='scan-multi-hide';
+      hideDiv.textContent=`#sh-add .f-lbl,#sh-add .amt-wr,#sh-add .txt-in,#sh-add .eg,#sh-add .tog-row,#sh-add #btn-add-tx,#sh-add #dup-warn{display:none!important}`;
+      document.head.appendChild(hideDiv);
+    }
+  }else{
+    const s=document.getElementById('scan-multi-hide');if(s)s.remove();
+    const it=items[0];
+    document.getElementById('a-amt').value=it.monto||'';
+    document.getElementById('tx-consumo').value=it.descripcion||'';
+    document.getElementById('tx-lugar').value=lugar;
+    aHormi=!!(it.monto&&it.monto<=D.threshold);
+    document.getElementById('h-pill').classList.toggle('on',aHormi);
+    const cg=categoriaSugerida?{id:categoriaSugerida}:guessCat(it.descripcion||lugar||'');selAddCat(cg.id);
+    if((it.descripcion||'').length>=5)checkAndShowDuplicate(it.descripcion);
+    const cb=document.getElementById('scan-confirm-banner');if(cb)cb.style.display='';
+  }
+  if(resEl)resEl.style.display='block';
+}
+function removeScanItem(idx){
+  if(!_scanPending||!_scanPending.items[idx])return;
+  _scanPending.items.splice(idx,1);
+  if(!_scanPending.items.length){discardScan();toast('Sin ítems','warn');return;}
+  rerenderScanPreview();
 }
 let _editScanIdx=null,_esiCatSel=null;
 function editScanItem(idx){
@@ -1129,16 +1162,30 @@ function editScanItem(idx){
   document.getElementById('esi-lugar').value=it.lugar||_scanPending.lugar||'';
   document.getElementById('esi-date').value=it.date||_scanPending.date||td();
   document.getElementById('esi-time').value=it.time||'';
-  const cats=allCats();
   const guess=guessCat(it.descripcion||'');
   _esiCatSel=it.categoria||guess.id;
   const isHormi=it.isHormi!==undefined?it.isHormi:_esiCatSel!=='market';
   document.getElementById('esi-hormi-pill').classList.toggle('on',isHormi);
+  renderEsiCatGrid();
+  document.getElementById('m-edit-scan-item').classList.add('open');
+}
+function renderEsiCatGrid(){
+  const cats=allCats();
   document.getElementById('esi-cats').innerHTML=cats.map(c=>`
     <button onclick="esiSelCat('${c.id}',this)" style="display:flex;align-items:center;gap:6px;padding:9px 12px;border-radius:12px;border:1.5px solid ${_esiCatSel===c.id?'var(--lime-t)':'var(--b2)'};background:${_esiCatSel===c.id?'rgba(200,246,90,.15)':'var(--bg)'};cursor:pointer;font-size:13px;font-family:var(--font-body);color:var(--t1);font-weight:${_esiCatSel===c.id?'700':'400'};transition:all .15s;-webkit-tap-highlight-color:transparent">
       <span style="font-size:16px">${c.e}</span><span>${c.l}</span>
-    </button>`).join('');
-  document.getElementById('m-edit-scan-item').classList.add('open');
+    </button>`).join('')
+    +`<button onclick="addCustomCatFromEdit()" title="personalizar" style="display:flex;align-items:center;gap:6px;padding:9px 12px;border-radius:12px;border:1.5px dashed var(--b2);background:var(--bg);cursor:pointer;font-size:13px;font-family:var(--font-body);color:var(--t1);-webkit-tap-highlight-color:transparent">
+      <span style="font-size:16px">＋</span><span>crear</span>
+    </button>`;
+}
+function addCustomCatFromEdit(){
+  const l=prompt('Nombre de la nueva categoría (ej: libros):');if(!l?.trim())return;
+  if(!D.customCats)D.customCats=[];
+  if(!D.customCats.find(c=>c.l===l.trim()))D.customCats.push({e:'🫙',l:l.trim()});
+  save();saveUserData();
+  _esiCatSel='c_'+l.trim();
+  renderEsiCatGrid();
 }
 function esiSelCat(id,el){
   _esiCatSel=id;
@@ -1165,20 +1212,7 @@ function saveEditScanItem(){
   if(_esiCatSel)it.categoria=_esiCatSel;
   closeOv('m-edit-scan-item');
   _editScanIdx=null;
-  // re-render scan fields
-  const totalAmt=_scanPending.items.reduce((s,x)=>s+(x.monto||0),0);
-  const lugar=_scanPending.lugar||'';
-  const ds=_scanPending.date;
-  document.getElementById('scan-fields').innerHTML=`
-    <div style="font-size:11px;color:var(--t3);letter-spacing:.04em;margin-bottom:5px">${lugar||'Detectado'}</div>
-    ${_scanPending.items.map((x,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;margin-bottom:4px;gap:6px">
-      <span style="color:var(--t1);flex:1">${x.descripcion||'ítem'}</span>
-      <span style="font-weight:600;white-space:nowrap;color:var(--t1)">${fmt(x.monto||0)}</span>
-      <button onclick="editScanItem(${i})" style="background:rgba(45,81,88,.1);border:1px solid #2d5158;border-radius:6px;padding:3px 10px;font-size:11px;color:#2d5158;cursor:pointer;white-space:nowrap;font-family:var(--font-body);font-weight:600">editar</button>
-    </div>`).join('')}
-    ${_scanPending.items.length>1?`<div style="border-top:.5px solid var(--b2);margin-top:6px;padding-top:6px;display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--t3)">Total</span><span style="font-weight:700;color:var(--t1)">${fmt(totalAmt)}</span></div>`:''}
-    ${ds?`<div style="font-size:11px;color:var(--t3);margin-top:4px">${ds}</div>`:''}
-  `;
+  rerenderScanPreview();
   toast('Ítem actualizado ✓','ok');
 }
 function saveAllScan(){
