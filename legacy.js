@@ -1443,11 +1443,20 @@ function selAddCat(id){
   aCat=id;
   document.querySelectorAll('#a-eg .eb:not([onclick*="openCatEditor"])').forEach(b=>b.classList.toggle('on',b.querySelector('.eb-nm')?.textContent===(allCats().find(c=>c.id===id)||{}).l));
 }
-function openCatEditor(context){
-  _catEditorMode=context; // 'add' o 'edit'
-  _catEditorEmoji='🫙';
-  document.getElementById('m-cat-title').textContent='nueva categoría';
-  document.getElementById('cat-name-in').value='';
+let _catEditingLabel=null; // si no es null, estamos editando esa cat
+function openCatEditor(context, editLabel){
+  _catEditorMode=context;
+  _catEditingLabel=editLabel||null;
+  if(editLabel){
+    const cat=(D.customCats||[]).find(c=>c.l===editLabel);
+    _catEditorEmoji=cat?cat.e:'🫙';
+    document.getElementById('m-cat-title').textContent='editar categoría';
+    document.getElementById('cat-name-in').value=cat?cat.l:'';
+  }else{
+    _catEditorEmoji='🫙';
+    document.getElementById('m-cat-title').textContent='nueva categoría';
+    document.getElementById('cat-name-in').value='';
+  }
   renderEmojiGrid();
   openSheet('m-cat-editor');
 }
@@ -1461,6 +1470,34 @@ function saveCatEditor(){
   const l=document.getElementById('cat-name-in').value.trim();
   if(!l){toast('Escribe un nombre','warn');return;}
   if(!D.customCats)D.customCats=[];
+
+  if(_catEditingLabel){
+    // EDITAR: buscar la cat original
+    const cat=D.customCats.find(c=>c.l===_catEditingLabel);
+    if(!cat){closeOv('m-cat-editor');return;}
+    const nombreCambia = l.toLowerCase()!==_catEditingLabel.toLowerCase();
+    // si cambia el nombre, validar que el nuevo no choque
+    if(nombreCambia){
+      if(D.customCats.find(c=>c.l.toLowerCase()===l.toLowerCase())){toast('Ya existe esa categoría','warn');return;}
+      if(CATS.find(c=>c.l.toLowerCase()===l.toLowerCase())){toast('Ese nombre ya es una categoría','warn');return;}
+      // el id es 'c_'+label, así que cambiar nombre cambia el id:
+      // reasignar los gastos que usaban el id viejo al nuevo
+      const oldId='c_'+cat.l, newId='c_'+l;
+      D.transactions.forEach(t=>{if(t.category===oldId){t.category=newId;saveTx(t);}});
+    }
+    cat.l=l;
+    cat.e=_catEditorEmoji;
+    // actualizar emoji en los gastos que usan esta cat
+    const curId='c_'+l;
+    D.transactions.forEach(t=>{if(t.category===curId){t.emoji=_catEditorEmoji;saveTx(t);}});
+    save();saveUserData();
+    closeOv('m-cat-editor');
+    buildAddGrid();renderSet();
+    toast('Categoría actualizada ✓','ok');
+    return;
+  }
+
+  // CREAR (lógica existente)
   if(D.customCats.find(c=>c.l.toLowerCase()===l.toLowerCase())){toast('Ya existe esa categoría','warn');return;}
   if(CATS.find(c=>c.l.toLowerCase()===l.toLowerCase())){toast('Ese nombre ya es una categoría','warn');return;}
   D.customCats.push({e:_catEditorEmoji,l});
@@ -2738,7 +2775,10 @@ function renderSet(){
           ? (D.customCats||[]).map(c=>`
             <div class="s-row">
               <div class="s-rl"><div class="s-rl-t">${c.e} ${c.l}</div></div>
-              <div class="s-rr"><button onclick="delCustomCatFromSet('c_'+${JSON.stringify(c.l)})" style="background:rgba(230,57,70,.08);border:1px solid var(--red-b);border-radius:8px;padding:5px 12px;font-size:12px;color:var(--red);font-weight:700;cursor:pointer;font-family:var(--font-body)">eliminar</button></div>
+              <div class="s-rr" style="display:flex;gap:6px">
+                <button onclick="openCatEditor('set',${JSON.stringify(c.l)})" style="background:rgba(45,81,88,.08);border:1px solid var(--b2);border-radius:8px;padding:5px 12px;font-size:12px;color:#2d5158;font-weight:700;cursor:pointer;font-family:var(--font-body)">editar</button>
+                <button onclick="delCustomCatFromSet('c_'+${JSON.stringify(c.l)})" style="background:rgba(230,57,70,.08);border:1px solid var(--red-b);border-radius:8px;padding:5px 12px;font-size:12px;color:var(--red);font-weight:700;cursor:pointer;font-family:var(--font-body)">eliminar</button>
+              </div>
             </div>`).join('')
           : `<div class="s-row"><div class="s-rl"><div class="s-rl-s">Aún no has creado categorías propias. Puedes crearlas al registrar un gasto.</div></div></div>`
         }
