@@ -1180,17 +1180,9 @@ function renderEsiCatGrid(){
     <button onclick="esiSelCat('${c.id}',this)" style="display:flex;align-items:center;gap:6px;padding:9px 12px;border-radius:12px;border:1.5px solid ${_esiCatSel===c.id?'var(--lime-t)':'var(--b2)'};background:${_esiCatSel===c.id?'rgba(200,246,90,.15)':'var(--bg)'};cursor:pointer;font-size:13px;font-family:var(--font-body);color:var(--t1);font-weight:${_esiCatSel===c.id?'700':'400'};transition:all .15s;-webkit-tap-highlight-color:transparent">
       <span style="font-size:16px">${c.e}</span><span>${c.l}</span>
     </button>`).join('')
-    +`<button onclick="addCustomCatFromEdit()" title="personalizar" style="display:flex;align-items:center;gap:6px;padding:9px 12px;border-radius:12px;border:1.5px dashed var(--b2);background:var(--bg);cursor:pointer;font-size:13px;font-family:var(--font-body);color:var(--t1);-webkit-tap-highlight-color:transparent">
+    +`<button onclick="openCatEditor('edit')" title="personalizar" style="display:flex;align-items:center;gap:6px;padding:9px 12px;border-radius:12px;border:1.5px dashed var(--b2);background:var(--bg);cursor:pointer;font-size:13px;font-family:var(--font-body);color:var(--t1);-webkit-tap-highlight-color:transparent">
       <span style="font-size:16px">＋</span><span>crear</span>
     </button>`;
-}
-function addCustomCatFromEdit(){
-  const l=prompt('Nombre de la nueva categoría (ej: libros):');if(!l?.trim())return;
-  if(!D.customCats)D.customCats=[];
-  if(!D.customCats.find(c=>c.l===l.trim()))D.customCats.push({e:'🫙',l:l.trim()});
-  save();saveUserData();
-  _esiCatSel='c_'+l.trim();
-  renderEsiCatGrid();
 }
 function esiSelCat(id,el){
   _esiCatSel=id;
@@ -1429,22 +1421,67 @@ function ttime(t){
 }
 
 // ── ADD TX ────────────────────────────────────────────────────────────────────
+const CAT_EMOJIS=['🛒','🍔','☕','🍪','🍕','🥗','🍺','🚗','🚕','⛽','🏠','💊','💅','💇','🏋️','⚽','📚','🎮','🎬','🎵','👕','👗','👟','💻','📱','🎁','🐶','🐱','🌱','🧹','🧼','🚿','✈️','🏨','🎨','🔧','💡','📷','🎯','💰','🫙'];
+let _catEditorMode=null; // 'new-add' | 'new-edit' | null (contexto de dónde se abrió)
+let _catEditorEmoji='🫙';
 function allCats(){return[...CATS,...(D.customCats||[]).map(c=>({id:'c_'+c.l,e:c.e,l:c.l}))];}
 function buildAddGrid(){
   const el=document.getElementById('a-eg');
   const cats=allCats();
-  el.innerHTML=cats.map(c=>`<button class="eb${c.id===aCat?' on':''}" onclick="selAddCat('${c.id}')"><div class="eb-e">${c.e}</div><div class="eb-nm">${c.l}</div></button>`).join('')
-    +`<button class="eb" onclick="addCustomCat()" title="personalizar"><div class="eb-e">＋</div><div class="eb-nm">crear</div></button>`;
+  el.innerHTML=cats.map(c=>{
+    const btn=`<button class="eb${c.id===aCat?' on':''}" onclick="selAddCat('${c.id}')"><div class="eb-e">${c.e}</div><div class="eb-nm">${c.l}</div></button>`;
+    if(c.id.startsWith('c_')){
+      return `<div style="position:relative">${btn}<button onclick="event.stopPropagation();delCustomCat('${c.id}')" style="position:absolute;top:-4px;right:-4px;width:18px;height:18px;border-radius:50%;background:var(--red);color:#fff;border:none;font-size:11px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2">×</button></div>`;
+    }
+    return btn;
+  }).join('')
+    +`<button class="eb" onclick="openCatEditor('add')" title="personalizar"><div class="eb-e">＋</div><div class="eb-nm">crear</div></button>`;
 }
 function selAddCat(id){
   aCat=id;
-  document.querySelectorAll('#a-eg .eb:not([onclick*="addCustomCat"])').forEach(b=>b.classList.toggle('on',b.querySelector('.eb-nm')?.textContent===(allCats().find(c=>c.id===id)||{}).l));
+  document.querySelectorAll('#a-eg .eb:not([onclick*="openCatEditor"])').forEach(b=>b.classList.toggle('on',b.querySelector('.eb-nm')?.textContent===(allCats().find(c=>c.id===id)||{}).l));
 }
-function addCustomCat(){
-  const l=prompt('Nombre de la nueva categoría (ej: libros):');if(!l?.trim())return;
+function openCatEditor(context){
+  _catEditorMode=context; // 'add' o 'edit'
+  _catEditorEmoji='🫙';
+  document.getElementById('m-cat-title').textContent='nueva categoría';
+  document.getElementById('cat-name-in').value='';
+  renderEmojiGrid();
+  openSheet('m-cat-editor');
+}
+function renderEmojiGrid(){
+  document.getElementById('cat-emoji-grid').innerHTML=CAT_EMOJIS.map(e=>
+    `<button onclick="selCatEmoji('${e}')" style="font-size:22px;padding:6px;border-radius:8px;border:1.5px solid ${_catEditorEmoji===e?'var(--lime-t)':'var(--b2)'};background:${_catEditorEmoji===e?'rgba(200,246,90,.15)':'var(--bg)'};cursor:pointer;-webkit-tap-highlight-color:transparent">${e}</button>`
+  ).join('');
+}
+function selCatEmoji(e){_catEditorEmoji=e;renderEmojiGrid();}
+function saveCatEditor(){
+  const l=document.getElementById('cat-name-in').value.trim();
+  if(!l){toast('Escribe un nombre','warn');return;}
   if(!D.customCats)D.customCats=[];
-  if(!D.customCats.find(c=>c.l===l.trim()))D.customCats.push({e:'🫙',l:l.trim()});
-  save();saveUserData();buildAddGrid();selAddCat('c_'+l.trim());
+  if(D.customCats.find(c=>c.l.toLowerCase()===l.toLowerCase())){toast('Ya existe esa categoría','warn');return;}
+  if(CATS.find(c=>c.l.toLowerCase()===l.toLowerCase())){toast('Ese nombre ya es una categoría','warn');return;}
+  D.customCats.push({e:_catEditorEmoji,l});
+  save();saveUserData();
+  closeOv('m-cat-editor');
+  const newId='c_'+l;
+  if(_catEditorMode==='edit'){_esiCatSel=newId;renderEsiCatGrid();}
+  else{buildAddGrid();selAddCat(newId);}
+  toast('Categoría creada ✓','ok');
+}
+function delCustomCat(catId){
+  const cat=(D.customCats||[]).find(c=>'c_'+c.l===catId);
+  if(!cat)return;
+  const afectados=D.transactions.filter(t=>t.category===catId).length;
+  const msg=afectados>0
+    ? `Eliminar "${cat.l}"? ${afectados} gasto(s) pasarán a Otros.`
+    : `Eliminar "${cat.l}"?`;
+  if(!confirm(msg))return;
+  // reasignar gastos huérfanos a 'other'
+  D.transactions.forEach(t=>{if(t.category===catId){t.category='other';t.emoji='🫙';saveTx(t);}});
+  D.customCats=D.customCats.filter(c=>'c_'+c.l!==catId);
+  save();saveUserData();buildAddGrid();
+  toast('Categoría eliminada','ok');
 }
 function togHormi(){aHormi=!aHormi;document.getElementById('h-pill').classList.toggle('on',aHormi);}
 
