@@ -1095,16 +1095,21 @@ function rerenderScanPreview(){
   if(confianza==='baja')banners.push(`<div style="background:var(--amber-bg);border:1px solid rgba(217,119,6,.3);border-radius:var(--rsm);padding:10px 13px;font-size:13px;color:var(--amber-t);margin-bottom:7px">⚠️ Algunos datos podrían estar mal leídos — revísalos antes de guardar</div>`);
   if(totalImpreso!=null&&Math.abs(totalAmt-totalImpreso)>1)banners.push(`<div style="background:var(--amber-bg);border:1px solid rgba(217,119,6,.3);border-radius:var(--rsm);padding:10px 13px;font-size:13px;color:var(--amber-t);margin-bottom:7px">⚠️ El total detectado (${fmt(totalAmt)}) no coincide con el del ticket (${fmt(totalImpreso)}) — revisa los montos o vuelve a tomar la foto</div>`);
   if(numItemsImpreso!=null&&numItemsImpreso!==items.length)banners.push(`<div style="background:var(--amber-bg);border:1px solid rgba(217,119,6,.3);border-radius:var(--rsm);padding:10px 13px;font-size:13px;color:var(--amber-t);margin-bottom:7px">⚠️ Detectamos ${items.length} de ${numItemsImpreso} productos</div>`);
+  const hayAvisos = banners.length>0;
+  const retryBtn = hayAvisos
+    ? `<button onclick="discardScan();openScanOptions();" style="width:100%;margin-bottom:9px;background:transparent;border:1px solid var(--amber);border-radius:var(--rsm);padding:9px;font-size:13px;color:var(--amber-t);font-weight:600;cursor:pointer;font-family:var(--font-title)">📷 Volver a tomar la foto</button>`
+    : '';
   if(multi){
     document.getElementById('scan-fields').innerHTML=`
       ${banners.join('')}
+      ${retryBtn}
       <div style="font-size:11px;color:var(--t3);letter-spacing:.04em;margin-bottom:5px">${lugar||'Detectado'}</div>
-      ${items.map((it,idx)=>`<div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;margin-bottom:4px;gap:6px"><span style="color:var(--t1);flex:1;">${it.descripcion||'ítem'}</span><span style="font-weight:600;white-space:nowrap;color:var(--t1)">${fmt(it.monto||0)}</span><button onclick="editScanItem(${idx})" style="background:rgba(45,81,88,.1);border:1px solid #2d5158;border-radius:6px;padding:3px 10px;font-size:11px;color:#2d5158;cursor:pointer;white-space:nowrap;font-family:var(--font-body);font-weight:600">editar</button><button onclick="removeScanItem(${idx})" style="background:none;border:none;color:var(--red);font-size:16px;font-weight:700;cursor:pointer;padding:0 6px;line-height:1">×</button></div>`).join('')}
+      ${items.map((it,idx)=>`<div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;margin-bottom:4px;gap:6px"><span style="color:var(--t1);flex:1;">${it.descripcion||'ítem'}</span><span style="font-weight:600;white-space:nowrap;color:var(--t1)">${fmt(it.monto||0)}</span><button onclick="editScanItem(${idx})" style="background:rgba(45,81,88,.1);border:1px solid #2d5158;border-radius:6px;padding:3px 10px;font-size:11px;color:#2d5158;cursor:pointer;white-space:nowrap;font-family:var(--font-body);font-weight:600">editar</button><button onclick="removeScanItem(${idx})" style="background:rgba(230,57,70,.08);border:1px solid var(--red-b);border-radius:6px;padding:3px 9px;font-size:13px;color:var(--red);cursor:pointer;white-space:nowrap;font-family:var(--font-body);font-weight:700;line-height:1.4">×</button></div>`).join('')}
       <div style="border-top:.5px solid var(--b2);margin-top:6px;padding-top:6px;display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--t3)">Total</span><span style="font-weight:700;color:var(--t1)">${fmt(totalAmt)}</span></div>
       ${date?`<div style="font-size:11px;color:${fechaOriginal?'var(--t3)':'var(--amber-t)'};margin-top:4px">${fechaOriginal||date}${fechaOriginal?'':' (verificar)'}${hora?' · '+hora:''}</div>`:''}
     `;
   }else{
-    document.getElementById('scan-fields').innerHTML=`${banners.join('')}<div style="font-size:12px;color:var(--t3)">Revisa y ajusta los campos de abajo si es necesario</div>`;
+    document.getElementById('scan-fields').innerHTML=`${banners.join('')}${retryBtn}<div style="font-size:12px;color:var(--t3)">Revisa y ajusta los campos de abajo si es necesario</div>`;
   }
   const resEl=document.getElementById('scan-res');
   const btnsEl=document.getElementById('scan-res-btns');
