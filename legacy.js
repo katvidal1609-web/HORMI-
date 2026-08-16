@@ -1436,13 +1436,7 @@ function allCats(){return[...CATS,...(D.customCats||[]).map(c=>({id:'c_'+c.l,e:c
 function buildAddGrid(){
   const el=document.getElementById('a-eg');
   const cats=allCats();
-  el.innerHTML=cats.map(c=>{
-    const btn=`<button class="eb${c.id===aCat?' on':''}" onclick="selAddCat('${c.id}')"><div class="eb-e">${c.e}</div><div class="eb-nm">${c.l}</div></button>`;
-    if(c.id.startsWith('c_')){
-      return `<div style="position:relative">${btn}<button onclick="event.stopPropagation();delCustomCat('${c.id}')" style="position:absolute;top:-4px;right:-4px;width:18px;height:18px;border-radius:50%;background:var(--red);color:#fff;border:none;font-size:11px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2">×</button></div>`;
-    }
-    return btn;
-  }).join('')
+  el.innerHTML=cats.map(c=>`<button class="eb${c.id===aCat?' on':''}" onclick="selAddCat('${c.id}')"><div class="eb-e">${c.e}</div><div class="eb-nm">${c.l}</div></button>`).join('')
     +`<button class="eb" onclick="openCatEditor('add')" title="personalizar"><div class="eb-e">＋</div><div class="eb-nm">crear</div></button>`;
 }
 function selAddCat(id){
@@ -1477,7 +1471,7 @@ function saveCatEditor(){
   else{buildAddGrid();selAddCat(newId);}
   toast('Categoría creada ✓','ok');
 }
-function delCustomCat(catId){
+function delCustomCatFromSet(catId){
   const cat=(D.customCats||[]).find(c=>'c_'+c.l===catId);
   if(!cat)return;
   const afectados=D.transactions.filter(t=>t.category===catId).length;
@@ -1485,10 +1479,11 @@ function delCustomCat(catId){
     ? `Eliminar "${cat.l}"? ${afectados} gasto(s) pasarán a Otros.`
     : `Eliminar "${cat.l}"?`;
   if(!confirm(msg))return;
-  // reasignar gastos huérfanos a 'other'
   D.transactions.forEach(t=>{if(t.category===catId){t.category='other';t.emoji='🫙';saveTx(t);}});
   D.customCats=D.customCats.filter(c=>'c_'+c.l!==catId);
-  save();saveUserData();buildAddGrid();
+  save();saveUserData();
+  buildAddGrid();  // repinta el grid de gastos
+  renderSet();     // repinta esta pantalla
   toast('Categoría eliminada','ok');
 }
 function togHormi(){aHormi=!aHormi;document.getElementById('h-pill').classList.toggle('on',aHormi);}
@@ -2735,6 +2730,18 @@ function renderSet(){
         <div class="sec">Preferencias</div>
         <div class="s-row" onclick="openModal('m-budget')"><div class="s-rl"><div class="s-rl-t">Límite diario</div><div class="s-rl-s">Alerta cuando superas</div></div><div class="s-rr" id="disp-budget">S/ ${D.budget} ›</div></div>
         <div class="s-row"><div class="s-rl"><div class="s-rl-t">Mis hormigas</div></div><div class="s-rr">${D.hormis.length} identificadas</div></div>
+      </div>
+      <!-- MIS CATEGORÍAS -->
+      <div class="s-sec">
+        <div class="sec">Mis categorías</div>
+        ${(D.customCats||[]).length
+          ? (D.customCats||[]).map(c=>`
+            <div class="s-row">
+              <div class="s-rl"><div class="s-rl-t">${c.e} ${c.l}</div></div>
+              <div class="s-rr"><button onclick="delCustomCatFromSet('c_'+${JSON.stringify(c.l)})" style="background:rgba(230,57,70,.08);border:1px solid var(--red-b);border-radius:8px;padding:5px 12px;font-size:12px;color:var(--red);font-weight:700;cursor:pointer;font-family:var(--font-body)">eliminar</button></div>
+            </div>`).join('')
+          : `<div class="s-row"><div class="s-rl"><div class="s-rl-s">Aún no has creado categorías propias. Puedes crearlas al registrar un gasto.</div></div></div>`
+        }
       </div>
       <!-- DATOS -->
       <div class="s-sec">
