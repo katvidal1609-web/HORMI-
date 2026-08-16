@@ -984,6 +984,11 @@ function openScanOptions(){
   }
 }
 
+function clearScanLoading(){
+  const f=document.getElementById('scan-fields');if(f)f.innerHTML='';
+  const rb=document.getElementById('scan-res-btns');if(rb)rb.style.display='none';
+  const bb=document.getElementById('scan-bottom-btns');if(bb){bb.style.display='none';bb.innerHTML='';}
+}
 async function scanImg(input){
   const file=input.files[0];if(!file)return;
   if(window._scanning){toast('Espera a que termine el escaneo actual','warn');input.value='';return;}
@@ -1012,15 +1017,18 @@ async function scanImg(input){
     try{p=JSON.parse(rawText);}catch(pe){throw new Error('JSON inválido: '+rawText.slice(0,80));}
     console.log('JSON parseado:',p);
     if(p.error==='no_receipt'){
+      clearScanLoading();
       st.innerHTML=`<div style="background:var(--red-bg);border:1px solid var(--red-b);border-radius:var(--rsm);padding:10px 13px;font-size:13px;color:var(--red);margin-bottom:7px">⚠️ Lo enviado no parece un comprobante de pago</div>`;
       input.value='';return;
     }
     if(p.error==='no_product'){
+      clearScanLoading();
       st.innerHTML=`<div style="background:var(--amber-bg);border:1px solid rgba(217,119,6,.3);border-radius:var(--rsm);padding:10px 13px;font-size:13px;color:var(--amber-t);margin-bottom:7px">ℹ️ El comprobante no registra el producto — agrégalo manualmente</div>`;
       if(p.fecha){const ds2=parseReceiptDate(p.fecha);if(ds2){txDate=ds2;document.getElementById('a-date').value=ds2;}}
       input.value='';return;
     }
     if(p.error==='low_quality'){
+      clearScanLoading();
       st.innerHTML=`<div style="background:var(--red-bg);border:1px solid var(--red-b);border-radius:var(--rsm);padding:10px 13px;font-size:13px;color:var(--red);margin-bottom:7px">⚠️ ${p.message||'La foto no se lee con claridad'}<br><button onclick="openScanOptions()" style="margin-top:8px;background:var(--red);color:#fff;border:none;border-radius:var(--rsm);padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer">Volver a tomar foto</button></div>`;
       input.value='';return;
     }
