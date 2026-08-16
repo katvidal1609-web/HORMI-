@@ -1457,15 +1457,48 @@ function openCatEditor(context, editLabel){
     document.getElementById('m-cat-title').textContent='nueva categoría';
     document.getElementById('cat-name-in').value='';
   }
+  const ci=document.getElementById('cat-emoji-custom');if(ci)ci.value='';
+  const pv=document.getElementById('cat-emoji-preview');if(pv)pv.textContent=_catEditorEmoji;
   renderEmojiGrid();
   openSheet('m-cat-editor');
+}
+function contarGrafemas(str){
+  try{
+    const seg=new Intl.Segmenter('es',{granularity:'grapheme'});
+    return [...seg.segment(str)].length;
+  }catch(e){
+    return [...str].length; // fallback aproximado
+  }
+}
+function esEmoji(str){
+  if(!str)return false;
+  return /\p{Extended_Pictographic}/u.test(str);
+}
+function onCustomEmojiInput(val){
+  const v=(val||'').trim();
+  if(!v){
+    document.getElementById('cat-emoji-preview').textContent=_catEditorEmoji;
+    return;
+  }
+  if(esEmoji(v)&&contarGrafemas(v)===1){
+    _catEditorEmoji=v;
+    document.getElementById('cat-emoji-preview').textContent=v;
+    renderEmojiGrid(); // deselecciona los de la grilla
+  }else{
+    document.getElementById('cat-emoji-preview').textContent='⚠️';
+  }
 }
 function renderEmojiGrid(){
   document.getElementById('cat-emoji-grid').innerHTML=CAT_EMOJIS.map(e=>
     `<button onclick="selCatEmoji('${e}')" style="font-size:22px;padding:6px;border-radius:8px;border:1.5px solid ${_catEditorEmoji===e?'var(--lime-t)':'var(--b2)'};background:${_catEditorEmoji===e?'rgba(200,246,90,.15)':'var(--bg)'};cursor:pointer;-webkit-tap-highlight-color:transparent">${e}</button>`
   ).join('');
 }
-function selCatEmoji(e){_catEditorEmoji=e;renderEmojiGrid();}
+function selCatEmoji(e){
+  _catEditorEmoji=e;
+  const ci=document.getElementById('cat-emoji-custom');if(ci)ci.value='';
+  const pv=document.getElementById('cat-emoji-preview');if(pv)pv.textContent=e;
+  renderEmojiGrid();
+}
 function saveCatEditor(){
   const l=document.getElementById('cat-name-in').value.trim();
   if(!l){toast('Escribe un nombre','warn');return;}
@@ -1485,6 +1518,7 @@ function saveCatEditor(){
       const oldId='c_'+cat.l, newId='c_'+l;
       D.transactions.forEach(t=>{if(t.category===oldId){t.category=newId;saveTx(t);}});
     }
+    if(!esEmoji(_catEditorEmoji)){toast('Elige un emoji válido','warn');return;}
     cat.l=l;
     cat.e=_catEditorEmoji;
     // actualizar emoji en los gastos que usan esta cat
@@ -1500,6 +1534,7 @@ function saveCatEditor(){
   // CREAR (lógica existente)
   if(D.customCats.find(c=>c.l.toLowerCase()===l.toLowerCase())){toast('Ya existe esa categoría','warn');return;}
   if(CATS.find(c=>c.l.toLowerCase()===l.toLowerCase())){toast('Ese nombre ya es una categoría','warn');return;}
+  if(!esEmoji(_catEditorEmoji)){toast('Elige un emoji válido','warn');return;}
   D.customCats.push({e:_catEditorEmoji,l});
   save();saveUserData();
   closeOv('m-cat-editor');

@@ -1057,6 +1057,10 @@
     <input type="text" class="txt-in" id="cat-name-in" placeholder="ej: libros, mascota..." style="margin-bottom:14px" maxlength="18">
     <div class="f-lbl">emoji</div>
     <div id="cat-emoji-grid" style="display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-bottom:14px;max-height:180px;overflow-y:auto"></div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+      <input type="text" id="cat-emoji-custom" placeholder="o escribe uno 👆" maxlength="4" style="flex:1;padding:9px 12px;border-radius:10px;border:1.5px solid var(--b2);background:var(--bg);font-size:15px;font-family:var(--font-body);color:var(--t1);text-align:center" oninput="onCustomEmojiInput(this.value)">
+      <div id="cat-emoji-preview" style="font-size:26px;min-width:36px;text-align:center">🫙</div>
+    </div>
     <div class="m-acts">
       <button class="m-cancel" onclick="closeOv('m-cat-editor')">cancelar</button>
       <button class="m-save" onclick="saveCatEditor()">guardar</button>
