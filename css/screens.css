@@ -592,6 +592,8 @@
 @keyframes vbRipple{0%{transform:scale(1);opacity:.6}100%{transform:scale(1.9);opacity:0}}
 @keyframes vbPulse{from{transform:scale(1)}to{transform:scale(1.15)}}
 @keyframes vbSpin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+@keyframes spin{to{transform:rotate(360deg)}}
 #vb-popup{position:relative;margin-top:16px;display:none;flex-direction:column;align-items:center;gap:8px;min-width:max-content}
 #vb-popup.on{display:flex;animation:fu .2s ease}
 #vb-pill-text{background:rgba(0,0,0,.82);color:#fff;font-size:13px;font-weight:600;font-family:var(--font-title);border-radius:20px;padding:8px 14px;white-space:nowrap;line-height:1.2;transition:background .2s}

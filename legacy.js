@@ -1004,6 +1004,7 @@ async function scanImg(input){
   if(!checkScanLimit()){window._scanning=false;input.value='';return;}
   _scanState='processing';
   document.getElementById('scan-minimize-btn').style.display='block';
+  const di=document.getElementById('a-date');if(di)di.value='';
   input.value='';
   doScanWork(file).catch(e=>{
     console.error('scan work error:',e);
@@ -1024,6 +1025,8 @@ async function doScanWork(file){
       document.getElementById('scan-res').style.display='block';
       document.getElementById('scan-fields').innerHTML=`<div style="display:flex;align-items:center;gap:8px;padding:8px 0;color:var(--t3);font-size:13px"><span class="spin"></span>Extrayendo datos...</div>`;
       const _scanBtns=document.getElementById('scan-btns');if(_scanBtns)_scanBtns.innerHTML='';
+      const _resBtns=document.getElementById('scan-res-btns');
+      if(_resBtns){_resBtns.style.display='flex';_resBtns.innerHTML=`<button class="ms-disc" style="flex:1" onclick="closeAddSheet()">× Descartar</button>`;}
     }
     scanReceiptTs=null;_currentThumb=null;_scanPending=null;
     const b64=await toJpegBase64(file);
@@ -1168,14 +1171,18 @@ async function doScanWork(file){
       return;
     }
     window._scanning=false;
-    _scanState='ready';
     if(_scanSheetOpen){
+      _scanState='ready';
       rerenderScanPreview();
       toast('✓ Datos extraídos','ok');
       _scanState='idle';
     }else{
+      const hayAvisos = p.confianza==='baja'
+        || (typeof p.total_impreso==='number' && Math.abs(items.reduce((s,it)=>s+(it.monto||0),0)-p.total_impreso)>1)
+        || (typeof p.num_items_impreso==='number' && p.num_items_impreso!==items.length);
+      _scanState = hayAvisos ? 'warning' : 'ready';
       updateScanBubble();
-      toast('✓ Boleta lista — tócala para revisar','ok',4000);
+      toast(hayAvisos?'Boleta lista — revisa los avisos':'✓ Boleta lista — tócala para revisar','ok',4000);
     }
   }catch(e){
     if(scanTimeout)clearTimeout(scanTimeout);
@@ -1193,7 +1200,7 @@ function restoreScan(){
   _scanSheetOpen=true;
   document.getElementById('scan-bubble').style.display='none';
   setTimeout(()=>{
-    if(_scanState==='ready'&&_scanPending)rerenderScanPreview();
+    if((_scanState==='ready'||_scanState==='warning')&&_scanPending)rerenderScanPreview();
     else if(_scanState==='processing'){
       const st=document.getElementById('scan-st');
       if(st)st.innerHTML='<div style="color:var(--t2);font-size:13px">Procesando boleta...</div>';
@@ -1202,15 +1209,24 @@ function restoreScan(){
 }
 function updateScanBubble(){
   const b=document.getElementById('scan-bubble');
-  const inner=document.getElementById('scan-bubble-inner');
+  const icon=document.getElementById('scan-bubble-icon');
+  const fab=document.querySelector('.fab-fixed');
   if(!b)return;
-  // solo mostrar la burbuja si el sheet NO está abierto
-  if(!_scanSheetOpen&&(_scanState==='processing'||_scanState==='ready')){
+  const visible=!_scanSheetOpen&&(_scanState==='processing'||_scanState==='ready'||_scanState==='warning');
+  if(visible){
     b.style.display='flex';
-    inner.textContent=_scanState==='ready'?'✓':'⏳';
-    if(_scanState==='ready'){b.style.background='var(--lime-t)';b.style.animation='pulse 1.5s ease-in-out infinite';}
-    else{b.style.background='var(--primary)';b.style.animation='none';}
-  }else{b.style.display='none';}
+    if(fab)fab.style.display='none';
+    let ico='loader-2',bg='var(--primary)',anim='spin 1s linear infinite';
+    if(_scanState==='ready'){ico='check';bg='var(--lime-t)';anim='pulse 1.5s ease-in-out infinite';}
+    if(_scanState==='warning'){ico='alert-triangle';bg='#d97706';anim='pulse 1.5s ease-in-out infinite';}
+    if(icon){icon.setAttribute('data-lucide',ico);icon.style.animation=_scanState==='processing'?anim:'none';}
+    b.style.background=bg;
+    b.style.animation=_scanState==='processing'?'none':anim;
+    if(window.lucide)lucide.createIcons();
+  }else{
+    b.style.display='none';
+    if(fab)fab.style.display='';
+  }
 }
 function rerenderScanPreview(){
   if(!_scanPending)return;
@@ -1276,6 +1292,8 @@ function rerenderScanPreview(){
     const cb=document.getElementById('scan-confirm-banner');if(cb)cb.style.display='';
   }
   if(resEl)resEl.style.display='block';
+  const ssb=document.getElementById('scan-save-btn');
+  if(ssb)ssb.style.display='flex';
 }
 function removeScanItem(idx){
   if(!_scanPending||!_scanPending.items[idx])return;
@@ -1387,25 +1405,32 @@ function resetScanUI(){
   if(mb)mb.style.display='none';
   const bubble=document.getElementById('scan-bubble');
   if(bubble)bubble.style.display='none';
+  const ssb2=document.getElementById('scan-save-btn');if(ssb2)ssb2.style.display='none';
+}
+function saveScanFromHeader(){
+  if(_scanPending&&_scanPending.items&&_scanPending.items.length>1){saveAllScan();return;}
+  const btn=document.getElementById('btn-add-tx');
+  if(btn&&!btn.disabled)addTx();
+  else toast('Completa los campos faltantes','warn');
 }
 function closeAddSheet(){
   if(_scanState==='processing'){
     if(!confirm('¿Cancelar el escaneo en curso? Se perderá el progreso.'))return;
-    // el usuario confirmó cancelar un scan a medias:
     window._scanning=false;
-    _scanState='idle';_scanSheetOpen=false;
-    _scanPending=null;
+    _scanState='idle';
+    discardScan();          // limpia DOM + _scanPending + estado
     closeOv('sh-add');
-    resetScanUI();
     toast('Escaneo cancelado','');
     return;
   }
-  // ready o idle: descartar directo sin preguntar
+  // ready/warning/idle
+  if(_scanPending||_scanState!=='idle'){
+    discardScan();   // había un scan: limpieza completa
+  }else{
+    _scanSheetOpen=false;  // gasto manual: solo cerrar, no borrar lo escrito
+    resetScanUI();
+  }
   closeOv('sh-add');
-  _scanSheetOpen=false;
-  _scanState='idle';
-  _scanPending=null;
-  resetScanUI();
 }
 function saveDraft(){
   const amt=parseFloat(document.getElementById('a-amt').value);
