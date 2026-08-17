@@ -500,7 +500,10 @@
       <div class="sh"></div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
         <div class="s-title" style="margin:0">Nuevo gasto</div>
-        <button class="btn-close" onclick="closeOv('sh-add')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        <div style="display:flex;align-items:center">
+          <button onclick="minimizeScan()" id="scan-minimize-btn" style="display:none;background:none;border:none;font-size:22px;color:var(--t2);cursor:pointer;padding:4px 10px;line-height:1" title="Minimizar">⌄</button>
+          <button class="btn-close" onclick="closeAddSheet()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
       </div>
       <div class="scan-up" id="scan-drop" onclick="openScanOptions()">
         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
@@ -1071,7 +1074,9 @@
 <div class="toast" id="toast"></div>
 </div>
 
-
+<div id="scan-bubble" onclick="restoreScan()" style="display:none;position:fixed;bottom:88px;right:16px;width:56px;height:56px;border-radius:50%;background:var(--primary);box-shadow:0 4px 16px rgba(0,0,0,.25);z-index:9000;align-items:center;justify-content:center;cursor:pointer">
+  <div id="scan-bubble-inner" style="font-size:24px">⏳</div>
+</div>
 
 <!-- Entry point -->
 <script src="/legacy.js"></script>

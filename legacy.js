@@ -55,6 +55,8 @@ let _statsMonth = new Date().toISOString().slice(0,7); // YYYY-MM seleccionado e
 let aCat='food',aHormi=true,obGoalHormi=null,mgHormi=null;
 let wkOffset=0,calY=new Date().getFullYear(),calM=new Date().getMonth();
 let txDate=null,scanReceiptTs=null,_currentThumb=null,_scanPending=null,_dayDs=null,_selDay=null,_txSource='manual';
+let _scanState='idle'; // idle | processing | ready | error
+let _scanSheetOpen=false;
 let _swipeX=0,_swipeY=0,_swipeReady=false;
 let _selectedPlan='mensual',_pendingProCallback=null;
 let _editHormi=false,_editCat='other';
@@ -746,7 +748,11 @@ function refreshCurrent(){renderHome();}
 // ── OVERLAYS ─────────────────────────────────────────────────────────────────
 function openSheet(id){document.getElementById(id).classList.add('open');}
 function closeOv(id){document.getElementById(id).classList.remove('open');}
-function maybeClose(e,id){if(e.target===document.getElementById(id))closeOv(id);}
+function maybeClose(e,id){
+  if(e.target!==document.getElementById(id))return;
+  if(id==='sh-add'){closeAddSheet();return;}
+  closeOv(id);
+}
 function openModal(id){
   if(id==='m-budget'){document.getElementById('bud-in').value=D.budget;}
   if(id==='m-goal'){mgSelectedHormis={};mgSelectedCats={};buildMgChipsMulti();}
@@ -841,6 +847,7 @@ function startVoice(){
 }
 
 function openAddSheet(ds){
+  _scanSheetOpen=true;
   const dateIn=document.getElementById('a-date');
   if(dateIn)dateIn.value=ds||_selDay||td();
   const timeIn=document.getElementById('a-time');
@@ -994,23 +1001,42 @@ async function scanImg(input){
   const file=input.files[0];if(!file)return;
   if(window._scanning){toast('Espera a que termine el escaneo actual','warn');input.value='';return;}
   window._scanning=true;
-  try{
-  if(!checkScanLimit())return;
+  if(!checkScanLimit()){window._scanning=false;input.value='';return;}
+  _scanState='processing';
+  document.getElementById('scan-minimize-btn').style.display='block';
+  input.value='';
+  doScanWork(file).catch(e=>{
+    console.error('scan work error:',e);
+    window._scanning=false;_scanState='error';
+    updateScanBubble();
+    if(_scanSheetOpen){
+      const st=document.getElementById('scan-st');
+      if(st){clearScanLoading();st.innerHTML=`<div style="font-size:12px;color:var(--red);margin-bottom:7px">Error al procesar. <button onclick="openScanOptions()" style="margin-left:6px;background:var(--red);color:#fff;border:none;border-radius:var(--rsm);padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer">Reintentar</button></div>`;}
+    }else{toast('No se pudo procesar la boleta','err');}
+  });
+}
+async function doScanWork(file){
+  let scanTimeout;
   const st=document.getElementById('scan-st');
-  st.innerHTML='';
-  document.getElementById('scan-res').style.display='block';
-  document.getElementById('scan-fields').innerHTML=`<div style="display:flex;align-items:center;gap:8px;padding:8px 0;color:var(--t3);font-size:13px"><span class="spin"></span>Extrayendo datos...</div>`;
-  const _scanBtns=document.getElementById('scan-btns');if(_scanBtns)_scanBtns.innerHTML='';
-  scanReceiptTs=null;_currentThumb=null;_scanPending=null;
   try{
+    if(_scanSheetOpen){
+      if(st)st.innerHTML='';
+      document.getElementById('scan-res').style.display='block';
+      document.getElementById('scan-fields').innerHTML=`<div style="display:flex;align-items:center;gap:8px;padding:8px 0;color:var(--t3);font-size:13px"><span class="spin"></span>Extrayendo datos...</div>`;
+      const _scanBtns=document.getElementById('scan-btns');if(_scanBtns)_scanBtns.innerHTML='';
+    }
+    scanReceiptTs=null;_currentThumb=null;_scanPending=null;
     const b64=await toJpegBase64(file);
     const mime='image/jpeg';
     const{data:{session}}=await _sb.auth.getSession();
     const token=session?.access_token;
-    if(!token){console.error('❌ No hay sesión activa');return;}
+    if(!token){console.error('❌ No hay sesión activa');window._scanning=false;_scanState='error';updateScanBubble();return;}
     const thumb=await compressImageThumb(b64,mime).catch(()=>null);
     _currentThumb=thumb;
-    const r=await fetch(SCAN_URL,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},body:JSON.stringify({image_base64:b64,media_type:mime,prompt:SCAN_PROMPT})});
+    const scanAc=new AbortController();
+    scanTimeout=setTimeout(()=>scanAc.abort(),45000);
+    const r=await fetch(SCAN_URL,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},body:JSON.stringify({image_base64:b64,media_type:mime,prompt:SCAN_PROMPT}),signal:scanAc.signal});
+    clearTimeout(scanTimeout);
     if(!r.ok){
       const errBody=await r.text();
       let errMsg='Error '+r.status;
@@ -1037,25 +1063,46 @@ async function scanImg(input){
     }
     console.log('JSON parseado:',p);
     if(p.error==='no_receipt'){
-      clearScanLoading();
-      st.innerHTML=`<div style="background:var(--red-bg);border:1px solid var(--red-b);border-radius:var(--rsm);padding:10px 13px;font-size:13px;color:var(--red);margin-bottom:7px">⚠️ Lo enviado no parece un comprobante de pago</div>`;
-      input.value='';return;
+      window._scanning=false;_scanState='error';
+      if(_scanSheetOpen){
+        clearScanLoading();
+        if(st)st.innerHTML=`<div style="background:var(--red-bg);border:1px solid var(--red-b);border-radius:var(--rsm);padding:10px 13px;font-size:13px;color:var(--red);margin-bottom:7px">⚠️ Lo enviado no parece un comprobante de pago</div>`;
+      }else{
+        updateScanBubble();
+        toast('El comprobante no se pudo procesar','err');
+      }
+      return;
     }
     if(p.error==='no_product'){
-      clearScanLoading();
-      st.innerHTML=`<div style="background:var(--amber-bg);border:1px solid rgba(217,119,6,.3);border-radius:var(--rsm);padding:10px 13px;font-size:13px;color:var(--amber-t);margin-bottom:7px">ℹ️ El comprobante no registra el producto — agrégalo manualmente</div>`;
-      if(p.fecha){const ds2=parseReceiptDate(p.fecha);if(ds2){txDate=ds2;document.getElementById('a-date').value=ds2;}}
-      input.value='';return;
+      window._scanning=false;_scanState='error';
+      if(_scanSheetOpen){
+        clearScanLoading();
+        if(st)st.innerHTML=`<div style="background:var(--amber-bg);border:1px solid rgba(217,119,6,.3);border-radius:var(--rsm);padding:10px 13px;font-size:13px;color:var(--amber-t);margin-bottom:7px">ℹ️ El comprobante no registra el producto — agrégalo manualmente</div>`;
+        if(p.fecha){const ds2=parseReceiptDate(p.fecha);if(ds2){txDate=ds2;const di=document.getElementById('a-date');if(di)di.value=ds2;}}
+      }else{
+        updateScanBubble();
+        toast('El comprobante no registra el producto','warn');
+      }
+      return;
     }
     if(p.error==='low_quality'){
-      clearScanLoading();
-      st.innerHTML=`<div style="background:var(--red-bg);border:1px solid var(--red-b);border-radius:var(--rsm);padding:10px 13px;font-size:13px;color:var(--red);margin-bottom:7px">⚠️ ${p.message||'La foto no se lee con claridad'}<br><button onclick="openScanOptions()" style="margin-top:8px;background:var(--red);color:#fff;border:none;border-radius:var(--rsm);padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer">Volver a tomar foto</button></div>`;
-      input.value='';return;
+      window._scanning=false;_scanState='error';
+      if(_scanSheetOpen){
+        clearScanLoading();
+        if(st)st.innerHTML=`<div style="background:var(--red-bg);border:1px solid var(--red-b);border-radius:var(--rsm);padding:10px 13px;font-size:13px;color:var(--red);margin-bottom:7px">⚠️ ${p.message||'La foto no se lee con claridad'}<br><button onclick="openScanOptions()" style="margin-top:8px;background:var(--red);color:#fff;border:none;border-radius:var(--rsm);padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer">Volver a tomar foto</button></div>`;
+      }else{
+        updateScanBubble();
+        toast(p.message||'La foto no se lee con claridad','err');
+      }
+      return;
     }
     // parse date/time — use string directly, never new Date(str) to avoid UTC shift
     let ds=null;
-    if(p.fecha){ds=parseReceiptDate(p.fecha);if(ds){txDate=ds;document.getElementById('a-date').value=ds;}else{toast('No pudimos leer la fecha de la boleta — revísala antes de guardar','warn',4000);}}
-    else{
+    if(p.fecha){
+      ds=parseReceiptDate(p.fecha);
+      if(ds){txDate=ds;if(_scanSheetOpen){const di=document.getElementById('a-date');if(di)di.value=ds;}}
+      else if(_scanSheetOpen){toast('No pudimos leer la fecha de la boleta — revísala antes de guardar','warn',4000);}
+    }else if(_scanSheetOpen){
       const dateIn=document.getElementById('a-date');
       if(dateIn){
         dateIn.value='';
@@ -1083,19 +1130,25 @@ async function scanImg(input){
     if(p.hora&&/^\d{1,2}:\d{2}$/.test(p.hora)){
       const base=ds||td();
       scanReceiptTs=`${base}T${p.hora.padStart(5,'0')}:00`;
-      document.getElementById('a-time').value=p.hora.padStart(5,'0');
+      if(_scanSheetOpen){const ti=document.getElementById('a-time');if(ti)ti.value=p.hora.padStart(5,'0');}
     }
-    st.innerHTML='';
+    if(_scanSheetOpen&&st)st.innerHTML='';
     const items=Array.isArray(p.items)&&p.items.length?p.items:[];
     const lugar=(p.lugar||'').trim();
     if(!items.length){
-      // FIX 3: don't block — fill date/lugar if available, let user complete the rest
-      if(lugar)document.getElementById('tx-lugar').value=lugar;
-      const fallbackAmt=parseFloat(p.amount||p.monto||0);
-      if(fallbackAmt>0)document.getElementById('a-amt').value=fallbackAmt;
-      toast('Monto y fecha detectados. Completa el concepto manualmente.','ok');
-      st.innerHTML='';
-      input.value='';return;
+      window._scanning=false;_scanState='error';
+      if(_scanSheetOpen){
+        // FIX 3: don't block — fill date/lugar if available, let user complete the rest
+        if(lugar){const li=document.getElementById('tx-lugar');if(li)li.value=lugar;}
+        const fallbackAmt=parseFloat(p.amount||p.monto||0);
+        if(fallbackAmt>0){const ai=document.getElementById('a-amt');if(ai)ai.value=fallbackAmt;}
+        toast('Monto y fecha detectados. Completa el concepto manualmente.','ok');
+        if(st)st.innerHTML='';
+      }else{
+        updateScanBubble();
+        toast('No se detectaron ítems en la boleta','warn');
+      }
+      return;
     }
     // store for multi-save
     _txSource='scan';
@@ -1108,14 +1161,56 @@ async function scanImg(input){
       numItemsImpreso:(typeof p.num_items_impreso==='number')?p.num_items_impreso:null,
       confianza:p.confianza||null
     };
-    rerenderScanPreview();
-    toast('✓ Datos extraídos','ok');
+    if(_scanState==='idle'&&!_scanSheetOpen){
+      // el usuario canceló mientras procesaba: descarta el resultado
+      window._scanning=false;
+      _scanPending=null;
+      return;
+    }
+    window._scanning=false;
+    _scanState='ready';
+    if(_scanSheetOpen){
+      rerenderScanPreview();
+      toast('✓ Datos extraídos','ok');
+      _scanState='idle';
+    }else{
+      updateScanBubble();
+      toast('✓ Boleta lista — tócala para revisar','ok',4000);
+    }
   }catch(e){
-    clearScanLoading();
-    st.innerHTML=`<div style="font-size:12px;color:var(--red);margin-bottom:7px">Error: ${e.message}<br><button onclick="openScanOptions()" style="margin-top:8px;background:var(--red);color:#fff;border:none;border-radius:var(--rsm);padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer">Volver a tomar foto</button></div>`;
+    if(scanTimeout)clearTimeout(scanTimeout);
+    window._scanning=false;
+    throw e; // lo maneja el .catch de scanImg
   }
-  input.value='';
-  }finally{window._scanning=false;}
+}
+function minimizeScan(){
+  closeOv('sh-add');
+  _scanSheetOpen=false;
+  updateScanBubble();
+}
+function restoreScan(){
+  openAddSheet(_selDay);
+  _scanSheetOpen=true;
+  document.getElementById('scan-bubble').style.display='none';
+  setTimeout(()=>{
+    if(_scanState==='ready'&&_scanPending)rerenderScanPreview();
+    else if(_scanState==='processing'){
+      const st=document.getElementById('scan-st');
+      if(st)st.innerHTML='<div style="color:var(--t2);font-size:13px">Procesando boleta...</div>';
+    }
+  },50);
+}
+function updateScanBubble(){
+  const b=document.getElementById('scan-bubble');
+  const inner=document.getElementById('scan-bubble-inner');
+  if(!b)return;
+  // solo mostrar la burbuja si el sheet NO está abierto
+  if(!_scanSheetOpen&&(_scanState==='processing'||_scanState==='ready')){
+    b.style.display='flex';
+    inner.textContent=_scanState==='ready'?'✓':'⏳';
+    if(_scanState==='ready'){b.style.background='var(--lime-t)';b.style.animation='pulse 1.5s ease-in-out infinite';}
+    else{b.style.background='var(--primary)';b.style.animation='none';}
+  }else{b.style.display='none';}
 }
 function rerenderScanPreview(){
   if(!_scanPending)return;
@@ -1264,7 +1359,7 @@ function saveAllScan(){
     save();discardScan();closeOv('sh-add');selectDay(savedDate>td()?td():savedDate);
     toast(`${count} gasto${count!==1?'s':''} guardado${count!==1?'s':''} ✓`,'ok');
   }
-  else toast('Sin montos válidos','warn');
+  else{_scanState='idle';resetScanUI();toast('Sin montos válidos','warn');}
 }
 function discardScan(){
   const bb=document.getElementById('scan-bottom-btns');if(bb){bb.style.display='none';bb.innerHTML='';}
@@ -1284,6 +1379,33 @@ function discardScan(){
   const _da=document.getElementById('a-date');if(_da){_da.style.border='';_da.style.background='';}
   scanReceiptTs=null;txDate=null;_currentThumb=null;_scanPending=null;
   const s=document.getElementById('scan-multi-hide');if(s)s.remove();
+  _scanState='idle';_scanSheetOpen=false;updateScanBubble();
+  resetScanUI();
+}
+function resetScanUI(){
+  const mb=document.getElementById('scan-minimize-btn');
+  if(mb)mb.style.display='none';
+  const bubble=document.getElementById('scan-bubble');
+  if(bubble)bubble.style.display='none';
+}
+function closeAddSheet(){
+  if(_scanState==='processing'){
+    if(!confirm('¿Cancelar el escaneo en curso? Se perderá el progreso.'))return;
+    // el usuario confirmó cancelar un scan a medias:
+    window._scanning=false;
+    _scanState='idle';_scanSheetOpen=false;
+    _scanPending=null;
+    closeOv('sh-add');
+    resetScanUI();
+    toast('Escaneo cancelado','');
+    return;
+  }
+  // ready o idle: descartar directo sin preguntar
+  closeOv('sh-add');
+  _scanSheetOpen=false;
+  _scanState='idle';
+  _scanPending=null;
+  resetScanUI();
 }
 function saveDraft(){
   const amt=parseFloat(document.getElementById('a-amt').value);
