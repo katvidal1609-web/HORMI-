@@ -1151,6 +1151,7 @@ async function doScanWork(file){
     if(!items.length){
       window._scanning=false;_scanState='error';
       if(_scanSheetOpen){
+        clearScanLoading();
         // FIX 3: don't block — fill date/lugar if available, let user complete the rest
         if(lugar){const li=document.getElementById('tx-lugar');if(li)li.value=lugar;}
         const fallbackAmt=parseFloat(p.amount||p.monto||0);
@@ -1220,6 +1221,7 @@ function restoreScan(){
       if(st)st.innerHTML='<div style="color:var(--t2);font-size:13px">Procesando boleta...</div>';
     }
     else if(_scanState==='error'){
+      clearScanLoading();
       const st=document.getElementById('scan-st');
       if(st)st.innerHTML='<div style="background:var(--red-bg);border:1px solid var(--red-b);border-radius:var(--rsm);padding:10px 13px;font-size:13px;color:var(--red);margin-bottom:7px">⚠️ No se pudo procesar la boleta.<br><button onclick="openScanOptions()" style="margin-top:8px;background:var(--red);color:#fff;border:none;border-radius:var(--rsm);padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer">Volver a tomar foto</button></div>';
     }
