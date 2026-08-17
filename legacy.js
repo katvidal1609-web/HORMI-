@@ -822,30 +822,6 @@ function confirmSameExpense(){
   toast('Gasto no registrado — ya lo tenías guardado','ok');
 }
 
-function startVoice(){
-  if(!isPro()){requirePro('voz',null);return;}
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){toast('Voz no disponible en este navegador','err');return;}
-  const rec=new SR();rec.lang='es-PE';rec.interimResults=false;rec.maxAlternatives=1;
-  const btn=document.getElementById('voice-btn');
-  if(btn){btn.classList.add('active');btn.textContent='⏺';}
-  rec.onresult=(e)=>{
-    const text=e.results[0][0].transcript;
-    const numMatch=text.match(/(\d+(?:[.,]\d{1,2})?)/);
-    if(numMatch){
-      const amt=parseFloat(numMatch[1].replace(',','.'));
-      document.getElementById('a-amt').value=amt.toFixed(2);
-      const desc=text.replace(numMatch[0],'').replace(/^(soles?|sol|s\/)\s*/i,'').trim();
-      if(desc){document.getElementById('tx-consumo').value=desc;if(desc.length>=5)checkAndShowDuplicate(desc);}
-      aHormi=amt<=D.threshold;document.getElementById('h-pill').classList.toggle('on',aHormi);
-    }else{document.getElementById('tx-consumo').value=text;}
-    toast('✓ Capturado','ok');
-  };
-  rec.onerror=(e)=>{toast('Error de voz: '+esc(e.error),'err');};
-  rec.onend=()=>{if(btn){btn.classList.remove('active');btn.textContent='🎤';}};
-  rec.start();toast('Habla ahora...','ok');
-}
-
 function openAddSheet(ds){
   _scanSheetOpen=true;
   const dateIn=document.getElementById('a-date');
@@ -3996,14 +3972,16 @@ function vbStartRecording(){
   _vbRec=rec;
   rec.lang='es-PE';
   rec.continuous=false;
-  rec.interimResults=false;
+  rec.interimResults=true;
   rec.maxAlternatives=5;
   rec.onresult=(ev)=>{
-    let final='';
+    let final='',interim='';
     for(let i=ev.resultIndex;i<ev.results.length;i++){
-      if(ev.results[i].isFinal)final+=ev.results[i][0].transcript;
+      const t=ev.results[i][0].transcript;
+      if(ev.results[i].isFinal)final+=t; else interim+=t;
     }
     if(final)_vbFinal+=final;
+    _vbInterim=interim;
   };
   rec.onerror=(ev)=>{
     clearTimeout(_voiceTimeout);_voiceTimeout=null;
@@ -4015,36 +3993,49 @@ function vbStartRecording(){
   rec.onend=()=>{
     clearTimeout(_voiceTimeout);_voiceTimeout=null;
     _isRecording=false;_vbRec=null;
-    if(_vbState!=='recording')return;
     const text=(_vbFinal+' '+_vbInterim).trim();
+    // si el usuario canceló explícitamente, no procesar
+    if(_vbState==='idle'||_vbState==='error'){return;}
     if(text){
       vbSetState('processing');
       vbCallAI(text);
-    }else{
-      // En iOS Safari, SpeechRecognition puede terminar sin audio si el permiso de micrófono
-      // se otorgó pero no hubo input. Reintentar una vez automáticamente.
-      if(typeof _vbRetries==='undefined')_vbRetries=0;
-      if(_vbRetries<1){
-        _vbRetries++;
-        setTimeout(()=>{if(_vbState==='idle')vbStartRecording();},400);
-      }else{
-        _vbRetries=0;
-        vbSetState('idle');
-        toast('No se detectó audio. Habla más cerca del micrófono.','warn');
-      }
+      return;
     }
+    // sin texto: un solo reintento, y SOLO si seguimos en recording
+    if(_vbState==='recording'&&_vbRetries<1){
+      _vbRetries++;
+      setTimeout(()=>{if(_vbState==='recording')vbStartRecording();},400);
+      return;
+    }
+    // cualquier otro caso: volver a idle SIEMPRE (nunca colgar)
+    _vbRetries=0;
+    vbSetState('idle');
+    toast('No se detectó audio. Intenta de nuevo hablando más cerca.','warn');
   };
   _voiceTimeout=setTimeout(()=>{
     if(_isRecording&&_vbRec){try{_vbRec.stop();}catch(x){}}
-  },10000);
+  },15000);
   try{rec.start();}catch(x){
     clearTimeout(_voiceTimeout);_voiceTimeout=null;
     _vbRec=null;vbSetState('error','No se pudo iniciar el micrófono');
   }
 }
 function vbStopManual(){
-  if(_vbRec){try{_vbRec.stop();}catch(x){}}
-  // onend handles transition
+  const recAtStop=_vbRec;
+  if(!recAtStop){vbSetState('idle');return;}
+  try{recAtStop.stop();}catch(x){}
+  setTimeout(()=>{
+    // solo actúa si SIGUE siendo la misma instancia de grabación
+    // (si _vbRec cambió, es una grabación nueva — no tocarla)
+    if(_vbState==='recording'&&_vbRec===recAtStop){
+      const text=(_vbFinal+' '+_vbInterim).trim();
+      _isRecording=false;
+      try{recAtStop.abort();}catch(x){}
+      _vbRec=null;
+      if(text){vbSetState('processing');vbCallAI(text);}
+      else{vbSetState('idle');toast('No se detectó audio','warn');}
+    }
+  },3000);
 }
 async function vbCallAI(voiceText){
   try{
