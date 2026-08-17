@@ -500,14 +500,16 @@
       <div class="sh"></div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
         <div class="s-title" style="margin:0">Nuevo gasto</div>
-        <div style="display:flex;align-items:center">
-          <button onclick="saveScanFromHeader()" id="scan-save-btn" style="display:none;background:var(--lime);border:none;border-radius:10px;cursor:pointer;padding:8px 10px;margin-right:6px;align-items:center;justify-content:center">
+        <div style="display:flex;align-items:center;gap:8px">
+          <button onclick="saveScanFromHeader()" id="scan-save-btn" title="Guardar" style="display:none;width:42px;height:42px;border-radius:14px;background:var(--lime);border:none;cursor:pointer;align-items:center;justify-content:center;padding:0;box-shadow:0 1px 3px rgba(0,0,0,.08)">
             <i data-lucide="check" style="width:20px;height:20px;color:#1a2e2a;display:block"></i>
           </button>
-          <button onclick="minimizeScan()" id="scan-minimize-btn" style="display:none;background:rgba(45,81,88,.08);border:1px solid var(--b2);border-radius:10px;cursor:pointer;padding:8px 10px;margin-right:6px;align-items:center;justify-content:center">
-            <i data-lucide="chevron-down" style="width:20px;height:20px;color:var(--primary);display:block"></i>
+          <button onclick="minimizeScan()" id="scan-minimize-btn" title="Minimizar" style="display:none;width:42px;height:42px;border-radius:14px;background:var(--s2);border:1px solid var(--b2);cursor:pointer;align-items:center;justify-content:center;padding:0">
+            <i data-lucide="chevron-down" style="width:20px;height:20px;color:var(--t2);display:block"></i>
           </button>
-          <button class="btn-close" onclick="closeAddSheet()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+          <button onclick="closeAddSheet()" id="scan-close-btn" title="Cerrar" style="width:42px;height:42px;border-radius:14px;background:transparent;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0">
+            <i id="scan-close-icon" data-lucide="x" style="width:20px;height:20px;color:var(--t3);display:block"></i>
+          </button>
         </div>
       </div>
       <div class="scan-up" id="scan-drop" onclick="openScanOptions()">

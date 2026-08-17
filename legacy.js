@@ -854,6 +854,7 @@ function openAddSheet(ds){
   if(timeIn)timeIn.value='';
   txDate=ds||null;
   openSheet('sh-add');
+  syncHeaderButtons();
 }
 
 // ── SCAN IMAGE ────────────────────────────────────────────────────────────────
@@ -997,19 +998,46 @@ function clearScanLoading(){
   const rb=document.getElementById('scan-res-btns');if(rb)rb.style.display='none';
   const bb=document.getElementById('scan-bottom-btns');if(bb){bb.style.display='none';bb.innerHTML='';}
 }
+function showMissingDateWarning(){
+  const dateIn=document.getElementById('a-date');
+  if(!dateIn)return;
+  dateIn.value='';
+  dateIn.style.border='2px solid var(--red)';
+  dateIn.style.background='rgba(230,57,70,.05)';
+  let warn=document.getElementById('scan-date-warning');
+  if(!warn){
+    warn=document.createElement('div');
+    warn.id='scan-date-warning';
+    warn.style.cssText='background:rgba(230,57,70,.07);border:1.5px solid var(--red-b);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--red);margin-bottom:8px;display:flex;gap:8px;align-items:center';
+    warn.innerHTML='<i data-lucide="alert-circle" style="width:16px;height:16px;flex-shrink:0"></i><span>No se detectó la fecha. Ingrésala para continuar.</span>';
+    dateIn.parentElement.insertBefore(warn,dateIn);
+    if(window.lucide)lucide.createIcons();
+  }
+  const saveBtn=document.getElementById('btn-add-tx');
+  if(saveBtn){saveBtn.disabled=true;saveBtn.style.opacity='0.4';}
+  const hdrSave=document.getElementById('scan-save-btn');
+  if(hdrSave){hdrSave.style.opacity='0.4';hdrSave.dataset.blocked='1';}
+  dateIn.addEventListener('change',function oh(){
+    this.style.border='';this.style.background='';
+    const w=document.getElementById('scan-date-warning');if(w)w.remove();
+    if(saveBtn){saveBtn.disabled=false;saveBtn.style.opacity='1';}
+    if(hdrSave){hdrSave.style.opacity='1';delete hdrSave.dataset.blocked;}
+    this.removeEventListener('change',oh);
+  },{once:true});
+}
 async function scanImg(input){
   const file=input.files[0];if(!file)return;
   if(window._scanning){toast('Espera a que termine el escaneo actual','warn');input.value='';return;}
   window._scanning=true;
   if(!checkScanLimit()){window._scanning=false;input.value='';return;}
   _scanState='processing';
-  document.getElementById('scan-minimize-btn').style.display='block';
   const di=document.getElementById('a-date');if(di)di.value='';
   input.value='';
   doScanWork(file).catch(e=>{
     console.error('scan work error:',e);
     window._scanning=false;_scanState='error';
     updateScanBubble();
+    syncHeaderButtons();
     if(_scanSheetOpen){
       const st=document.getElementById('scan-st');
       if(st){clearScanLoading();st.innerHTML=`<div style="font-size:12px;color:var(--red);margin-bottom:7px">Error al procesar. <button onclick="openScanOptions()" style="margin-left:6px;background:var(--red);color:#fff;border:none;border-radius:var(--rsm);padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer">Reintentar</button></div>`;}
@@ -1019,6 +1047,7 @@ async function scanImg(input){
 async function doScanWork(file){
   let scanTimeout;
   const st=document.getElementById('scan-st');
+  syncHeaderButtons();
   try{
     if(_scanSheetOpen){
       if(st)st.innerHTML='';
@@ -1033,7 +1062,7 @@ async function doScanWork(file){
     const mime='image/jpeg';
     const{data:{session}}=await _sb.auth.getSession();
     const token=session?.access_token;
-    if(!token){console.error('❌ No hay sesión activa');window._scanning=false;_scanState='error';updateScanBubble();return;}
+    if(!token){console.error('❌ No hay sesión activa');window._scanning=false;_scanState='error';updateScanBubble();syncHeaderButtons();return;}
     const thumb=await compressImageThumb(b64,mime).catch(()=>null);
     _currentThumb=thumb;
     const scanAc=new AbortController();
@@ -1074,6 +1103,7 @@ async function doScanWork(file){
         updateScanBubble();
         toast('El comprobante no se pudo procesar','err');
       }
+      syncHeaderButtons();
       return;
     }
     if(p.error==='no_product'){
@@ -1086,6 +1116,7 @@ async function doScanWork(file){
         updateScanBubble();
         toast('El comprobante no registra el producto','warn');
       }
+      syncHeaderButtons();
       return;
     }
     if(p.error==='low_quality'){
@@ -1097,6 +1128,7 @@ async function doScanWork(file){
         updateScanBubble();
         toast(p.message||'La foto no se lee con claridad','err');
       }
+      syncHeaderButtons();
       return;
     }
     // parse date/time — use string directly, never new Date(str) to avoid UTC shift
@@ -1106,29 +1138,7 @@ async function doScanWork(file){
       if(ds){txDate=ds;if(_scanSheetOpen){const di=document.getElementById('a-date');if(di)di.value=ds;}}
       else if(_scanSheetOpen){toast('No pudimos leer la fecha de la boleta — revísala antes de guardar','warn',4000);}
     }else if(_scanSheetOpen){
-      const dateIn=document.getElementById('a-date');
-      if(dateIn){
-        dateIn.value='';
-        dateIn.style.border='2px solid var(--red)';
-        dateIn.style.background='rgba(230,57,70,.05)';
-        let warn=document.getElementById('scan-date-warning');
-        if(!warn){
-          warn=document.createElement('div');
-          warn.id='scan-date-warning';
-          warn.style.cssText='background:rgba(230,57,70,.07);border:1.5px solid var(--red-b);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--red);margin-bottom:8px;display:flex;gap:8px;align-items:center';
-          warn.innerHTML='<i data-lucide="alert-circle" style="width:16px;height:16px;flex-shrink:0"></i><span>No se detectó la fecha. Ingrésala para continuar.</span>';
-          dateIn.parentElement.insertBefore(warn,dateIn);
-          if(window.lucide)lucide.createIcons();
-        }
-        const saveBtn=document.getElementById('btn-add-tx');
-        if(saveBtn){saveBtn.disabled=true;saveBtn.style.opacity='0.4';}
-        dateIn.addEventListener('change',function oh(){
-          this.style.border='';this.style.background='';
-          const w=document.getElementById('scan-date-warning');if(w)w.remove();
-          if(saveBtn){saveBtn.disabled=false;saveBtn.style.opacity='1';}
-          this.removeEventListener('change',oh);
-        },{once:true});
-      }
+      showMissingDateWarning();
     }
     if(p.hora&&/^\d{1,2}:\d{2}$/.test(p.hora)){
       const base=ds||td();
@@ -1151,6 +1161,7 @@ async function doScanWork(file){
         updateScanBubble();
         toast('No se detectaron ítems en la boleta','warn');
       }
+      syncHeaderButtons();
       return;
     }
     // store for multi-save
@@ -1168,6 +1179,7 @@ async function doScanWork(file){
       // el usuario canceló mientras procesaba: descarta el resultado
       window._scanning=false;
       _scanPending=null;
+      syncHeaderButtons();
       return;
     }
     window._scanning=false;
@@ -1183,10 +1195,12 @@ async function doScanWork(file){
       _scanState = hayAvisos ? 'warning' : 'ready';
       updateScanBubble();
       toast(hayAvisos?'Boleta lista — revisa los avisos':'✓ Boleta lista — tócala para revisar','ok',4000);
+      syncHeaderButtons();
     }
   }catch(e){
     if(scanTimeout)clearTimeout(scanTimeout);
     window._scanning=false;
+    syncHeaderButtons();
     throw e; // lo maneja el .catch de scanImg
   }
 }
@@ -1266,8 +1280,7 @@ function rerenderScanPreview(){
     const bottomBtns=document.getElementById('scan-bottom-btns');
     if(bottomBtns){
       bottomBtns.style.display='flex';
-      bottomBtns.innerHTML=`<button class="ms-disc" style="flex:1" onclick="discardScan()">× Descartar</button>
-        <button class="ms-disc" style="flex:1;color:var(--amber);border-color:rgba(255,187,51,.3)" onclick="saveDraft()">Guardar borrador</button>`;
+      bottomBtns.innerHTML=`<button class="ms-disc" style="flex:1;color:var(--amber);border-color:rgba(255,187,51,.3)" onclick="saveDraft()">Guardar borrador</button>`;
     }
   }
   // ocultar formulario manual cuando hay scan múltiple
@@ -1290,10 +1303,20 @@ function rerenderScanPreview(){
     const cg=categoriaSugerida?{id:categoriaSugerida}:guessCat(it.descripcion||lugar||'');selAddCat(cg.id);
     if((it.descripcion||'').length>=5)checkAndShowDuplicate(it.descripcion);
     const cb=document.getElementById('scan-confirm-banner');if(cb)cb.style.display='';
+    // restaurar fecha/hora detectadas por el scan (se pierden si
+    // openAddSheet las pisó al restaurar desde la burbuja)
+    const di=document.getElementById('a-date');
+    if(di){
+      if(fechaOriginal){di.value=date;}
+      else{showMissingDateWarning();}
+    }
+    if(hora){
+      const ti=document.getElementById('a-time');
+      if(ti)ti.value=hora.padStart(5,'0');
+    }
   }
   if(resEl)resEl.style.display='block';
-  const ssb=document.getElementById('scan-save-btn');
-  if(ssb)ssb.style.display='flex';
+  syncHeaderButtons();
 }
 function removeScanItem(idx){
   if(!_scanPending||!_scanPending.items[idx])return;
@@ -1405,9 +1428,31 @@ function resetScanUI(){
   if(mb)mb.style.display='none';
   const bubble=document.getElementById('scan-bubble');
   if(bubble)bubble.style.display='none';
-  const ssb2=document.getElementById('scan-save-btn');if(ssb2)ssb2.style.display='none';
+  const ssb2=document.getElementById('scan-save-btn');
+  if(ssb2){ssb2.style.display='none';ssb2.style.opacity='1';delete ssb2.dataset.blocked;}
+  syncHeaderButtons();
+}
+function syncHeaderButtons(){
+  const save=document.getElementById('scan-save-btn');
+  const min=document.getElementById('scan-minimize-btn');
+  const closeIcon=document.getElementById('scan-close-icon');
+  const hayScan=!!_scanPending||_scanState==='processing';
+
+  if(save)save.style.display=((_scanState==='ready'||_scanState==='warning')&&_scanPending)?'flex':'none';
+  if(min)min.style.display=(_scanState==='processing')?'flex':'none';
+
+  // ícono dinámico: papelera si hay scan que descartar, × si no
+  if(closeIcon){
+    closeIcon.setAttribute('data-lucide',hayScan?'trash-2':'x');
+    closeIcon.style.color=hayScan?'var(--red)':'var(--t3)';
+    closeIcon.style.width=hayScan?'19px':'20px';
+    closeIcon.style.height=hayScan?'19px':'20px';
+  }
+  if(window.lucide)lucide.createIcons();
 }
 function saveScanFromHeader(){
+  const hdrSave=document.getElementById('scan-save-btn');
+  if(hdrSave&&hdrSave.dataset.blocked){toast('Ingresa la fecha para continuar','warn');return;}
   if(_scanPending&&_scanPending.items&&_scanPending.items.length>1){saveAllScan();return;}
   const btn=document.getElementById('btn-add-tx');
   if(btn&&!btn.disabled)addTx();
