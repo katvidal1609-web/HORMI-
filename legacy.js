@@ -2811,8 +2811,8 @@ function renderSet(){
             <div class="s-row">
               <div class="s-rl"><div class="s-rl-t">${c.e} ${c.l}</div></div>
               <div class="s-rr" style="display:flex;gap:6px">
-                <button onclick="openCatEditor('set',${JSON.stringify(c.l)})" style="background:rgba(45,81,88,.08);border:1px solid var(--b2);border-radius:8px;padding:5px 12px;font-size:12px;color:#2d5158;font-weight:700;cursor:pointer;font-family:var(--font-body)">editar</button>
-                <button onclick="delCustomCatFromSet('c_'+${JSON.stringify(c.l)})" style="background:rgba(230,57,70,.08);border:1px solid var(--red-b);border-radius:8px;padding:5px 12px;font-size:12px;color:var(--red);font-weight:700;cursor:pointer;font-family:var(--font-body)">eliminar</button>
+                <button onclick="openCatEditor('set','${jsAttr(c.l)}')" style="background:rgba(45,81,88,.08);border:1px solid var(--b2);border-radius:8px;padding:5px 12px;font-size:12px;color:#2d5158;font-weight:700;cursor:pointer;font-family:var(--font-body)">editar</button>
+                <button onclick="delCustomCatFromSet('c_${jsAttr(c.l)}')" style="background:rgba(230,57,70,.08);border:1px solid var(--red-b);border-radius:8px;padding:5px 12px;font-size:12px;color:var(--red);font-weight:700;cursor:pointer;font-family:var(--font-body)">eliminar</button>
               </div>
             </div>`).join('')
           : `<div class="s-row"><div class="s-rl"><div class="s-rl-s">Aún no has creado categorías propias. Puedes crearlas al registrar un gasto.</div></div></div>`
@@ -3685,6 +3685,7 @@ function guessCat(desc){
   return CATS.find(c=>c.id==='other');
 }
 
+function jsAttr(s){return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');}
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 // toast() usa innerHTML: todo contenido dinámico (variables, errores
 // de API, datos de IA/boletas) DEBE pasar por esc() antes de
