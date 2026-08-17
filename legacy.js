@@ -1010,7 +1010,12 @@ async function scanImg(input){
     const thumb=await compressImageThumb(b64,mime).catch(()=>null);
     _currentThumb=thumb;
     const r=await fetch(SCAN_URL,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},body:JSON.stringify({image_base64:b64,media_type:mime,prompt:SCAN_PROMPT})});
-    if(!r.ok){const errBody=await r.text();throw new Error(JSON.parse(errBody).error||'Error '+r.status);}
+    if(!r.ok){
+      const errBody=await r.text();
+      let errMsg='Error '+r.status;
+      try{errMsg=JSON.parse(errBody).error||errMsg;}catch(_e){}
+      throw new Error(errMsg);
+    }
     const rawText=await r.text();
     console.log('Respuesta escáner raw:',rawText);
     let p;
@@ -1090,7 +1095,10 @@ async function scanImg(input){
     };
     rerenderScanPreview();
     toast('✓ Datos extraídos','ok');
-  }catch(e){st.innerHTML=`<div style="font-size:12px;color:var(--red);margin-bottom:7px">Error: ${e.message}</div>`;}
+  }catch(e){
+    clearScanLoading();
+    st.innerHTML=`<div style="font-size:12px;color:var(--red);margin-bottom:7px">Error: ${e.message}<br><button onclick="openScanOptions()" style="margin-top:8px;background:var(--red);color:#fff;border:none;border-radius:var(--rsm);padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer">Volver a tomar foto</button></div>`;
+  }
   input.value='';
   }finally{window._scanning=false;}
 }
