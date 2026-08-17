@@ -878,6 +878,7 @@ Si la imagen está borrosa, cortada, con reflejos, muy oscura, o si no puedes le
 {"error":"low_quality","message":"La foto no se lee con claridad"}
 No intentes adivinar valores de una imagen ilegible.
 Además, si SÍ pudiste extraer pero tienes dudas en algún dato, agrega al JSON el campo "confianza":"baja" (o "alta" si estás seguro de todo).
+Esta decisión (calidad de imagen) va PRIMERO y es DEFINITIVA: si tienes cualquier duda entre reportar low_quality o intentar extraer datos parciales, SIEMPRE elige low_quality. Nunca generes un JSON parcial o mezclado — es todo o nada.
 
 AUTOVERIFICACIÓN: después de extraer los items, suma sus montos y compárala con el total impreso del ticket. Si la diferencia es mayor a S/1.00, o si la cantidad de items que extrajiste no coincide con el 'NUMERO DE ITEMS' impreso, marca confianza:'baja'. Nunca ajustes montos para que cuadren — reporta lo que leíste y marca la confianza.
 "total_impreso" es el IMPORTE TOTAL / TOTAL que aparece impreso en el ticket, o null si no se ve. "num_items_impreso" es el campo "NUMERO DE ITEMS" si aparece, o null si no aparece.
@@ -1019,7 +1020,21 @@ async function scanImg(input){
     const rawText=await r.text();
     console.log('Respuesta escáner raw:',rawText);
     let p;
-    try{p=JSON.parse(rawText);}catch(pe){throw new Error('JSON inválido: '+rawText.slice(0,80));}
+    try{
+      p=JSON.parse(rawText);
+    }catch(pe){
+      // Intento de recuperación: a veces el modelo corta el JSON a medias
+      // o mezcla texto. Busca el primer bloque {...} balanceado.
+      const match=rawText.match(/\{[\s\S]*\}/);
+      if(match){
+        try{p=JSON.parse(match[0]);}catch(pe2){p=null;}
+      }
+      if(!p){
+        // No se pudo recuperar nada usable: trátalo como low_quality,
+        // no como error técnico feo.
+        p={error:'low_quality',message:'La foto no se lee con claridad'};
+      }
+    }
     console.log('JSON parseado:',p);
     if(p.error==='no_receipt'){
       clearScanLoading();
