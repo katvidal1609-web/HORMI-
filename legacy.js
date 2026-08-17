@@ -1219,6 +1219,10 @@ function restoreScan(){
       const st=document.getElementById('scan-st');
       if(st)st.innerHTML='<div style="color:var(--t2);font-size:13px">Procesando boleta...</div>';
     }
+    else if(_scanState==='error'){
+      const st=document.getElementById('scan-st');
+      if(st)st.innerHTML='<div style="background:var(--red-bg);border:1px solid var(--red-b);border-radius:var(--rsm);padding:10px 13px;font-size:13px;color:var(--red);margin-bottom:7px">⚠️ No se pudo procesar la boleta.<br><button onclick="openScanOptions()" style="margin-top:8px;background:var(--red);color:#fff;border:none;border-radius:var(--rsm);padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer">Volver a tomar foto</button></div>';
+    }
   },50);
 }
 function updateScanBubble(){
@@ -1226,13 +1230,14 @@ function updateScanBubble(){
   const icon=document.getElementById('scan-bubble-icon');
   const fab=document.querySelector('.fab-fixed');
   if(!b)return;
-  const visible=!_scanSheetOpen&&(_scanState==='processing'||_scanState==='ready'||_scanState==='warning');
+  const visible=!_scanSheetOpen&&(_scanState==='processing'||_scanState==='ready'||_scanState==='warning'||_scanState==='error');
   if(visible){
     b.style.display='flex';
     if(fab)fab.style.display='none';
     let ico='loader-2',bg='var(--primary)',anim='spin 1s linear infinite';
     if(_scanState==='ready'){ico='check';bg='var(--lime-t)';anim='pulse 1.5s ease-in-out infinite';}
     if(_scanState==='warning'){ico='alert-triangle';bg='#d97706';anim='pulse 1.5s ease-in-out infinite';}
+    if(_scanState==='error'){ico='alert-circle';bg='var(--red)';anim='pulse 1.5s ease-in-out infinite';}
     if(icon){icon.setAttribute('data-lucide',ico);icon.style.animation=_scanState==='processing'?anim:'none';}
     b.style.background=bg;
     b.style.animation=_scanState==='processing'?'none':anim;
