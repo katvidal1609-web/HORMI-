@@ -1404,6 +1404,7 @@ function discardScan(){
   const _da=document.getElementById('a-date');if(_da){_da.style.border='';_da.style.background='';}
   scanReceiptTs=null;txDate=null;_currentThumb=null;_scanPending=null;
   const s=document.getElementById('scan-multi-hide');if(s)s.remove();
+  const sd2=document.getElementById('scan-drop');if(sd2)sd2.style.display='';
   _scanState='idle';_scanSheetOpen=false;_voiceMode=false;updateScanBubble();
   resetScanUI();
 }
@@ -1424,7 +1425,7 @@ function syncHeaderButtons(){
   const tieneContenido=!!_scanPending||_scanState==='ready';
 
   if(save)save.style.display=((_scanState==='ready'||_scanState==='warning')&&tieneContenido)?'flex':'none';
-  if(min)min.style.display=(_scanState==='processing'&&!_voiceMode)?'flex':'none';
+  if(min)min.style.display=(_scanState==='processing'||(_voiceMode&&(_scanState==='ready'||_scanState==='warning')))?'flex':'none';
 
   // ícono dinámico: papelera si hay scan que descartar, × si no
   if(closeIcon){
@@ -4106,6 +4107,8 @@ function previewBeforeSave(txData){
     if(txData.catId)selAddCat(txData.catId);
     if(txData.monto){aHormi=txData.monto<=D.threshold;document.getElementById('h-pill').classList.toggle('on',aHormi);}
     const cb=document.getElementById('scan-confirm-banner');if(cb)cb.style.display='';
+    const sd=document.getElementById('scan-drop');
+    if(sd)sd.style.display=_voiceMode?'none':'';
     syncHeaderButtons();
   },80);
 }
