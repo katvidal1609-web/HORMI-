@@ -1420,8 +1420,9 @@ function syncHeaderButtons(){
   const min=document.getElementById('scan-minimize-btn');
   const closeIcon=document.getElementById('scan-close-icon');
   const hayScan=!!_scanPending||_scanState==='processing';
+  const tieneContenido=!!_scanPending||_scanState==='ready';
 
-  if(save)save.style.display=((_scanState==='ready'||_scanState==='warning')&&_scanPending)?'flex':'none';
+  if(save)save.style.display=((_scanState==='ready'||_scanState==='warning')&&tieneContenido)?'flex':'none';
   if(min)min.style.display=(_scanState==='processing')?'flex':'none';
 
   // ícono dinámico: papelera si hay scan que descartar, × si no
@@ -1805,6 +1806,7 @@ function addTx(){
   const _adi=document.getElementById('a-date');if(_adi){_adi.style.border='';_adi.style.background='';_adi.value=_selDay||td();}
   document.getElementById('a-time').value='';
   txDate=null;scanReceiptTs=null;_currentThumb=null;_scanPending=null;_txSource='manual';
+  _scanState='idle';
   closeOv('sh-add');
   const _ss=document.getElementById('stat-streak');if(_ss)_ss.textContent=calcStreak();
   const today=td();
@@ -4039,7 +4041,27 @@ function vbStopManual(){
 }
 async function vbCallAI(voiceText){
   try{
-    const voicePrompt=`El usuario dijo al registrar un gasto: '${voiceText}'. Extrae: monto en soles (número), qué consumió (consumo: producto o servicio concreto), dónde (lugar: nombre del local, puede ser null). Responde SOLO JSON sin markdown: {"monto":0.00,"consumo":"...","lugar":"..." o null}. Si no hay monto claro: {"error":"no_amount"}`;
+    const voicePrompt=`Un usuario peruano dictó por voz un gasto. La transcripción automática puede tener ERRORES DE RECONOCIMIENTO — tu trabajo es interpretar qué quiso decir realmente.
+
+Transcripción: "${voiceText}"
+
+CORRECCIÓN DE TRANSCRIPCIÓN:
+- Los nombres de productos peruanos suelen transcribirse mal. Ejemplos del tipo de error: "junior"→"chuño", "mai cena"→"maicena", "papa yuca"→"papa/yuca". Usa tu conocimiento de productos peruanos para corregir.
+- Los nombres de comercios peruanos también: si suena parecido a una cadena conocida (Tottus, Wong, Metro, Plaza Vea, Vivanda, Tambo, Oxxo, Starbucks, Bembos, KFC, Juan Valdez, Inkafarma, Mifarma), corrige al nombre real más probable según el contexto del producto. Ojo: si el producto es de supermercado (abarrotes, verduras), es más probable un supermercado que una cafetería.
+- Si el usuario dice un lugar genérico ("bodega", "la tienda", "el mercado"), déjalo tal cual — no inventes una cadena.
+
+EXTRAE:
+- monto: número en soles
+- consumo: el producto o servicio, ya CORREGIDO y escrito correctamente en español
+- lugar: el comercio, ya CORREGIDO, o null si no lo mencionó
+- categoria: UNO de estos IDs, decidido por QUÉ ES el producto (no dónde se compró):
+  food (comida preparada, platos, menús) · drink (cualquier bebida: café, capuchino, jugo, gaseosa) · snack (dulces, galletas, postres, golosinas) · market (insumos crudos y de despensa: azúcar, arroz, harina, maicena, chuño, verduras, carnes, limpieza) · trans (taxi, bus, combustible) · subs (apps, suscripciones) · health (medicinas, farmacia) · beauty (perfumes, cosméticos, cuidado personal, peluquería) · sport (gimnasio, deporte) · edu (libros, cursos) · shop (ropa, calzado, accesorios) · soc (bares, salidas) · enter (cine, conciertos) · del (delivery) · other (SOLO si nada aplica)
+
+REGLA: 'other' es el último recurso. Un perfume es beauty. Un capuchino es drink. La maicena y el azúcar son market. Si identificas el producto, tiene categoría.
+
+Responde SOLO JSON sin markdown:
+{"monto":0.00,"consumo":"...","lugar":"..." o null,"categoria":"ID"}
+Si no hay monto claro: {"error":"no_amount"}`;
     const{data:{session:_ss4}}=await _sb.auth.getSession();
     const resp=await fetch(SCAN_URL,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${_ss4?.access_token||''}`},body:JSON.stringify({prompt:voicePrompt})});
     if(!resp.ok)throw new Error('HTTP '+resp.status);
@@ -4050,7 +4072,8 @@ async function vbCallAI(voiceText){
       const consumo=data.consumo||'';
       const lugar=data.lugar||null;
       const desc=lugar?`${consumo} en ${lugar}`:consumo;
-      const cat=guessCat(consumo||'');
+      const catId=data.categoria;
+      const cat=(catId&&allCats().find(c=>c.id===catId))||guessCat(consumo||'');
       _voicePending={amt:data.monto,consumo,lugar,cat};
       vbSetState('result',{amt:data.monto,desc:desc||'gasto',confidence:'high'});
     }else{
@@ -4062,6 +4085,7 @@ async function vbCallAI(voiceText){
 }
 function previewBeforeSave(txData){
   openAddSheet(txData.fecha||_selDay||td());
+  _scanState='ready';
   setTimeout(()=>{
     if(txData.monto)document.getElementById('a-amt').value=txData.monto;
     if(txData.consumo)document.getElementById('tx-consumo').value=txData.consumo;
@@ -4070,6 +4094,7 @@ function previewBeforeSave(txData){
     if(txData.catId)selAddCat(txData.catId);
     if(txData.monto){aHormi=txData.monto<=D.threshold;document.getElementById('h-pill').classList.toggle('on',aHormi);}
     const cb=document.getElementById('scan-confirm-banner');if(cb)cb.style.display='';
+    syncHeaderButtons();
   },80);
 }
 function vbSave(){
@@ -4085,6 +4110,12 @@ function vbCancel(){
   if(_vbRec){try{_vbRec.stop();}catch(x){}_vbRec=null;}
   vbSetState('idle');
   fabReset();
+}
+function vbRetry(){
+  _voicePending=null;
+  _vbFinal='';_vbInterim='';_vbRetries=0;
+  vbSetState('idle');
+  setTimeout(()=>vbStartRecording(),150);
 }
 function fabReset(){
   const opts=document.getElementById('sh-fab-opts');
@@ -4103,7 +4134,7 @@ function openFabVoice(){
   if(voice){voice.style.display='flex';voice.style.flexDirection='column';voice.style.alignItems='center';}
   vbSetState('idle');
 }
-function closeFabSheet(){closeOv('sh-fab');fabReset();}
+function closeFabSheet(){if(_vbRec){try{_vbRec.stop();}catch(x){}_vbRec=null;}vbSetState('idle');closeOv('sh-fab');fabReset();}
 function fabMaybeClose(e){if(e.target===e.currentTarget){closeOv('sh-fab');if(_vbRec){try{_vbRec.stop();}catch(x){}_vbRec=null;}vbSetState('idle');fabReset();}}
 // Legacy compat
 function startVoiceBubble(){openSheet('sh-fab');setTimeout(openFabVoice,300);}
