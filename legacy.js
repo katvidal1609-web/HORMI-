@@ -56,6 +56,7 @@ let aCat='food',aHormi=true,obGoalHormi=null,mgHormi=null;
 let wkOffset=0,calY=new Date().getFullYear(),calM=new Date().getMonth();
 let txDate=null,scanReceiptTs=null,_currentThumb=null,_scanPending=null,_dayDs=null,_selDay=null,_txSource='manual';
 let _scanState='idle'; // idle | processing | ready | error
+let _voiceMode=false;
 let _scanSheetOpen=false;
 let _swipeX=0,_swipeY=0,_swipeReady=false;
 let _selectedPlan='mensual',_pendingProCallback=null;
@@ -1403,7 +1404,7 @@ function discardScan(){
   const _da=document.getElementById('a-date');if(_da){_da.style.border='';_da.style.background='';}
   scanReceiptTs=null;txDate=null;_currentThumb=null;_scanPending=null;
   const s=document.getElementById('scan-multi-hide');if(s)s.remove();
-  _scanState='idle';_scanSheetOpen=false;updateScanBubble();
+  _scanState='idle';_scanSheetOpen=false;_voiceMode=false;updateScanBubble();
   resetScanUI();
 }
 function resetScanUI(){
@@ -1423,7 +1424,7 @@ function syncHeaderButtons(){
   const tieneContenido=!!_scanPending||_scanState==='ready';
 
   if(save)save.style.display=((_scanState==='ready'||_scanState==='warning')&&tieneContenido)?'flex':'none';
-  if(min)min.style.display=(_scanState==='processing')?'flex':'none';
+  if(min)min.style.display=(_scanState==='processing'&&!_voiceMode)?'flex':'none';
 
   // ícono dinámico: papelera si hay scan que descartar, × si no
   if(closeIcon){
@@ -1433,6 +1434,8 @@ function syncHeaderButtons(){
     closeIcon.style.height=hayScan?'19px':'20px';
   }
   if(window.lucide)lucide.createIcons();
+  const retry=document.getElementById('voice-retry-btn');
+  if(retry)retry.style.display=(_voiceMode&&(_scanState==='ready'||_scanState==='warning'))?'flex':'none';
 }
 function saveScanFromHeader(){
   const hdrSave=document.getElementById('scan-save-btn');
@@ -1443,6 +1446,7 @@ function saveScanFromHeader(){
   else toast('Completa los campos faltantes','warn');
 }
 function closeAddSheet(){
+  _voiceMode=false;
   if(_scanState==='processing'){
     if(!confirm('¿Cancelar el escaneo en curso? Se perderá el progreso.'))return;
     window._scanning=false;
@@ -1806,7 +1810,7 @@ function addTx(){
   const _adi=document.getElementById('a-date');if(_adi){_adi.style.border='';_adi.style.background='';_adi.value=_selDay||td();}
   document.getElementById('a-time').value='';
   txDate=null;scanReceiptTs=null;_currentThumb=null;_scanPending=null;_txSource='manual';
-  _scanState='idle';
+  _scanState='idle';_voiceMode=false;
   closeOv('sh-add');
   const _ss=document.getElementById('stat-streak');if(_ss)_ss.textContent=calcStreak();
   const today=td();
@@ -3977,6 +3981,7 @@ function vbStartRecording(){
   rec.interimResults=true;
   rec.maxAlternatives=5;
   rec.onresult=(ev)=>{
+    console.log('VOZ onresult - resultados:',ev.results.length);
     let final='',interim='';
     for(let i=ev.resultIndex;i<ev.results.length;i++){
       const t=ev.results[i][0].transcript;
@@ -3993,6 +3998,7 @@ function vbStartRecording(){
     toast('Error de micrófono: '+ev.error,'warn');
   };
   rec.onend=()=>{
+    console.log('VOZ onend - estado:',_vbState,'final:',_vbFinal,'interim:',_vbInterim);
     clearTimeout(_voiceTimeout);_voiceTimeout=null;
     _isRecording=false;_vbRec=null;
     const text=(_vbFinal+' '+_vbInterim).trim();
@@ -4023,6 +4029,7 @@ function vbStartRecording(){
   }
 }
 function vbStopManual(){
+  console.log('VOZ stop manual - rec existe:',!!_vbRec,'estado:',_vbState);
   const recAtStop=_vbRec;
   if(!recAtStop){vbSetState('idle');return;}
   try{recAtStop.stop();}catch(x){}
@@ -4072,11 +4079,15 @@ Si no hay monto claro: {"error":"no_amount"}`;
     }else if(data.monto>0){
       const consumo=data.consumo||'';
       const lugar=data.lugar||null;
-      const desc=lugar?`${consumo} en ${lugar}`:consumo;
       const catId=data.categoria;
       const cat=(catId&&allCats().find(c=>c.id===catId))||guessCat(consumo||'');
-      _voicePending={amt:data.monto,consumo,lugar,cat};
-      vbSetState('result',{amt:data.monto,desc:desc||'gasto',confidence:'high'});
+      _voicePending=null;
+      vbSetState('idle');
+      closeOv('sh-fab');
+      fabReset();
+      _txSource='voice';
+      _voiceMode=true;   // marca que venimos de voz, para el botón regrabar
+      previewBeforeSave({monto:data.monto,consumo,lugar,catId:cat.id,fecha:_selDay||td()});
     }else{
       vbSetState('error','No entendí el monto — intenta de nuevo');
     }
@@ -4117,6 +4128,17 @@ function vbRetry(){
   _vbFinal='';_vbInterim='';_vbRetries=0;
   vbSetState('idle');
   setTimeout(()=>vbStartRecording(),150);
+}
+function vbRetryFromForm(){
+  _voiceMode=false;
+  _scanState='idle';
+  discardScan();          // limpia el formulario
+  closeOv('sh-add');
+  openSheet('sh-fab');
+  setTimeout(()=>{
+    openFabVoice();
+    setTimeout(()=>vbStartRecording(),200);
+  },250);
 }
 function fabReset(){
   const opts=document.getElementById('sh-fab-opts');
