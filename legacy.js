@@ -1419,7 +1419,7 @@ function syncHeaderButtons(){
   const save=document.getElementById('scan-save-btn');
   const min=document.getElementById('scan-minimize-btn');
   const closeIcon=document.getElementById('scan-close-icon');
-  const hayScan=!!_scanPending||_scanState==='processing';
+  const hayScan=!!_scanPending||_scanState==='processing'||_scanState==='ready'||_scanState==='warning';
   const tieneContenido=!!_scanPending||_scanState==='ready';
 
   if(save)save.style.display=((_scanState==='ready'||_scanState==='warning')&&tieneContenido)?'flex':'none';
@@ -4049,6 +4049,7 @@ CORRECCIÓN DE TRANSCRIPCIÓN:
 - Los nombres de productos peruanos suelen transcribirse mal. Ejemplos del tipo de error: "junior"→"chuño", "mai cena"→"maicena", "papa yuca"→"papa/yuca". Usa tu conocimiento de productos peruanos para corregir.
 - Los nombres de comercios peruanos también: si suena parecido a una cadena conocida (Tottus, Wong, Metro, Plaza Vea, Vivanda, Tambo, Oxxo, Starbucks, Bembos, KFC, Juan Valdez, Inkafarma, Mifarma), corrige al nombre real más probable según el contexto del producto. Ojo: si el producto es de supermercado (abarrotes, verduras), es más probable un supermercado que una cafetería.
 - Si el usuario dice un lugar genérico ("bodega", "la tienda", "el mercado"), déjalo tal cual — no inventes una cadena.
+- BEBIDAS DE CAFETERÍA: el reconocimiento de voz en español suele fallar con términos de cafetería modernos. Si el contexto es una bebida y la transcripción suena rara, considera estas posibilidades frecuentes: 'chocolatada'/'macha'/'shake'/'marcha' pueden ser MATCHA; 'late'/'latte'; 'frappe'/'frapé'; 'capuchino'/'cappuccino'; 'cold brew'/'cold bru'. Si el usuario menciona un sabor + una palabra rara + 'latte' o 'shake', es muy probable que sea una bebida de cafetería con ese sabor. Prioriza la interpretación más común en cafeterías peruanas.
 
 EXTRAE:
 - monto: número en soles
