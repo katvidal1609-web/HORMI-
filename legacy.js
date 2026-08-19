@@ -2485,8 +2485,9 @@ Responde SOLO este JSON, sin markdown:
 
 async function renderLugarChart(){
   const el=document.getElementById('lugar-chart');if(!el)return;
+  const tm=_statsMonth;
   const byLugar={};
-  D.transactions.filter(t=>t.isHormi).forEach(t=>{
+  D.transactions.filter(t=>t.isHormi&&t.date&&t.date.startsWith(tm)).forEach(t=>{
     const raw=extractLugar(t.description);if(!raw)return;
     const norm=_lugarCache[raw]||raw;
     byLugar[norm]=(byLugar[norm]||0)+t.amount;
@@ -2500,7 +2501,7 @@ async function renderLugarChart(){
       <div style="flex:1;height:9px;background:var(--s);border-radius:5px;overflow:hidden"><div style="height:100%;width:${Math.round(amt/max*100)}%;background:var(--lime);border-radius:5px"></div></div>
       <div style="font-size:12px;color:var(--t2);min-width:48px;text-align:right">${fmt(amt)}</div>
     </div>`).join('');
-  const rawNames=[...new Set(D.transactions.filter(t=>t.isHormi).map(t=>extractLugar(t.description)).filter(Boolean))];
+  const rawNames=[...new Set(D.transactions.filter(t=>t.isHormi&&t.date&&t.date.startsWith(tm)).map(t=>extractLugar(t.description)).filter(Boolean))];
   if(rawNames.length){normalizarLugares(rawNames).then(changed=>{if(changed)renderLugarChart();});}
 }
 
@@ -2557,7 +2558,7 @@ function renderStats(){
   const byCat={};txsMes.forEach(t=>{byCat[t.category]=(byCat[t.category]||0)+t.amount;});
   const sc=Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
   const mc=sc[0]?.[1]||1;
-  const byH=Array(24).fill(0);all.forEach(t=>{byH[new Date(t.ts).getHours()]+=t.amount;});
+  const byH=Array(24).fill(0);txsMes.forEach(t=>{byH[new Date(t.ts).getHours()]+=t.amount;});
   const mxH=Math.max(...byH)||1;const pkH=byH.indexOf(Math.max(...byH));
   const days=[...new Set(hm.map(t=>t.date))].length||1;const avg=tH/days;
   // proyección al cierre del mes seleccionado
@@ -2621,7 +2622,7 @@ function renderStats(){
       ${hm.length>0?`<p style="font-size:11px;color:var(--t3);margin-top:10px">Toca una categoría para ver el detalle →</p>`:''}
     </div>
     <div class="hrc" style="margin-bottom:16px">
-      <div class="sec" style="margin-bottom:8px;display:flex;align-items:center;gap:5px">Dónde gastas más — Hormis <i data-lucide="map-pin" style="width:13px;height:13px"></i></div>
+      <div class="sec" style="margin-bottom:8px;display:flex;align-items:center;gap:5px">Dónde gastaste más en ${monthLabel} — Hormis <i data-lucide="map-pin" style="width:13px;height:13px"></i></div>
       <div id="lugar-chart"><div style="font-size:12px;color:var(--t3)">Cargando...</div></div>
     </div>
     <div class="hrc">
